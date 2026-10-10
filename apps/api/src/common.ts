@@ -24,16 +24,21 @@ export class Ctx {
   constructor(
     readonly customerId: string,
     readonly db: TenantDb,
-    readonly userId: string,
+    readonly userId: string | null, // null for scheduled jobs
     readonly deviceId: string | null,
     readonly grants: Grant[],
   ) {}
+
+  // Background jobs act as the system, with every permission.
+  static system(customerId: string, db: TenantDb, device: string) {
+    return new Ctx(customerId, db, null, device, [{ outletId: null, permission: '*' }]);
+  }
 
   // outletId undefined: held anywhere. null: held for every outlet. string: held at that outlet.
   can(perm: Permission, outletId?: string | null) {
     return this.grants.some(
       (g) =>
-        g.permission === perm &&
+        (g.permission === perm || g.permission === '*') &&
         (outletId === undefined || g.outletId === null || (outletId !== null && g.outletId === outletId)),
     );
   }
@@ -43,7 +48,7 @@ export class Ctx {
   }
 
   outletsWith(perm: Permission): 'all' | string[] {
-    const mine = this.grants.filter((g) => g.permission === perm);
+    const mine = this.grants.filter((g) => g.permission === perm || g.permission === '*');
     if (mine.some((g) => g.outletId === null)) return 'all';
     return [...new Set(mine.map((g) => g.outletId!))];
   }
@@ -52,7 +57,7 @@ export class Ctx {
   tx<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
     return this.db.transaction(async (tx) => {
       await tx.execute(
-        sql`select set_config('app.user_id', ${this.userId}, true), set_config('app.device_id', ${this.deviceId ?? ''}, true)`,
+        sql`select set_config('app.user_id', ${this.userId ?? ''}, true), set_config('app.device_id', ${this.deviceId ?? ''}, true)`,
       );
       return fn(tx);
     });

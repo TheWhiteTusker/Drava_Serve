@@ -264,7 +264,7 @@ export const recipeLine = pgTable(
     id: id(),
     menuItemId: uuid().notNull().references(() => menuItem.id, { onDelete: 'cascade' }),
     stockItemId: uuid().notNull().references(() => stockItem.id),
-    quantity: qty().notNull(), // base units used per portion, after yield
+    quantity: qty().notNull(), // base units in one portion; stock drawn = quantity ÷ yield
     yieldPct: pct().notNull().default('100'),
   },
   (t) => [
@@ -357,7 +357,12 @@ export const stockLedger = pgTable(
     deviceId: text(),
     at: ts().notNull().defaultNow(),
   },
-  (t) => [index().on(t.storeId, t.stockItemId, t.at), index().on(t.refType, t.refId), index().on(t.outletId, t.at)],
+  (t) => [
+    index().on(t.storeId, t.stockItemId, t.at),
+    index().on(t.refType, t.refId),
+    index().on(t.outletId, t.at),
+    index().on(t.lotId),
+  ],
 );
 
 export const stockBalance = pgTable(

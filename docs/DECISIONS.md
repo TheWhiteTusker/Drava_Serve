@@ -56,3 +56,20 @@ Nothing in this system or its documents says that discounts on liquor are legall
 - **Drizzle ORM** for the schema, SQL migrations and row locks (`SELECT … FOR UPDATE`). Migrations are plain SQL files in `apps/api/migrations`.
 - **SeaweedFS** as the local S3-compatible store: MinIO no longer publishes Docker images. Any S3-compatible service works in production.
 - **Sample data** is generated with a fixed random seed so the sample week is the same every time. All names, prices, costs, GSTIN, FSSAI and licence numbers in it are made up.
+
+## Phase 2
+
+- **Sales draw from the kitchen store (food stock) or the bar store (beverage stock).** "Portions available" is worked out from that store, so moving stock from the main store into the kitchen or bar is what makes it sellable.
+- **Portions available subtract what open bills have already ordered.** Two counters cannot both sell the last portion: the second is told it just sold out (phase 5 uses this).
+- **Recipe quantity is the amount in the dish; yield says how much survives preparation.** Stock drawn = quantity ÷ yield. 250 g at 80% yield draws 312.5 g.
+- **Who can write off without approval:** a new permission, "Record wastage, spillage and breakage without approval", is given to Owner, Outlet manager and Chef / bar manager (handoff 6.12 lets the chef and bar manager change wastage and spillage directly). Storekeepers' write-offs go to the approval queue.
+- **Complimentary and staff meals always name an approver.** If the person recording it can approve, they are the approver; otherwise it waits in the queue.
+- **Count corrections are approved by a manager.** A manager's own count goes straight in (handoff: managers can change stock corrections); anyone else's waits. The correction posted is counted − what the books said when the count started.
+- **Nobody approves their own request.** A request goes straight in when the person raising it could approve it anyway (for example a manager recording their own spillage); otherwise someone else must approve it.
+- **Opening stock for a new customer is entered as a stock count.** The count shows the books at zero; the counted quantity becomes the correction, with an audit trail.
+- **Lots and expiry:** perishables get a lot on every receipt, dated by the expiry entered (or received date + shelf life). Stock that existed before lot tracking is treated as one lot with no expiry and is issued after dated lots.
+- **A negative balance is allowed only for sales recorded offline** (phase 5); everything else is refused with "Not enough …".
+- **Weighted average** moves only on receipts; issues are costed at the current average. Stock value uses the average; menu costing (phase 4) uses the latest billed rate, as the handoff says.
+- **Business day** starts at 05:00 India time by default (a setting), so a bar's 1:30 am sales belong to the evening before. The liquor register and day close use the business day.
+- **Liquor register** lists every beverage stock item with an alcohol % above zero. Transfers inside the outlet are not shown (they net to zero for the licence); wastage, breakage, counts and reversals show as "Other". The format must be checked with an excise consultant.
+- **Live updates** use WebSocket (socket.io) with the Redis adapter, one room per customer and outlet.

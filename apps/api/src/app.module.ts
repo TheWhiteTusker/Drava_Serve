@@ -4,12 +4,15 @@ import { JwtModule } from '@nestjs/jwt';
 import {
   AuditController, OutletsController, RolesController, SettingsController, UsersController,
 } from './access.controller.js';
+import { ApprovalsController } from './approvals.js';
 import { AuthController } from './auth.controller.js';
 import {
   BrandsController, CategoriesController, LiquorTreeController, MenuItemsController, StockItemsController,
   TaxClassesController,
 } from './catalog.controller.js';
 import { AuthGuard, ErrorFilter, Public } from './common.js';
+import { LiveGateway } from './events.js';
+import { InventoryController } from './inventory.controller.js';
 
 @Controller('health')
 class HealthController {
@@ -31,9 +34,10 @@ export function jwtSecret() {
   controllers: [
     HealthController, AuthController, UsersController, RolesController, OutletsController, SettingsController,
     AuditController, CategoriesController, BrandsController, TaxClassesController, StockItemsController,
-    MenuItemsController, LiquorTreeController,
+    MenuItemsController, LiquorTreeController, ApprovalsController, InventoryController,
   ],
   providers: [
+    LiveGateway,
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_FILTER, useClass: ErrorFilter },
   ],

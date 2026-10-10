@@ -15,6 +15,7 @@ const decimal = (places: number) =>
 
 export const zMoney = decimal(2);
 export const zQty = decimal(3);
+export const zUnitCost = decimal(6); // ₹ per gram or ml can be small
 export const zPct = decimal(2).refine((v) => Number(v) <= 100, 'Must be 100 or less');
 const id = z.uuid();
 const optText = z.string().trim().max(500).optional().nullable().transform((v) => v || null);
@@ -98,7 +99,7 @@ export const zStockItem = z
     priceTier: z.enum(PRICE_TIERS).nullable().optional(),
     perishable: z.boolean().default(false),
     shelfLifeDays: z.coerce.number().int().positive().nullable().optional(),
-    currentCost: zQty.default('0'), // ₹ per base unit, from the latest billed rate
+    currentCost: zUnitCost.default('0'), // ₹ per base unit, from the latest billed rate
     active: z.boolean().default(true),
     // Purchase units: e.g. "kg" = 1000 g, "case of 12" = 9000 ml.
     units: z

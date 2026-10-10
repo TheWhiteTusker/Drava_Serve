@@ -120,7 +120,7 @@ export class UsersController {
   async setOwnPin(@C() ctx: Ctx, @Body() body: unknown) {
     const { pin } = parse(z.object({ pin: z.string().regex(/^\d{4,6}$/, 'PIN is 4 to 6 digits') }), body);
     const pinHash = await hashSecret(pin);
-    await ctx.tx((tx) => tx.update(t.appUser).set({ pinHash }).where(eq(t.appUser.id, ctx.userId)));
+    await ctx.tx((tx) => tx.update(t.appUser).set({ pinHash }).where(eq(t.appUser.id, ctx.userId!)));
     return { ok: true };
   }
 }
@@ -223,6 +223,8 @@ const settingValue: Record<SettingKey, z.ZodType> = {
   'receiving.rateTolerancePct': z.number().min(0).max(100),
   'approvals.priceChangeLimitPct': z.number().min(0).max(100),
   'menu.lowThresholdServes': z.number().int().min(0),
+  'pricing.flagTolerancePct': z.number().min(0).max(100),
+  'business.dayStart': z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use 24-hour time, e.g. 05:00'),
 };
 
 @Controller('settings')

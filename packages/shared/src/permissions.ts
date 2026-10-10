@@ -19,7 +19,8 @@ export const PERMISSIONS = {
   // Inventory
   'inventory.view': 'See stock levels and movements',
   'inventory.transfer': 'Move stock between stores',
-  'inventory.wastage': 'Record wastage, spillage and breakage',
+  'inventory.wastage': 'Record wastage, spillage and breakage (goes for approval)',
+  'inventory.writeOff': 'Record wastage, spillage and breakage without approval',
   'inventory.count': 'Enter stock counts',
   // Purchasing and receiving
   'vendors.manage': 'Add and edit vendors',
@@ -52,7 +53,7 @@ export const SEED_ROLES: { name: string; description: string; permissions: Permi
     description: 'Menu, prices, offers, nightly indent, stock corrections for their outlet',
     permissions: [
       'catalog.view', 'catalog.manage', 'recipes.manage', 'prices.manage', 'menu.pins',
-      'inventory.view', 'inventory.transfer', 'inventory.wastage', 'inventory.count',
+      'inventory.view', 'inventory.transfer', 'inventory.wastage', 'inventory.writeOff', 'inventory.count',
       'vendors.manage', 'rates.view', 'indent.manage', 'receiving.recheck', 'grn.approve',
       'approvals.decide', 'pos.bill', 'pos.dayClose', 'reports.view', 'reports.export', 'audit.view',
     ],
@@ -73,7 +74,7 @@ export const SEED_ROLES: { name: string; description: string; permissions: Permi
   {
     name: 'Chef / bar manager',
     description: 'Recipes, kitchen or bar stock, wastage and spillage',
-    permissions: ['catalog.view', 'recipes.manage', 'inventory.view', 'inventory.wastage', 'rates.view'],
+    permissions: ['catalog.view', 'recipes.manage', 'inventory.view', 'inventory.wastage', 'inventory.writeOff', 'rates.view'],
   },
   {
     name: 'Cashier',

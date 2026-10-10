@@ -7,6 +7,7 @@ import type { Permission } from '@fnb/shared';
 import { api, can, setCurrentOutlet, setSession, useApi, useCurrentOutlet, useSession, type Session } from './api';
 import { ErrorNote, Modal } from './ui';
 import { AuditPage } from './pages/audit';
+import { ApprovalsPage, CountsPage, LiquorRegisterPage, StockPage } from './pages/inventory';
 import { BrandsPage, CategoriesPage, LiquorTreePage, TaxClassesPage } from './pages/catalog';
 import { MenuItemsPage } from './pages/menu-items';
 import { OutletsPage, SettingsPage } from './pages/outlets';
@@ -136,12 +137,16 @@ function PinSwitch({ open, onClose }: { open: boolean; onClose: () => void }) {
 
 // ---------- Layout ----------
 
-const NAV: { to: string; label: string; perm?: Permission; group: string; page: () => React.JSX.Element }[] = [
+const NAV: { to: string; label: string; perm?: Permission; group: string; page: () => React.JSX.Element | null }[] = [
   { to: '/outlets', label: 'Outlets', group: 'Business', page: OutletsPage },
   { to: '/settings', label: 'Settings', group: 'Business', perm: 'settings.manage', page: SettingsPage },
   { to: '/users', label: 'Users', group: 'Business', perm: 'users.manage', page: UsersPage },
   { to: '/roles', label: 'Roles', group: 'Business', perm: 'users.manage', page: RolesPage },
   { to: '/audit', label: 'Change history', group: 'Business', perm: 'audit.view', page: AuditPage },
+  { to: '/approvals', label: 'Approvals', group: 'Business', page: ApprovalsPage },
+  { to: '/stock', label: 'Stock', group: 'Inventory', perm: 'inventory.view', page: StockPage },
+  { to: '/counts', label: 'Stock counts', group: 'Inventory', perm: 'inventory.view', page: CountsPage },
+  { to: '/liquor-register', label: 'Liquor register', group: 'Inventory', perm: 'inventory.view', page: LiquorRegisterPage },
   { to: '/menu-items', label: 'Menu items', group: 'Catalog', perm: 'catalog.view', page: MenuItemsPage },
   { to: '/stock-items', label: 'Stock items', group: 'Catalog', perm: 'catalog.view', page: StockItemsPage },
   { to: '/liquor', label: 'Liquor tree', group: 'Catalog', perm: 'catalog.view', page: LiquorTreePage },

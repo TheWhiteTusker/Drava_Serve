@@ -17,7 +17,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['apps/admin/**/*.tsx'],
+    files: ['apps/{admin,field}/**/*.{ts,tsx}'],
     plugins: { 'react-hooks': reactHooks },
     rules: { 'react-hooks/rules-of-hooks': 'error', 'react-hooks/exhaustive-deps': 'warn' },
   },

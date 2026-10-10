@@ -69,6 +69,8 @@ export const SETTING_DEFAULTS = {
   'receiving.rateTolerancePct': 10,
   'approvals.priceChangeLimitPct': 10,
   'menu.lowThresholdServes': 5,
+  'pricing.flagTolerancePct': 2,
+  'business.dayStart': '05:00',
 } as const;
 export type SettingKey = keyof typeof SETTING_DEFAULTS;
 export const SETTING_KEYS = Object.keys(SETTING_DEFAULTS) as SettingKey[];

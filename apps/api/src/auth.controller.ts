@@ -83,7 +83,7 @@ export class AuthController {
 
   @Get('me')
   me(@C() ctx: Ctx) {
-    return me(ctx.db, ctx.customerId, ctx.userId);
+    return me(ctx.db, ctx.customerId, ctx.userId!);
   }
 }
 

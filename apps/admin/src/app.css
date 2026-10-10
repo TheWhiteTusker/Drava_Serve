@@ -431,3 +431,34 @@ dialog::backdrop {
 .tree ul {
   margin: 0.25rem 0;
 }
+
+/* Printing: only the page content */
+.print-only {
+  display: none;
+}
+@media print {
+  .topbar,
+  #sidenav,
+  .page-head .row,
+  .tabs,
+  button {
+    display: none !important;
+  }
+  .print-only {
+    display: block;
+  }
+  .shell {
+    display: block;
+  }
+  .content {
+    padding: 0;
+  }
+  .table-wrap {
+    border: 0;
+    overflow: visible;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+}
