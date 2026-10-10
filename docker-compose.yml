@@ -36,6 +36,7 @@ services:
       REDIS_URL: redis://redis:6379
       S3_ENDPOINT: http://objects:8333
       JWT_SECRET: ${JWT_SECRET:-dev-only-secret-change-me}
+      SEED_DEMO: "true"
       TZ: Asia/Kolkata
     ports: ["3000:3000"]
     depends_on:

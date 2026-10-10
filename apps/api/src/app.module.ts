@@ -12,7 +12,10 @@ import {
 } from './catalog.controller.js';
 import { AuthGuard, ErrorFilter, Public } from './common.js';
 import { LiveGateway } from './events.js';
+import { DataController } from './data.js';
 import { InventoryController } from './inventory.controller.js';
+import { PosController } from './pos.controller.js';
+import { ReportsController } from './reports.js';
 import { PricingController, PublicMenuController } from './pricing.controller.js';
 import { IndentsController, VendorItemsController, VendorRatesController, VendorsController } from './purchasing.controller.js';
 import { AttachmentsController, DeliveriesController, GrnsController } from './receiving.controller.js';
@@ -40,6 +43,7 @@ export function jwtSecret() {
     MenuItemsController, LiquorTreeController, ApprovalsController, InventoryController,
     VendorsController, VendorItemsController, VendorRatesController, IndentsController,
     DeliveriesController, GrnsController, AttachmentsController, PricingController, PublicMenuController,
+    PosController, ReportsController, DataController,
   ],
   providers: [
     LiveGateway,

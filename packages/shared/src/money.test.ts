@@ -17,9 +17,10 @@ describe('billTotals', () => {
         { name: 'CGST', ratePct: '2.5', amount: '15.00' },
         { name: 'SGST', ratePct: '2.5', amount: '15.00' },
       ],
+      discount: '0.00',
       total: '630.00',
     });
-    expect(t.liquor).toEqual({ subtotal: '960.00', taxes: [{ name: 'VAT', ratePct: '10', amount: '96.00' }], total: '1056.00' });
+    expect(t.liquor).toEqual({ subtotal: '960.00', discount: '0.00', taxes: [{ name: 'VAT', ratePct: '10', amount: '96.00' }], total: '1056.00' });
     expect(t.grandTotal).toBe('1686.00');
     expect(t.roundOff).toBe('0.00');
   });
@@ -39,6 +40,20 @@ describe('billTotals', () => {
 
   it('an empty side totals zero', () => {
     const t = billTotals([{ qty: 1, unitPrice: '50', taxClass: gst5 }]);
-    expect(t.liquor).toEqual({ subtotal: '0.00', taxes: [], total: '0.00' });
+    expect(t.liquor).toEqual({ subtotal: '0.00', discount: '0.00', taxes: [], total: '0.00' });
+  });
+
+  it('an approved 10% discount comes off before tax, on both sides of the bill', () => {
+    const t = billTotals(
+      [
+        { qty: 1, unitPrice: '200', taxClass: gst5 },
+        { qty: 1, unitPrice: '300', taxClass: liquorTax },
+      ],
+      { discountPct: 10 },
+    );
+    expect(t.food).toMatchObject({ subtotal: '200.00', discount: '20.00', total: '189.00' }); // 180 + 4.50 + 4.50
+    expect(t.liquor).toMatchObject({ subtotal: '300.00', discount: '30.00', total: '297.00' }); // 270 + 27
+    expect(t.discount).toBe('50.00');
+    expect(t.grandTotal).toBe('486.00');
   });
 });

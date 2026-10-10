@@ -684,14 +684,15 @@ export const bill = pgTable(
     liquorSubtotal: money().notNull().default('0'),
     liquorTax: money().notNull().default('0'),
     taxes: jsonb(), // full breakdown as printed
-    manualDiscount: money().notNull().default('0'),
+    manualDiscount: money().notNull().default('0'), // ₹ taken off (food + liquor) by an approved discount
+    manualDiscountPct: pct().notNull().default('0'),
     roundOff: money().notNull().default('0'),
     total: money().notNull().default('0'),
     cancelReason: text(),
     approvalId: uuid().references(() => approvalRequest.id),
     ...stamps,
   },
-  (t) => [index().on(t.outletId, t.businessDate), index().on(t.outletId, t.status)],
+  (t) => [index().on(t.outletId, t.businessDate), index().on(t.outletId, t.status), unique().on(t.outletId, t.number)],
 );
 
 // One round of ordering on a bill. The first one sets bill.openedAt.
@@ -796,4 +797,19 @@ export const jobRun = pgTable(
     detail: jsonb(),
   },
   (t) => [primaryKey({ columns: [t.job, t.scope, t.key] })],
+);
+
+// Bills by the hour they opened: count, takings before tax and minutes from first order to
+// payment. Feeds "average bill value" and "time spent by time of day" on the dashboard.
+export const billHourly = pgTable(
+  'bill_hourly',
+  {
+    outletId: uuid().notNull().references(() => outlet.id),
+    businessDate: date().notNull(),
+    hour: smallint().notNull(),
+    bills: integer().notNull().default(0),
+    revenue: money().notNull().default('0'),
+    minutesSpent: integer().notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.outletId, t.businessDate, t.hour] })],
 );

@@ -7,6 +7,7 @@ import type { Permission } from '@fnb/shared';
 import { api, can, setCurrentOutlet, setSession, useApi, useCurrentOutlet, useSession, type Session } from './api';
 import { ErrorNote, Modal } from './ui';
 import { AuditPage } from './pages/audit';
+import { DashboardPage, ReportsPage } from './pages/dashboard';
 import { ApprovalsPage, CountsPage, LiquorRegisterPage, StockPage } from './pages/inventory';
 import { BrandsPage, CategoriesPage, LiquorTreePage, TaxClassesPage } from './pages/catalog';
 import { MenuItemsPage } from './pages/menu-items';
@@ -140,6 +141,8 @@ function PinSwitch({ open, onClose }: { open: boolean; onClose: () => void }) {
 // ---------- Layout ----------
 
 const NAV: { to: string; label: string; perm?: Permission; group: string; page: () => React.JSX.Element | null }[] = [
+  { to: '/dashboard', label: 'Dashboard', group: 'Overview', perm: 'reports.view', page: DashboardPage },
+  { to: '/reports', label: 'Reports', group: 'Overview', perm: 'reports.view', page: ReportsPage },
   { to: '/outlets', label: 'Outlets', group: 'Business', page: OutletsPage },
   { to: '/settings', label: 'Settings', group: 'Business', perm: 'settings.manage', page: SettingsPage },
   { to: '/users', label: 'Users', group: 'Business', perm: 'users.manage', page: UsersPage },
@@ -224,7 +227,7 @@ function Shell({ s }: { s: Session }) {
           {nav.map((n) => (
             <Route key={n.to} path={n.to} element={<n.page />} />
           ))}
-          <Route path="*" element={<Navigate to={nav.find((n) => n.to === '/menu-items')?.to ?? nav[0].to} replace />} />
+          <Route path="*" element={<Navigate to={(nav.find((n) => n.to === '/dashboard') ?? nav.find((n) => n.to === '/menu-items') ?? nav.find((n) => n.to === '/outlets')!).to} replace />} />
         </Routes>
       </main>
       <PinSwitch open={pinOpen} onClose={() => setPinOpen(false)} />

@@ -31,29 +31,34 @@ export interface TaxLine {
 }
 export interface DepartmentTotal {
   subtotal: string;
+  discount: string;
   taxes: TaxLine[];
   total: string;
 }
 export interface BillTotals {
   food: DepartmentTotal;
   liquor: DepartmentTotal;
+  discount: string;
   roundOff: string;
   grandTotal: string;
 }
 
 // Menu prices are before tax. Food and liquor are totalled separately, each with its own
-// taxes worked out on its subtotal; the grand total is rounded to the nearest rupee.
-export function billTotals(lines: BillLineInput[]): BillTotals {
+// taxes worked out on its subtotal (after any approved manual discount); the grand total is
+// rounded to the nearest rupee.
+export function billTotals(lines: BillLineInput[], opts: { discountPct?: Num } = {}): BillTotals {
+  const keep = dec(1).minus(dec(opts.discountPct ?? 0).div(100));
   const part = (kind: TaxKind): DepartmentTotal => {
     const mine = lines.filter((l) => l.taxClass.kind === kind);
     const subtotal = sum(mine.map((l) => dec(l.qty).times(l.unitPrice))).toDecimalPlaces(2, Decimal.ROUND_HALF_UP);
+    const discount = subtotal.minus(subtotal.times(keep)).toDecimalPlaces(2, Decimal.ROUND_HALF_UP);
     // Group by component name + rate so two classes with the same CGST rate merge into one line.
     const byKey = new Map<string, { name: string; ratePct: string; base: Decimal }>();
     for (const l of mine) {
       for (const c of l.taxClass.components) {
         const key = `${c.name}@${dec(c.ratePct).toString()}`;
         const row = byKey.get(key) ?? { name: c.name, ratePct: dec(c.ratePct).toString(), base: dec(0) };
-        row.base = row.base.plus(dec(l.qty).times(l.unitPrice));
+        row.base = row.base.plus(dec(l.qty).times(l.unitPrice).times(keep));
         byKey.set(key, row);
       }
     }
@@ -62,12 +67,14 @@ export function billTotals(lines: BillLineInput[]): BillTotals {
       ratePct: t.ratePct,
       amount: rupees(t.base.times(t.ratePct).div(100)),
     }));
-    const total = subtotal.plus(sum(taxes.map((t) => t.amount)));
-    return { subtotal: subtotal.toFixed(2), taxes, total: total.toFixed(2) };
+    const total = subtotal.minus(discount).plus(sum(taxes.map((t) => t.amount)));
+    return { subtotal: subtotal.toFixed(2), discount: discount.toFixed(2), taxes, total: total.toFixed(2) };
   };
   const food = part('food');
   const liquor = part('liquor');
   const exact = dec(food.total).plus(liquor.total);
   const rounded = exact.toDecimalPlaces(0, Decimal.ROUND_HALF_UP);
-  return { food, liquor, roundOff: rounded.minus(exact).toFixed(2), grandTotal: rounded.toFixed(2) };
+  return {
+    food, liquor, discount: dec(food.discount).plus(liquor.discount).toFixed(2), roundOff: rounded.minus(exact).toFixed(2), grandTotal: rounded.toFixed(2),
+  };
 }

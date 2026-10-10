@@ -45,6 +45,14 @@
   --brand-font-mono: ui-monospace, 'Cascadia Mono', Consolas, monospace;
   --brand-shadow: 0 1px 2px rgb(16 24 40 / 0.06), 0 1px 3px rgb(16 24 40 / 0.1);
 
+
+  /* Charts (validated for colour-blind safety and contrast on the surfaces above) */
+  --chart-series: #2a78d6;
+  --chart-seq-low: #cde2fb;
+  --chart-seq-high: #0d366b;
+  --chart-grid: #e1e0d9;
+  --chart-axis: #c3c2b7;
+
   /* Compliance marks (not brand) */
   --mark-veg: #1a8a3a;
   --mark-nonveg: #7b3f12;
@@ -69,6 +77,12 @@
     --brand-danger: #f07167;
     --brand-info: #7fb0e0;
     --brand-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+
+    --chart-series: #3987e5;
+    --chart-seq-low: #1d3049;
+    --chart-seq-high: #b7d3f6;
+    --chart-grid: #2c2c2a;
+    --chart-axis: #383835;
     --mark-veg: #3dbb5f;
     --mark-nonveg: #c47a3d;
   }
@@ -92,6 +106,12 @@
   --brand-danger: #f07167;
   --brand-info: #7fb0e0;
   --brand-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+
+  --chart-series: #3987e5;
+  --chart-seq-low: #1d3049;
+  --chart-seq-high: #b7d3f6;
+  --chart-grid: #2c2c2a;
+  --chart-axis: #383835;
   --mark-veg: #3dbb5f;
   --mark-nonveg: #c47a3d;
 }

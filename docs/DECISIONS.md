@@ -106,3 +106,28 @@ Nothing in this system or its documents says that discounts on liquor are legall
 - **"Applies only to new bills":** the offer price applies to bills opened after the offer started. Lines already on a bill keep their price.
 - **Every new outlet gets one offer rule** with the handoff's example settings. Nothing runs until the owner switches offers on for that outlet.
 - **The guest menu shows sold-out items greyed** (not hidden), at `/m/<business code>/<outlet code>`. It refreshes every minute, says prices are before taxes, and shows the FSSAI number. It sets no cookies and collects nothing about guests.
+
+## Phase 5
+
+- **The last-portion check happens when an order is placed, stock is deducted at payment.** An online order locks the stock rows it needs and checks what is left after other open bills' orders; the loser of a race is told "Just sold out: … (0 left)" and the item is greyed. Payment then deducts per recipe in one transaction and is never refused for stock (a shortfall, e.g. stock written off in between, shows in the ledger).
+- **Offline bills** are priced as the device showed them (prices and sold-out marks as of the last sync) and are stored exactly once, keyed by ids the device creates. Changes go to the server strictly in the order they were made.
+- **Bill numbers come from the device** so bills can be numbered offline: `OUTLET-YYMMDD-<device tag><sequence>`, e.g. `BLR1-261010-6F001`. The server keeps them unique per outlet. Bills created through the API without a number get `OUTLET-YYYYMMDD-S001`. GST invoice-series rules must be confirmed with a CA.
+- **A bill's time** runs from its first order to payment; the business day is taken from the payment time.
+- **Manual discounts are a percentage** of the bill, taken off before tax on both food and liquor, and printed as a "Discount" line (unlike beverage offers, which are silent). Discounts, removing an item after it was sent, cancellations and refunds all need a manager's approval.
+- **Cancelling a paid bill** returns its stock (a reversal in the ledger) and removes it from the dashboard. A refund records a negative payment; a fully refunded bill is marked refunded.
+- **Day close** refuses while that day still has open bills. It records totals by tax and payment mode, the cash counted and the difference, a snapshot of the liquor register, and ends that day's offers. A day can be closed once.
+- **"Sent to the guest"** uses the device's share sheet with a text receipt (no guest phone number or email is collected).
+- **Receipt printing** uses the browser's print dialog with an 80 mm thermal layout; `apps/field/src/pos/printing.ts` is the one place to swap in a direct printer driver.
+- **The counter's outlet** is chosen once per device (skipped when the person works at only one outlet).
+
+## Phase 6
+
+- **Revenue on the dashboard is before tax and after approved discounts**, by the price actually charged. Cost is the portion cost at the time of sale.
+- **Demand by hour** uses the time each order was given; **time spent** is grouped by the hour the bill opened.
+- **"Litres of alcohol"** is the volume of liquor served (ml of products with an alcohol % in each recipe), not pure alcohol.
+- **"Margins that fell after a price change"** compares each dish's latest re-costing with the one before it.
+- **Offer impact** compares an offer's period with the same length of time just before it started, using the hourly summaries.
+- **Menu engineering** uses margin per plate (₹) against the menu's average for "high margin", and the handoff's 70% rule for "popular". Food and beverage are assessed separately.
+- **Pour cost** = cost of liquor-tax items sold ÷ their sales.
+- **Backups** run nightly at 02:00 India time: one compressed `pg_dump` per customer into the private `fnb-backups` bucket, kept 30 days (setting `BACKUP_KEEP_DAYS`). Restore and per-customer deletion are command-line operations for White Tusker staff, not buttons in the app.
+- **Data export** for the owner is a zip of every table as CSV (password and PIN hashes left out).

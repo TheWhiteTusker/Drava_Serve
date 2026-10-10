@@ -59,7 +59,7 @@ export function createSession(app: string) {
       });
       const data = await res.json().catch(() => null);
       if (res.status === 401 && session && !path.startsWith('/auth/')) set(null);
-      if (!res.ok) throw Object.assign(new Error(data?.message ?? `Request failed (${res.status})`), { status: res.status });
+      if (!res.ok) throw Object.assign(new Error(data?.message ?? `Request failed (${res.status})`), { status: res.status, data });
       return data as T;
     },
   };

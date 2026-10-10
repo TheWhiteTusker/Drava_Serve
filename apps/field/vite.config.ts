@@ -9,6 +9,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
+        pos: resolve(import.meta.dirname, 'pos/index.html'),
         receiving: resolve(import.meta.dirname, 'receiving/index.html'),
         menu: resolve(import.meta.dirname, 'menu/index.html'),
       },

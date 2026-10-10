@@ -111,6 +111,9 @@ importers:
       drizzle-orm:
         specifier: 0.45.4
         version: 0.45.4(@types/pg@8.23.1)(pg@8.23.1)
+      fflate:
+        specifier: ^0.8.3
+        version: 0.8.3
       ioredis:
         specifier: ^6.0.0
         version: 6.0.0

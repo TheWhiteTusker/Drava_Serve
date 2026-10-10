@@ -30,16 +30,25 @@ async function ensureBucket(bucket: string) {
   ready.add(bucket);
 }
 
-export async function putObject(customerCode: string, key: string, body: Buffer, contentType: string) {
-  const Bucket = bucketFor(customerCode);
+export async function putRaw(Bucket: string, key: string, body: Buffer, contentType: string) {
   await ensureBucket(Bucket);
   await s3().send(new PutObjectCommand({ Bucket, Key: key, Body: body, ContentType: contentType }));
 }
-
-export async function getObject(customerCode: string, key: string) {
-  const r = await s3().send(new GetObjectCommand({ Bucket: bucketFor(customerCode), Key: key }));
+export async function getRaw(Bucket: string, key: string) {
+  const r = await s3().send(new GetObjectCommand({ Bucket, Key: key }));
   return Buffer.from(await r.Body!.transformToByteArray());
 }
+export async function listRaw(Bucket: string, prefix: string) {
+  await ensureBucket(Bucket);
+  const r = await s3().send(new ListObjectsV2Command({ Bucket, Prefix: prefix }));
+  return (r.Contents ?? []).map((o) => ({ key: o.Key!, size: o.Size ?? 0, at: o.LastModified }));
+}
+export async function deleteRaw(Bucket: string, keys: string[]) {
+  if (keys.length) await s3().send(new DeleteObjectsCommand({ Bucket, Delete: { Objects: keys.map((Key) => ({ Key })) } }));
+}
+
+export const putObject = (customerCode: string, key: string, body: Buffer, contentType: string) => putRaw(bucketFor(customerCode), key, body, contentType);
+export const getObject = (customerCode: string, key: string) => getRaw(bucketFor(customerCode), key);
 
 // Used when a customer leaves: empty and remove their bucket.
 export async function deleteBucket(customerCode: string) {

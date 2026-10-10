@@ -1,5 +1,7 @@
 FROM node:24-alpine
 ENV TZ=Asia/Kolkata NODE_ENV=production
+# pg_dump / pg_restore for the nightly backup and restore commands
+RUN apk add --no-cache postgresql17-client
 RUN corepack enable
 WORKDIR /app
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml .npmrc tsconfig.base.json ./

@@ -3,6 +3,7 @@ import { billTotals, dec, rupees, TIME_ZONE, type DietType } from '@fnb/shared';
 import { addOwner, asSystem, bootstrapCustomer, createOutlet } from './bootstrap.js';
 import { Ctx, hashSecret } from './common.js';
 import { rerankOutlet, runOffers } from './pricing.js';
+import { rebuildRollups } from './reports.js';
 import { approveIndent, buildIndents } from './purchasing.controller.js';
 import { controlDb, controlSchema, createCustomer, dropCustomer, tenantSchema as t } from './db/index.js';
 
@@ -354,5 +355,6 @@ export async function seedDemo(opts: { reset?: boolean; log?: (s: string) => voi
     .innerJoin(t.vendor, eq(t.vendor.id, t.indent.vendorId))
     .where(and(eq(t.indent.outletId, blr.id), eq(t.indent.forDate, today), eq(t.vendor.name, 'Sample Vegetable Supplier')));
   if (veg) await sys.tx((tx) => approveIndent(sys, tx, veg.id));
+  await sys.tx((tx) => rebuildRollups(tx)); // the sample week on the dashboard
   log(`Demo customer ready. Sign in as owner@demo.test / ${DEMO.password}`);
 }

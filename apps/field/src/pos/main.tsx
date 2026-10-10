@@ -1,0 +1,1026 @@
+import '@fnb/theme/theme.css';
+import '../lib/field.css';
+import './pos.css';
+import { StrictMode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import { io } from 'socket.io-client';
+import { billTotals, dec, istDate, type BillTotals } from '@fnb/shared';
+import { createQueue } from '../lib/queue';
+import { createSession, deviceId, type Session } from '../lib/session';
+import { DietMark, Login, OfflineBar, registerWorker, rupee } from '../lib/ui';
+import { printReceipt } from './printing';
+
+// Billing POS for a counter tablet or desktop. Touch, mouse and keyboard; keeps billing offline.
+// Margins never reach this screen: the API sends prices and order only.
+
+const session = createSession('pos');
+const queue = createQueue('pos', session);
+registerWorker('/pos/sw.js');
+
+interface MenuItem {
+  id: string;
+  name: string;
+  department: 'food' | 'beverage';
+  course: string | null;
+  type: string | null;
+  brand: string | null;
+  dietType: string | null;
+  serveSizeMl: string | null;
+  taxClassId: string;
+  taxKind: 'food' | 'liquor';
+  price: string;
+  activeDiscountId: string | null;
+  portions: number | null;
+  status: 'available' | 'low' | 'out';
+  rank: number;
+  code: string | null;
+}
+interface Catalog {
+  outlet: { id: string; name: string; code: string; address: string | null; gstin: string | null; fssaiNumber: string | null };
+  dayStart: string;
+  menu: MenuItem[];
+  taxClasses: { id: string; kind: 'food' | 'liquor'; components: { name: string; ratePct: string }[] }[];
+  tables: { id: string; name: string }[];
+  syncedAt: string;
+}
+interface Line {
+  id?: string;
+  menuItemId: string;
+  name: string;
+  qty: string;
+  price: string;
+  dietType: string | null;
+  taxClassId?: string;
+  status?: string;
+  activeDiscountId?: string | null;
+}
+interface LocalBill {
+  clientId: string;
+  id?: string; // server id once known
+  number: string;
+  kind: 'dine_in' | 'takeaway';
+  tableId: string | null;
+  table: string | null;
+  openedAt: string | null;
+  lines: Line[]; // sent to the kitchen / counter
+  cart: Line[]; // not sent yet
+  status: 'open' | 'paid' | 'cancelled' | 'refunded';
+  totals?: BillTotals;
+  total?: string;
+  paidAt?: string;
+  payments?: { mode: string; amount: string }[];
+  manualDiscountPct?: string;
+  unsent?: boolean; // changes saved on this device, not yet on the server
+}
+
+const store = {
+  get<T>(k: string, fallback: T): T {
+    try {
+      return JSON.parse(localStorage.getItem(`fnb.pos.${k}`) ?? 'null') ?? fallback;
+    } catch {
+      return fallback;
+    }
+  },
+  set: (k: string, v: unknown) => localStorage.setItem(`fnb.pos.${k}`, JSON.stringify(v)),
+};
+
+// Bill numbers come from the device so a bill can be numbered offline: OUTLET-YYMMDD-<tag><seq>.
+function nextBillNumber(outletCode: string) {
+  const tag = store.get<string>('deviceTag', deviceId.slice(0, 2).toUpperCase());
+  const day = istDate(new Date()).slice(2).replaceAll('-', '');
+  const key = `seq.${day}`;
+  const n = store.get<number>(key, 0) + 1;
+  store.set(key, n);
+  return `${outletCode}-${day}-${tag}${String(n).padStart(3, '0')}`;
+}
+
+function totalsFor(bill: LocalBill, cat: Catalog, withCart = true): BillTotals {
+  const lines = [...bill.lines.filter((l) => l.status !== 'voided'), ...(withCart ? bill.cart : [])];
+  return billTotals(
+    lines.map((l) => {
+      const item = cat.menu.find((m) => m.id === l.menuItemId);
+      const tc = cat.taxClasses.find((x) => x.id === (l.taxClassId ?? item?.taxClassId)) ?? { kind: 'food' as const, components: [] };
+      return { qty: l.qty, unitPrice: l.price, taxClass: tc };
+    }),
+    { discountPct: bill.manualDiscountPct ?? 0 },
+  );
+}
+
+// ---------- Receipt ----------
+
+function Mark({ diet }: { diet: string | null }) {
+  if (!diet) return null;
+  const veg = diet === 'veg';
+  const c = veg ? '#1a8a3a' : '#7b3f12';
+  const label = veg ? 'Veg' : 'Non-veg';
+  return (
+    <svg className="mark" width="11" height="11" viewBox="0 0 16 16" role="img" aria-label={label}>
+      <rect x="1" y="1" width="14" height="14" fill="none" stroke={c} strokeWidth="2" />
+      {veg ? <circle cx="8" cy="8" r="3.8" fill={c} /> : <path d="M8 3.5 12.5 12H3.5Z" fill={c} />}
+    </svg>
+  );
+}
+
+// The receipt shows the price charged for each item and nothing about offers.
+function Receipt({ bill, cat, cashier }: { bill: LocalBill; cat: Catalog; cashier: string }) {
+  const t = bill.totals ?? totalsFor(bill, cat, false);
+  const lines = bill.lines.filter((l) => l.status !== 'voided');
+  const taxLines = (d: BillTotals['food']) =>
+    d.taxes.map((x) => (
+      <div key={x.name + x.ratePct} className="row">
+        <span>
+          {x.name} {x.ratePct}%
+        </span>
+        <span>{dec(x.amount).toFixed(2)}</span>
+      </div>
+    ));
+  return (
+    <div className="receipt" id="receipt">
+      <h1>{cat.outlet.name}</h1>
+      {cat.outlet.address && <p className="center">{cat.outlet.address}</p>}
+      {cat.outlet.gstin && <p className="center">GSTIN {cat.outlet.gstin}</p>}
+      {cat.outlet.fssaiNumber && <p className="center">FSSAI Lic. No. {cat.outlet.fssaiNumber}</p>}
+      <hr />
+      <div className="row">
+        <span>Bill {bill.number}</span>
+        <span>{bill.kind === 'takeaway' ? 'Takeaway' : `Table ${bill.table ?? ''}`}</span>
+      </div>
+      <div className="row">
+        <span>{new Date(bill.paidAt ?? Date.now()).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'short', timeStyle: 'short' })}</span>
+        <span>{cashier}</span>
+      </div>
+      <hr />
+      {lines.map((l, i) => (
+        <div key={l.id ?? i} className="row">
+          <span>
+            <Mark diet={l.dietType} />
+            {l.name} × {dec(l.qty).toString()}
+          </span>
+          <span>{dec(l.qty).times(l.price).toFixed(2)}</span>
+        </div>
+      ))}
+      <hr />
+      {dec(t.food.subtotal).gt(0) && (
+        <>
+          <div className="row">
+            <span>Food</span>
+            <span>{t.food.subtotal}</span>
+          </div>
+          {dec(t.food.discount).gt(0) && (
+            <div className="row">
+              <span>Discount</span>
+              <span>−{t.food.discount}</span>
+            </div>
+          )}
+          {taxLines(t.food)}
+          <div className="row">
+            <span>Food total</span>
+            <span>{t.food.total}</span>
+          </div>
+          <hr />
+        </>
+      )}
+      {dec(t.liquor.subtotal).gt(0) && (
+        <>
+          <div className="row">
+            <span>Liquor</span>
+            <span>{t.liquor.subtotal}</span>
+          </div>
+          {dec(t.liquor.discount).gt(0) && (
+            <div className="row">
+              <span>Discount</span>
+              <span>−{t.liquor.discount}</span>
+            </div>
+          )}
+          {taxLines(t.liquor)}
+          <div className="row">
+            <span>Liquor total</span>
+            <span>{t.liquor.total}</span>
+          </div>
+          <hr />
+        </>
+      )}
+      {!dec(t.roundOff).isZero() && (
+        <div className="row">
+          <span>Round off</span>
+          <span>{t.roundOff}</span>
+        </div>
+      )}
+      <div className="row total">
+        <span>TOTAL ₹</span>
+        <span>{t.grandTotal}</span>
+      </div>
+      {(bill.payments ?? []).map((p, i) => (
+        <div key={i} className="row">
+          <span>Paid by {p.mode.toUpperCase()}</span>
+          <span>{dec(p.amount).toFixed(2)}</span>
+        </div>
+      ))}
+      <hr />
+      <p className="center">
+        <Mark diet="veg" /> Veg &nbsp; <Mark diet="non_veg" /> Non-veg
+      </p>
+      <p className="center">Thank you!</p>
+    </div>
+  );
+}
+
+function receiptText(bill: LocalBill, cat: Catalog) {
+  const t = bill.totals ?? totalsFor(bill, cat, false);
+  const lines = bill.lines.filter((l) => l.status !== 'voided').map((l) => `${l.dietType === 'veg' ? '(Veg) ' : l.dietType ? '(Non-veg) ' : ''}${l.name} x ${dec(l.qty)}  ₹${dec(l.qty).times(l.price).toFixed(2)}`);
+  return [
+    cat.outlet.name, cat.outlet.fssaiNumber ? `FSSAI Lic. No. ${cat.outlet.fssaiNumber}` : '', `Bill ${bill.number}`, '', ...lines, '',
+    dec(t.food.subtotal).gt(0) ? `Food ₹${t.food.subtotal} + taxes = ₹${t.food.total}` : '',
+    dec(t.liquor.subtotal).gt(0) ? `Liquor ₹${t.liquor.subtotal} + taxes = ₹${t.liquor.total}` : '',
+    `TOTAL ₹${t.grandTotal}`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+// ---------- Small dialogs ----------
+
+function Dialog({ title, onClose, children, wide }: { title: string; onClose: () => void; children: React.ReactNode; wide?: boolean }) {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    ref.current?.showModal();
+  }, []);
+  return (
+    <dialog ref={ref} className={wide ? 'wide' : ''} onClose={onClose} aria-label={title}>
+      <div className="row" style={{ marginBottom: '0.5rem' }}>
+        <h2 style={{ flex: 4 }}>{title}</h2>
+        <button className="ghost" onClick={onClose} aria-label="Close" style={{ flex: 0 }}>
+          ✕
+        </button>
+      </div>
+      {children}
+    </dialog>
+  );
+}
+
+function PinSwitch({ outletId, onClose }: { outletId: string; onClose: () => void }) {
+  const [people, setPeople] = useState<{ id: string; name: string }[]>([]);
+  const [who, setWho] = useState<string | null>(null);
+  const [pin, setPin] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    session.api(`/auth/pin-users?outletId=${outletId}`).then(setPeople).catch((e) => setError(e.message));
+  }, [outletId]);
+  async function go() {
+    try {
+      session.set(await session.api<Session>(`/auth/pin?outletId=${outletId}`, { body: { userId: who, pin } }));
+      onClose();
+    } catch (e) {
+      setError((e as Error).message);
+      setPin('');
+    }
+  }
+  return (
+    <Dialog title="Switch user" onClose={onClose}>
+      {!who ? (
+        <div className="grid-buttons">
+          {people.map((p) => (
+            <button key={p.id} className="secondary" onClick={() => setWho(p.id)}>
+              {p.name}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div className="stack" onKeyDown={(e) => (/^\d$/.test(e.key) ? setPin((p) => (p + e.key).slice(0, 6)) : e.key === 'Enter' && pin.length >= 4 && go())}>
+          <p>PIN for {people.find((p) => p.id === who)?.name}</p>
+          <output className="big" aria-live="polite">
+            {'●'.repeat(pin.length) || ' '}
+          </output>
+          <div className="keypad">
+            {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((d) => (
+              <button key={d} className="secondary huge" onClick={() => setPin((p) => (p + d).slice(0, 6))}>
+                {d}
+              </button>
+            ))}
+            <button className="ghost huge" onClick={() => setWho(null)}>
+              Back
+            </button>
+            <button className="secondary huge" onClick={() => setPin((p) => (p + '0').slice(0, 6))}>
+              0
+            </button>
+            <button className="huge" disabled={pin.length < 4} onClick={go}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+      {error && <p className="note danger">{error}</p>}
+    </Dialog>
+  );
+}
+
+// ---------- The till ----------
+
+function Till({ outletId }: { outletId: string }) {
+  const s = session.use()!;
+  const q = queue.use();
+  const [cat, setCat] = useState<Catalog | null>(() => store.get(`catalog.${outletId}`, null));
+  const [bills, setBills] = useState<LocalBill[]>(() => store.get(`bills.${outletId}`, []));
+  const [current, setCurrent] = useState<string | null>(() => store.get(`current.${outletId}`, null));
+  const [dept, setDept] = useState<'food' | 'beverage'>('food');
+  const [group, setGroup] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [dialog, setDialog] = useState<null | 'new' | 'open' | 'pay' | 'receipt' | 'more' | 'pin' | 'close' | 'approvals' | 'help'>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const bill = bills.find((b) => b.clientId === current) ?? null;
+
+  const saveBills = useCallback(
+    (fn: (b: LocalBill[]) => LocalBill[]) =>
+      setBills((prev) => {
+        const next = fn(prev).filter((b) => b.status === 'open' || (b.paidAt && Date.now() - new Date(b.paidAt).getTime() < 86_400_000));
+        store.set(`bills.${outletId}`, next);
+        return next;
+      }),
+    [outletId],
+  );
+  const update = (clientId: string, patch: Partial<LocalBill> | ((b: LocalBill) => Partial<LocalBill>)) =>
+    saveBills((all) => all.map((b) => (b.clientId === clientId ? { ...b, ...(typeof patch === 'function' ? patch(b) : patch) } : b)));
+  const select = (id: string | null) => {
+    setCurrent(id);
+    store.set(`current.${outletId}`, id);
+  };
+  const flash = (m: string) => {
+    setMessage(m);
+    setTimeout(() => setMessage(null), 5000);
+  };
+
+  // Catalog: from the server when online, from the device otherwise.
+  const loadCatalog = useCallback(async () => {
+    try {
+      const c = await session.api<Catalog>(`/pos/catalog?outletId=${outletId}`);
+      setCat(c);
+      store.set(`catalog.${outletId}`, c);
+    } catch {
+      /* offline: keep the last copy */
+    }
+  }, [outletId]);
+  // Bills opened on other counters.
+  const loadServerBills = useCallback(async () => {
+    try {
+      const open = await session.api<any[]>(`/pos/bills?outletId=${outletId}&status=open`);
+      saveBills((all) => {
+        const mine = all.map((b) => {
+          const srv = open.find((o) => o.clientId === b.clientId);
+          return srv && b.status === 'open' ? { ...b, ...fromServer(srv), cart: b.cart } : b;
+        });
+        const others = open.filter((o) => !all.some((b) => b.clientId === o.clientId)).map((o) => ({ ...fromServer(o), cart: [] }));
+        return [...mine, ...others];
+      });
+    } catch {
+      /* offline */
+    }
+  }, [outletId, saveBills]);
+  useEffect(() => {
+    loadCatalog();
+    loadServerBills();
+    const timer = setInterval(loadCatalog, 120_000);
+    const sock = io({ path: '/api/socket', auth: { token: s.token }, transports: ['websocket', 'polling'] });
+    sock.on('availability', (d: { items: { menuItemId: string; portions: number | null; status: MenuItem['status'] }[] }) =>
+      setCat((c) => {
+        if (!c) return c;
+        const next = { ...c, menu: c.menu.map((m) => ({ ...m, ...(d.items.find((i) => i.menuItemId === m.id) ? { portions: d.items.find((i) => i.menuItemId === m.id)!.portions, status: d.items.find((i) => i.menuItemId === m.id)!.status } : {}) })) };
+        store.set(`catalog.${outletId}`, next);
+        return next;
+      }),
+    );
+    sock.on('menu', loadCatalog);
+    sock.on('bill', loadServerBills);
+    return () => {
+      clearInterval(timer);
+      sock.close();
+    };
+  }, [s.token, outletId, loadCatalog, loadServerBills]);
+
+  // Once everything saved on the device has reached the server, nothing is unsent any more.
+  useEffect(() => {
+    if (q.pending === 0 && bills.some((b) => b.unsent)) {
+      saveBills((all) => all.map((b) => ({ ...b, unsent: false })));
+      loadServerBills();
+    }
+  }, [q.pending, bills, saveBills, loadServerBills]);
+
+  // ---------- Items ----------
+  const menu = useMemo(() => (cat?.menu ?? []).filter((m) => m.department === dept), [cat, dept]);
+  const groups = useMemo(() => [...new Set(menu.map((m) => (dept === 'food' ? m.course : m.type) ?? 'Other'))], [menu, dept]);
+  const visible = menu.filter(
+    (m) => (!group || (dept === 'food' ? m.course : m.type) === group) && (!search || m.name.toLowerCase().includes(search.toLowerCase()) || m.code?.toLowerCase() === search.toLowerCase()),
+  );
+
+  function newBill(kind: LocalBill['kind'], table?: { id: string; name: string }) {
+    const b: LocalBill = { clientId: crypto.randomUUID(), number: nextBillNumber(cat!.outlet.code), kind, tableId: table?.id ?? null, table: table?.name ?? null, openedAt: null, lines: [], cart: [], status: 'open' };
+    saveBills((all) => [...all, b]);
+    select(b.clientId);
+    setDialog(null);
+    setTimeout(() => searchRef.current?.focus(), 50);
+  }
+
+  function add(item: MenuItem) {
+    if (item.status === 'out') return;
+    if (!bill) {
+      setDialog('new');
+      return;
+    }
+    update(bill.clientId, (b) => {
+      const existing = b.cart.find((l) => l.menuItemId === item.id);
+      const cart = existing
+        ? b.cart.map((l) => (l === existing ? { ...l, qty: dec(l.qty).plus(1).toString() } : l))
+        : [...b.cart, { menuItemId: item.id, name: item.name, qty: '1', price: item.price, dietType: item.dietType, taxClassId: item.taxClassId, activeDiscountId: item.activeDiscountId }];
+      return { cart };
+    });
+  }
+
+  // Talk to the server directly only when online with nothing older still waiting, so the
+  // server always receives a bill's changes in the order they were made.
+  const direct = () => queue.state().online && queue.state().pending === 0;
+
+  // Send the cart as one order. Online: the server prices it and checks stock under a lock.
+  // Offline (or with older changes still waiting): saved on the device and sent in order later.
+  async function sendOrder() {
+    if (!bill || !bill.cart.length) return;
+    const placedAt = new Date().toISOString();
+    const order = { clientId: crypto.randomUUID(), placedAt, lines: bill.cart.map((l) => ({ menuItemId: l.menuItemId, qty: l.qty, priceCharged: l.price, activeDiscountId: l.activeDiscountId })) };
+    const body = (offline: boolean) => ({ outletId, bill: { clientId: bill.clientId, kind: bill.kind, tableId: bill.tableId, number: bill.number }, order, offline });
+    const local = (b: LocalBill) => ({ lines: [...b.lines, ...b.cart], cart: [], openedAt: b.openedAt ?? placedAt });
+    if (direct()) {
+      try {
+        const srv = await session.api('/pos/orders', { body: body(false) });
+        update(bill.clientId, { ...fromServer(srv), cart: [] });
+        return;
+      } catch (e: any) {
+        if (e.status === 409 && e.data?.soldOut) {
+          const out = e.data.soldOut.map((x: any) => x.menuItemId);
+          update(bill.clientId, (b) => ({ cart: b.cart.filter((l) => !out.includes(l.menuItemId)) }));
+          setCat((c) => c && { ...c, menu: c.menu.map((m) => (out.includes(m.id) ? { ...m, status: 'out', portions: 0 } : m)) });
+          flash(e.message);
+          return;
+        }
+        if (e.status && e.status < 500) {
+          flash(e.message);
+          return;
+        }
+      }
+    }
+    await queue.add({ kind: 'json', method: 'POST', path: '/pos/orders', body: body(true), label: `Order on bill ${bill.number}` });
+    update(bill.clientId, (b) => ({ ...local(b), unsent: true }));
+  }
+
+  async function pay(payments: { mode: string; amount: string; reference?: string }[]) {
+    if (!bill) return;
+    if (bill.cart.length) await sendOrder();
+    const paidAt = new Date().toISOString();
+    const body = (offline: boolean) => ({ billClientId: bill.clientId, paidAt, payments: payments.map((p) => ({ ...p, clientId: crypto.randomUUID() })), offline });
+    let done = false;
+    if (direct()) {
+      try {
+        const srv = await session.api('/pos/payments', { body: body(false) });
+        update(bill.clientId, { ...fromServer(srv), cart: [] });
+        done = true;
+      } catch (e: any) {
+        if (e.status && e.status < 500) {
+          flash(e.message);
+          return;
+        }
+      }
+    }
+    if (!done) {
+      await queue.add({ kind: 'json', method: 'POST', path: '/pos/payments', body: body(true), label: `Payment on bill ${bill.number}` });
+      update(bill.clientId, (b) => ({ status: 'paid', paidAt, payments, totals: totalsFor(b, cat!, false), unsent: true }));
+    }
+    setDialog('receipt');
+  }
+
+  async function request(kind: 'cancel' | 'discount' | 'void', extra: Record<string, string>) {
+    if (!bill?.id) {
+      flash('This bill has not reached the server yet. Try again when online.');
+      return;
+    }
+    try {
+      const r = await session.api(`/pos/bills/${bill.id}/${kind}`, { body: extra });
+      update(bill.clientId, { ...fromServer(r.bill), cart: bill.cart });
+      flash(r.status === 'pending' ? 'Sent to a manager for approval.' : 'Done.');
+      setDialog(null);
+    } catch (e) {
+      flash((e as Error).message);
+    }
+  }
+
+  // ---------- Keyboard ----------
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const typing = (e.target as HTMLElement)?.tagName === 'INPUT';
+      const keys: Record<string, (() => void) | false> = {
+        F2: () => setDialog('new'),
+        F4: () => setDialog('open'),
+        F8: !!bill && (() => setDialog('pay')),
+        F9: () => void sendOrder(),
+        F1: () => setDialog('help'),
+        '/': !typing && (() => searchRef.current?.focus()),
+      };
+      const action = e.altKey && e.key.toLowerCase() === 'n' ? keys.F2 : keys[e.key];
+      if (action) {
+        e.preventDefault();
+        action();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
+
+  if (!cat) return <p className="wrap">Loading the menu… (needs a connection the first time)</p>;
+  const totals = bill ? totalsFor(bill, cat) : null;
+  const openBills = bills.filter((b) => b.status === 'open');
+  const unsentBills = bills.filter((b) => b.unsent).length;
+
+  return (
+    <div className="till">
+      <header className="bar">
+        <span className="logo" role="img" aria-label="Logo" />
+        <strong>{cat.outlet.name}</strong>
+        <span className={`badge ${q.online ? '' : 'off'}`}>{q.online ? 'Online' : 'OFFLINE'}</span>
+        {unsentBills > 0 && (
+          <span className="badge off">
+            {unsentBills} unsent bill{unsentBills === 1 ? '' : 's'}
+          </span>
+        )}
+        <span className="spacer" />
+        <button className="secondary" onClick={() => setDialog('open')}>
+          Open bills ({openBills.length}) <kbd>F4</kbd>
+        </button>
+        {session.can('approvals.decide', outletId) && (
+          <button className="secondary" onClick={() => setDialog('approvals')}>
+            Approvals
+          </button>
+        )}
+        {session.can('pos.dayClose', outletId) && (
+          <button className="secondary" onClick={() => setDialog('close')}>
+            Day close
+          </button>
+        )}
+        <button className="ghost" onClick={() => setDialog('help')}>
+          Keys <kbd>F1</kbd>
+        </button>
+        <button className="ghost" onClick={() => setDialog('pin')}>
+          {s.user.name} · Switch
+        </button>
+      </header>
+      <OfflineBar q={q} />
+      {message && (
+        <div className="note danger flash" role="alert">
+          {message}
+        </div>
+      )}
+      <main className="till-body">
+        <section className="items" aria-label="Menu">
+          <div className="row tight-row">
+            <div className="tabs" role="tablist">
+              {(['food', 'beverage'] as const).map((d) => (
+                <button key={d} role="tab" aria-selected={dept === d} className={dept === d ? '' : 'secondary'} onClick={() => (setDept(d), setGroup(null))}>
+                  {d === 'food' ? 'Food' : 'Beverage'}
+                </button>
+              ))}
+            </div>
+            <input ref={searchRef} aria-label="Search items" placeholder="Search ( / )" value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const first = visible.find((m) => m.status !== 'out');
+                if (first) {
+                  add(first);
+                  setSearch('');
+                }
+              }
+              if (e.key === 'Escape') setSearch('');
+            }} />
+          </div>
+          <div className="chips" role="tablist" aria-label={dept === 'food' ? 'Courses' : 'Types'}>
+            <button className="secondary" aria-pressed={!group} onClick={() => setGroup(null)}>
+              All
+            </button>
+            {groups.map((g) => (
+              <button key={g} className="secondary" aria-pressed={group === g} onClick={() => setGroup(g)}>
+                {g}
+              </button>
+            ))}
+          </div>
+          {(group ? [group] : groups).map((g) => {
+            const list = visible.filter((m) => ((dept === 'food' ? m.course : m.type) ?? 'Other') === g);
+            if (!list.length) return null;
+            return (
+              <div key={g}>
+                <h3 className="group-title">{g}</h3>
+                <div className="grid-items">
+                  {list.map((m) => (
+                    <button key={m.id} className={`item ${m.status}`} disabled={m.status === 'out'} onClick={() => add(m)} aria-label={`${m.name}, ₹${m.price}${m.status === 'out' ? ', sold out' : m.status === 'low' ? `, ${m.portions} left` : ''}`}>
+                      <span className="item-name">
+                        <DietMark diet={m.dietType} size={14} /> {m.name}
+                      </span>
+                      <span className="item-meta">
+                        <span>{rupee(m.price)}</span>
+                        {m.status === 'out' ? <span className="badge off">Sold out</span> : m.status === 'low' ? <span className="badge low">{m.portions} left</span> : null}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </section>
+
+        <aside className="ticket" aria-label="Current bill">
+          {!bill ? (
+            <div className="stack">
+              <p className="muted">No bill open on this counter.</p>
+              <button className="huge" onClick={() => setDialog('new')}>
+                New bill <kbd>F2</kbd>
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="row">
+                <div style={{ flex: 3 }}>
+                  <strong>{bill.kind === 'takeaway' ? 'Takeaway' : `Table ${bill.table}`}</strong>
+                  <div className="muted">
+                    {bill.number} {bill.openedAt && `· since ${new Date(bill.openedAt).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}`}
+                  </div>
+                </div>
+                <button className="secondary" onClick={() => select(null)} style={{ flex: 1 }}>
+                  Park
+                </button>
+              </div>
+              <ul className="lines">
+                {bill.lines.map((l, i) => (
+                  <li key={l.id ?? `s${i}`} className={l.status === 'voided' ? 'voided' : ''}>
+                    <span>
+                      <DietMark diet={l.dietType} size={12} /> {l.name}
+                    </span>
+                    <span>× {dec(l.qty).toString()}</span>
+                    <span>{rupee(dec(l.qty).times(l.price).toString())}</span>
+                  </li>
+                ))}
+                {bill.cart.map((l) => (
+                  <li key={l.menuItemId} className="cart">
+                    <span>
+                      <DietMark diet={l.dietType} size={12} /> {l.name}
+                    </span>
+                    <span className="qty">
+                      <button className="secondary" aria-label={`One less ${l.name}`} onClick={() => update(bill.clientId, (b) => ({ cart: b.cart.flatMap((c) => (c.menuItemId !== l.menuItemId ? [c] : dec(c.qty).gt(1) ? [{ ...c, qty: dec(c.qty).minus(1).toString() }] : [])) }))}>
+                        −
+                      </button>
+                      {dec(l.qty).toString()}
+                      <button className="secondary" aria-label={`One more ${l.name}`} onClick={() => update(bill.clientId, (b) => ({ cart: b.cart.map((c) => (c.menuItemId === l.menuItemId ? { ...c, qty: dec(c.qty).plus(1).toString() } : c)) }))}>
+                        +
+                      </button>
+                    </span>
+                    <span>{rupee(dec(l.qty).times(l.price).toString())}</span>
+                  </li>
+                ))}
+              </ul>
+              {totals && (
+                <div className="totals">
+                  {dec(totals.food.subtotal).gt(0) && (
+                    <div className="row">
+                      <span>Food (incl. {totals.food.taxes.map((x) => x.name).join(' + ') || 'tax'})</span>
+                      <span>{rupee(totals.food.total)}</span>
+                    </div>
+                  )}
+                  {dec(totals.liquor.subtotal).gt(0) && (
+                    <div className="row">
+                      <span>Liquor (incl. {totals.liquor.taxes.map((x) => x.name).join(' + ') || 'tax'})</span>
+                      <span>{rupee(totals.liquor.total)}</span>
+                    </div>
+                  )}
+                  {dec(totals.discount).gt(0) && (
+                    <div className="row">
+                      <span>Discount (approved)</span>
+                      <span>−{rupee(totals.discount)}</span>
+                    </div>
+                  )}
+                  <div className="row big">
+                    <span>Total</span>
+                    <span>{rupee(totals.grandTotal)}</span>
+                  </div>
+                </div>
+              )}
+              <div className="row">
+                <button className="secondary" disabled={!bill.cart.length} onClick={sendOrder}>
+                  Send order <kbd>F9</kbd>
+                </button>
+                <button className="huge" disabled={!bill.lines.length && !bill.cart.length} onClick={() => setDialog('pay')}>
+                  Pay <kbd>F8</kbd>
+                </button>
+              </div>
+              <button className="ghost" onClick={() => setDialog('more')}>
+                Discount, remove item or cancel…
+              </button>
+            </>
+          )}
+        </aside>
+      </main>
+
+      {dialog === 'new' && (
+        <Dialog title="New bill" onClose={() => setDialog(null)} wide>
+          <button className="huge" onClick={() => newBill('takeaway')} style={{ width: '100%', marginBottom: '0.75rem' }}>
+            Takeaway
+          </button>
+          <div className="grid-buttons">
+            {cat.tables.map((tb) => {
+              const busy = openBills.some((b) => b.tableId === tb.id);
+              return (
+                <button key={tb.id} className={busy ? 'warn' : 'secondary'} onClick={() => (busy ? select(openBills.find((b) => b.tableId === tb.id)!.clientId) : newBill('dine_in', tb), setDialog(null))}>
+                  {tb.name}
+                  {busy && ' · open'}
+                </button>
+              );
+            })}
+          </div>
+        </Dialog>
+      )}
+      {dialog === 'open' && (
+        <Dialog title="Open bills" onClose={() => setDialog(null)} wide>
+          {openBills.length === 0 && <p className="muted">No open bills.</p>}
+          <div className="grid-buttons">
+            {openBills.map((b) => (
+              <button key={b.clientId} className={b.clientId === current ? '' : 'secondary'} onClick={() => (select(b.clientId), setDialog(null))}>
+                {b.kind === 'takeaway' ? 'Takeaway' : `Table ${b.table}`} · {b.number.split('-').pop()}
+                <br />
+                {rupee(totalsFor(b, cat).grandTotal)}
+              </button>
+            ))}
+          </div>
+        </Dialog>
+      )}
+      {dialog === 'pay' && bill && totals && <PayDialog total={totals.grandTotal} onPay={pay} onClose={() => setDialog(null)} />}
+      {dialog === 'receipt' && bill && (
+        <Dialog title="Receipt" onClose={() => (setDialog(null), select(null))}>
+          <Receipt bill={bill} cat={cat} cashier={s.user.name} />
+          <div className="row" style={{ marginTop: '0.75rem' }}>
+            <button className="secondary" onClick={() => printReceipt(document.getElementById('receipt')!)}>
+              Print
+            </button>
+            {'share' in navigator && (
+              <button className="secondary" onClick={() => navigator.share({ title: `Bill ${bill.number}`, text: receiptText(bill, cat) }).catch(() => {})}>
+                Send
+              </button>
+            )}
+            <button onClick={() => (setDialog(null), select(null), setDialog('new'))}>New bill</button>
+          </div>
+        </Dialog>
+      )}
+      {dialog === 'more' && bill && <MoreDialog bill={bill} onRequest={request} onClose={() => setDialog(null)} />}
+      {dialog === 'pin' && <PinSwitch outletId={outletId} onClose={() => setDialog(null)} />}
+      {dialog === 'close' && <DayClose outletId={outletId} onClose={() => setDialog(null)} />}
+      {dialog === 'approvals' && <Approvals outletId={outletId} onClose={() => (setDialog(null), loadServerBills())} />}
+      {dialog === 'help' && (
+        <Dialog title="Keyboard shortcuts" onClose={() => setDialog(null)}>
+          <ul>
+            <li>
+              <kbd>F2</kbd> or <kbd>Alt</kbd>+<kbd>N</kbd> new bill
+            </li>
+            <li>
+              <kbd>/</kbd> search; <kbd>Enter</kbd> adds the first match
+            </li>
+            <li>
+              <kbd>F9</kbd> send the order
+            </li>
+            <li>
+              <kbd>F8</kbd> pay
+            </li>
+            <li>
+              <kbd>F4</kbd> open bills
+            </li>
+            <li>
+              <kbd>Esc</kbd> close a window
+            </li>
+          </ul>
+        </Dialog>
+      )}
+    </div>
+  );
+}
+
+function fromServer(srv: any): LocalBill {
+  return {
+    clientId: srv.clientId, id: srv.id, number: srv.number, kind: srv.kind, tableId: srv.tableId, table: srv.table, openedAt: srv.openedAt,
+    lines: srv.lines.map((l: any) => ({ id: l.id, menuItemId: l.menuItemId, name: l.name, qty: l.qty, price: l.price, dietType: l.dietType, status: l.status })),
+    cart: [], status: srv.status, totals: srv.taxes ?? undefined, total: srv.total, paidAt: srv.paidAt ?? undefined,
+    payments: srv.payments?.map((p: any) => ({ mode: p.mode, amount: p.amount })), manualDiscountPct: srv.manualDiscountPct,
+  };
+}
+
+function PayDialog({ total, onPay, onClose }: { total: string; onPay: (p: { mode: string; amount: string; reference?: string }[]) => void; onClose: () => void }) {
+  const [mode, setMode] = useState<'cash' | 'upi' | 'card' | 'split'>('cash');
+  const [tendered, setTendered] = useState('');
+  const [split, setSplit] = useState({ cash: '', upi: '', card: '' });
+  const splitSum = dec(split.cash || 0).plus(split.upi || 0).plus(split.card || 0);
+  const change = tendered ? dec(tendered).minus(total) : null;
+  const ok = mode === 'split' ? splitSum.eq(total) : mode !== 'cash' || !tendered || dec(tendered).gte(total);
+  function confirm() {
+    if (mode === 'split') onPay((['cash', 'upi', 'card'] as const).filter((k) => split[k] && dec(split[k]).gt(0)).map((k) => ({ mode: k, amount: dec(split[k]).toFixed(2) })));
+    else onPay([{ mode, amount: dec(total).toFixed(2) }]);
+  }
+  return (
+    <Dialog title={`Pay ${rupee(total)}`} onClose={onClose}>
+      <div className="row">
+        {(['cash', 'upi', 'card', 'split'] as const).map((m) => (
+          <button key={m} className={mode === m ? '' : 'secondary'} onClick={() => setMode(m)}>
+            {m === 'upi' ? 'UPI' : m[0].toUpperCase() + m.slice(1)}
+          </button>
+        ))}
+      </div>
+      {mode === 'cash' && (
+        <label className="field" style={{ marginTop: '0.75rem' }}>
+          Cash received (optional)
+          <input inputMode="decimal" autoFocus value={tendered} onChange={(e) => setTendered(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && ok && confirm()} />
+          {change && change.gte(0) && <span className="big">Change {rupee(change.toString())}</span>}
+        </label>
+      )}
+      {mode === 'split' && (
+        <div className="stack" style={{ marginTop: '0.75rem' }}>
+          {(['cash', 'upi', 'card'] as const).map((k) => (
+            <label key={k} className="field">
+              {k === 'upi' ? 'UPI' : k[0].toUpperCase() + k.slice(1)}
+              <input inputMode="decimal" value={split[k]} onChange={(e) => setSplit({ ...split, [k]: e.target.value })} />
+            </label>
+          ))}
+          <p className={splitSum.eq(total) ? '' : 'note danger'}>
+            {rupee(splitSum.toString())} of {rupee(total)}
+          </p>
+        </div>
+      )}
+      <button className="huge" disabled={!ok} onClick={confirm} style={{ width: '100%', marginTop: '0.75rem' }}>
+        Confirm payment
+      </button>
+    </Dialog>
+  );
+}
+
+function MoreDialog({ bill, onRequest, onClose }: { bill: LocalBill; onRequest: (k: 'cancel' | 'discount' | 'void', extra: Record<string, string>) => void; onClose: () => void }) {
+  const [reason, setReason] = useState('');
+  const [pct, setPct] = useState('');
+  const [line, setLine] = useState('');
+  return (
+    <Dialog title="Needs a manager's approval" onClose={onClose}>
+      <div className="stack">
+        <label className="field">
+          Reason
+          <input value={reason} onChange={(e) => setReason(e.target.value)} />
+        </label>
+        <div className="row">
+          <label className="field" style={{ flex: 2 }}>
+            Discount %
+            <input inputMode="decimal" value={pct} onChange={(e) => setPct(e.target.value)} />
+          </label>
+          <button disabled={!pct || reason.length < 3} onClick={() => onRequest('discount', { discountPct: pct, reason })}>
+            Ask for discount
+          </button>
+        </div>
+        <div className="row">
+          <select aria-label="Item to remove" value={line} onChange={(e) => setLine(e.target.value)} style={{ flex: 2 }}>
+            <option value="">Item to remove…</option>
+            {bill.lines
+              .filter((l) => l.id && l.status !== 'voided')
+              .map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.name} × {dec(l.qty).toString()}
+                </option>
+              ))}
+          </select>
+          <button disabled={!line || reason.length < 3} onClick={() => onRequest('void', { lineId: line, reason })}>
+            Ask to remove
+          </button>
+        </div>
+        <button className="bad" disabled={reason.length < 3} onClick={() => onRequest('cancel', { reason })}>
+          Ask to cancel the whole bill
+        </button>
+      </div>
+    </Dialog>
+  );
+}
+
+function DayClose({ outletId, onClose }: { outletId: string; onClose: () => void }) {
+  const [date, setDate] = useState(() => {
+    const d = new Date(Date.now() - 5 * 3600_000);
+    return istDate(d);
+  });
+  const [data, setData] = useState<any>(null);
+  const [cash, setCash] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    session.api(`/pos/day-close?outletId=${outletId}&date=${date}`).then(setData).catch((e) => setError(e.message));
+  }, [outletId, date]);
+  const t = data?.totals;
+  async function close() {
+    try {
+      const r = await session.api('/pos/day-close', { body: { outletId, businessDate: date, cashCounted: cash || null } });
+      setData({ closed: r, totals: r.totals });
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+  return (
+    <Dialog title="Day close" onClose={onClose}>
+      <label className="field">
+        Business day
+        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+      </label>
+      {t && (
+        <table className="sums">
+          <tbody>
+            <tr><td>Bills</td><td>{t.bills}</td></tr>
+            <tr><td>Food sales</td><td>{rupee(t.foodSales)}</td></tr>
+            <tr><td>Food tax</td><td>{rupee(t.foodTax)}</td></tr>
+            <tr><td>Liquor sales</td><td>{rupee(t.liquorSales)}</td></tr>
+            <tr><td>Liquor tax</td><td>{rupee(t.liquorTax)}</td></tr>
+            <tr><td>Discounts</td><td>{rupee(t.discounts)}</td></tr>
+            <tr><td><strong>Total</strong></td><td><strong>{rupee(t.total)}</strong></td></tr>
+            {Object.entries(t.byMode).map(([k, v]) => (
+              <tr key={k}><td>{k.toUpperCase()}</td><td>{rupee(v as string)}</td></tr>
+            ))}
+            <tr><td>Cancelled / refunded</td><td>{t.cancelled} / {t.refunded}</td></tr>
+            {t.openBills > 0 && <tr><td colSpan={2} className="note danger">{t.openBills} bill(s) still open</td></tr>}
+            {t.cashDifference && <tr><td>Cash difference</td><td>{rupee(t.cashDifference)}</td></tr>}
+          </tbody>
+        </table>
+      )}
+      {data?.closed ? (
+        <p className="note">Closed. The liquor register for the day is closed too.</p>
+      ) : (
+        <div className="stack">
+          <label className="field">
+            Cash counted in the drawer
+            <input inputMode="decimal" value={cash} onChange={(e) => setCash(e.target.value)} />
+          </label>
+          <button className="huge" onClick={close} disabled={t?.openBills > 0}>
+            Close the day
+          </button>
+        </div>
+      )}
+      {error && <p className="note danger">{error}</p>}
+    </Dialog>
+  );
+}
+
+function Approvals({ outletId, onClose }: { outletId: string; onClose: () => void }) {
+  const [list, setList] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const load = useCallback(() => session.api<any[]>(`/approvals?status=pending&outletId=${outletId}`).then(setList).catch((e) => setError(e.message)), [outletId]);
+  useEffect(() => {
+    load();
+  }, [load]);
+  const decide = (id: string, approve: boolean) =>
+    session
+      .api(`/approvals/${id}/decide`, { body: { approve } })
+      .then(load)
+      .catch((e) => setError(e.message));
+  return (
+    <Dialog title="Waiting for approval" onClose={onClose} wide>
+      {list.length === 0 && <p className="muted">Nothing waiting.</p>}
+      {list.map((r) => (
+        <div key={r.id} className="card">
+          <strong>{r.label}</strong> · {r.proposedByName}
+          <p>{r.proposed?.summary}</p>
+          {r.reason && <p className="muted">“{r.reason}”</p>}
+          <div className="row">
+            <button className="secondary" onClick={() => decide(r.id, false)}>
+              Reject
+            </button>
+            <button onClick={() => decide(r.id, true)}>Approve</button>
+          </div>
+        </div>
+      ))}
+      {error && <p className="note danger">{error}</p>}
+    </Dialog>
+  );
+}
+
+function App() {
+  const s = session.use();
+  const [outletId, setOutletId] = useState<string | null>(() => session.outletId());
+  if (!s) return <Login session={session} title="Billing" />;
+  const allowed = s.outlets.filter((o) => session.can('pos.bill', o.id));
+  if (!allowed.length) return <p className="wrap">You do not have billing access at any outlet.</p>;
+  if (allowed.length === 1) return <Till key={`${allowed[0].id}-${s.user.id}`} outletId={allowed[0].id} />;
+  if (!outletId || !allowed.some((o) => o.id === outletId)) {
+    return (
+      <main className="wrap stack">
+        <h1>Which outlet is this counter at?</h1>
+        {allowed.map((o) => (
+          <button key={o.id} className="huge" onClick={() => (session.setOutlet(o.id), setOutletId(o.id))}>
+            {o.name}
+          </button>
+        ))}
+      </main>
+    );
+  }
+  return <Till key={`${outletId}-${s.user.id}`} outletId={outletId} />;
+}
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+);

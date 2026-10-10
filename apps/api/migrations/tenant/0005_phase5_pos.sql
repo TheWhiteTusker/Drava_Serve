@@ -1,0 +1,2 @@
+ALTER TABLE "bill" ADD COLUMN "manual_discount_pct" numeric(5, 2) DEFAULT '0' NOT NULL;--> statement-breakpoint
+ALTER TABLE "bill" ADD CONSTRAINT "bill_outletId_number_unique" UNIQUE("outlet_id","number");

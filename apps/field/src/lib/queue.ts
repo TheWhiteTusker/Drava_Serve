@@ -93,6 +93,7 @@ export function createQueue(name: string, session: SessionStore) {
       void flush();
     },
     flush,
+    state: () => state,
     clearFailed: () => update({ failed: [] }),
     use: () =>
       useSyncExternalStore(
