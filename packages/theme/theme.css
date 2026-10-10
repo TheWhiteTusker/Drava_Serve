@@ -1,0 +1,97 @@
+/*
+ * White Tusker brand theme — THE ONE FILE TO EDIT.
+ *
+ * The logo and brand colours have not been shared yet, so everything below is a neutral
+ * placeholder. To drop in the brand:
+ *   1. Replace logo.svg (light backgrounds) and logo-dark.svg (dark backgrounds) in this folder,
+ *      or point --brand-logo at other files.
+ *   2. Change the --brand-* values in the light block, then in both dark blocks.
+ *   3. Change --brand-font / --brand-font-heading (add a Google Fonts @import at the top if needed).
+ * Every app (admin, POS, receiving, guest menu) reads only these tokens.
+ *
+ * Do NOT restyle the --mark-* tokens: the veg / non-veg marks follow FSSAI conventions
+ * (green circle in a green square, brown triangle in a brown square).
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Brand */
+  --brand-logo: url('./logo.svg');
+  --brand-primary: #2f5d8a;
+  --brand-primary-hover: #264d73;
+  --brand-primary-contrast: #ffffff;
+  --brand-accent: #b7791f;
+
+  /* Surfaces and text */
+  --brand-bg: #f5f6f8;
+  --brand-surface: #ffffff;
+  --brand-surface-2: #eef0f3;
+  --brand-border: #d5d9e0;
+  --brand-text: #1c2430;
+  --brand-text-muted: #5b6573;
+
+  /* Status */
+  --brand-success: #1f7a4d;
+  --brand-warning: #a35f00;
+  --brand-danger: #b42318;
+  --brand-info: #2f5d8a;
+
+  /* Shape and type */
+  --brand-radius: 8px;
+  --brand-radius-small: 4px;
+  --brand-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', sans-serif;
+  --brand-font-heading: var(--brand-font);
+  --brand-font-mono: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  --brand-shadow: 0 1px 2px rgb(16 24 40 / 0.06), 0 1px 3px rgb(16 24 40 / 0.1);
+
+  /* Compliance marks (not brand) */
+  --mark-veg: #1a8a3a;
+  --mark-nonveg: #7b3f12;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --brand-logo: url('./logo-dark.svg');
+    --brand-primary: #7fb0e0;
+    --brand-primary-hover: #9cc3ea;
+    --brand-primary-contrast: #0d1520;
+    --brand-accent: #e0a64a;
+    --brand-bg: #11151b;
+    --brand-surface: #1a2028;
+    --brand-surface-2: #232a34;
+    --brand-border: #343d4a;
+    --brand-text: #e6e9ee;
+    --brand-text-muted: #9aa4b2;
+    --brand-success: #4cc38a;
+    --brand-warning: #e0a64a;
+    --brand-danger: #f07167;
+    --brand-info: #7fb0e0;
+    --brand-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+    --mark-veg: #3dbb5f;
+    --mark-nonveg: #c47a3d;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --brand-logo: url('./logo-dark.svg');
+  --brand-primary: #7fb0e0;
+  --brand-primary-hover: #9cc3ea;
+  --brand-primary-contrast: #0d1520;
+  --brand-accent: #e0a64a;
+  --brand-bg: #11151b;
+  --brand-surface: #1a2028;
+  --brand-surface-2: #232a34;
+  --brand-border: #343d4a;
+  --brand-text: #e6e9ee;
+  --brand-text-muted: #9aa4b2;
+  --brand-success: #4cc38a;
+  --brand-warning: #e0a64a;
+  --brand-danger: #f07167;
+  --brand-info: #7fb0e0;
+  --brand-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+  --mark-veg: #3dbb5f;
+  --mark-nonveg: #c47a3d;
+}

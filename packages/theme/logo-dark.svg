@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 32" role="img" aria-label="Logo placeholder">
+  <!-- Placeholder logo for dark mode. Replace this file with White Tusker's logo. -->
+  <rect x="1" y="1" width="30" height="30" rx="7" fill="none" stroke="#e6e9ee" stroke-width="2"/>
+  <path d="M9 21c3-8 11-8 14 0" fill="none" stroke="#e6e9ee" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="16" cy="11" r="2.5" fill="#e6e9ee"/>
+  <text x="40" y="21" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#e6e9ee">F&amp;B Manager</text>
+</svg>

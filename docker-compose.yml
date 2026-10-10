@@ -1,0 +1,52 @@
+# Local stack: docker compose up --build
+#   Admin web  http://localhost:5173
+#   API        http://localhost:3000/api
+name: fnb
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: fnb
+      POSTGRES_PASSWORD: fnb
+      TZ: Asia/Kolkata
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fnb"]
+      interval: 2s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  # S3-compatible object storage (SeaweedFS; MinIO no longer publishes images). Used from phase 3.
+  objects:
+    image: chrislusf/seaweedfs:4.48
+    command: server -s3 -dir=/data
+    ports: ["8333:8333"]
+    volumes: [objects:/data]
+
+  api:
+    build: { context: ., dockerfile: apps/api/Dockerfile }
+    environment:
+      POSTGRES_URL: postgres://fnb:fnb@postgres:5432/postgres
+      CONTROL_DB_NAME: fnb_control
+      REDIS_URL: redis://redis:6379
+      S3_ENDPOINT: http://objects:8333
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret-change-me}
+      TZ: Asia/Kolkata
+    ports: ["3000:3000"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_started }
+
+  admin:
+    build: { context: ., dockerfile: apps/admin/Dockerfile }
+    ports: ["5173:80"]
+    depends_on: [api]
+
+volumes:
+  pgdata:
+  objects:

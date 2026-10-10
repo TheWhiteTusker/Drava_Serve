@@ -1,0 +1,10 @@
+{
+  "name": "@fnb/theme",
+  "version": "0.1.0",
+  "private": true,
+  "exports": {
+    "./theme.css": "./theme.css",
+    "./logo.svg": "./logo.svg",
+    "./logo-dark.svg": "./logo-dark.svg"
+  }
+}

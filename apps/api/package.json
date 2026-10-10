@@ -1,0 +1,42 @@
+{
+  "name": "@fnb/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "nest build -b swc",
+    "dev": "nest start -b swc --watch",
+    "start": "node dist/main.js",
+    "cli": "node --env-file-if-exists=../../.env --import @swc-node/register/esm-register src/cli.ts",
+    "db:generate": "drizzle-kit generate --config drizzle.tenant.ts && drizzle-kit generate --config drizzle.control.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@fnb/shared": "workspace:*",
+    "@nestjs/common": "12.1.2",
+    "@nestjs/core": "12.1.2",
+    "@nestjs/jwt": "12.0.2",
+    "@nestjs/platform-express": "12.1.2",
+    "drizzle-orm": "0.45.4",
+    "pg": "8.23.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "12.0.8",
+    "@swc-node/register": "^1.12.1",
+    "@swc/cli": "^0.8.1",
+    "@swc/core": "1.16.13",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.4",
+    "@types/pg": "^8.23.1",
+    "@types/supertest": "^7.2.1",
+    "drizzle-kit": "0.31.11",
+    "supertest": "7.3.1",
+    "typescript": "6.0.3",
+    "unplugin-swc": "2.0.0",
+    "vitest": "5.0.3"
+  },
+  "type": "module"
+}
