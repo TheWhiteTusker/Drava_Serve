@@ -1,7 +1,9 @@
 import { and, eq } from 'drizzle-orm';
 import { billTotals, dec, rupees, TIME_ZONE, type DietType } from '@fnb/shared';
 import { addOwner, asSystem, bootstrapCustomer, createOutlet } from './bootstrap.js';
-import { hashSecret } from './common.js';
+import { Ctx, hashSecret } from './common.js';
+import { rerankOutlet, runOffers } from './pricing.js';
+import { approveIndent, buildIndents } from './purchasing.controller.js';
 import { controlDb, controlSchema, createCustomer, dropCustomer, tenantSchema as t } from './db/index.js';
 
 // SAMPLE DATA ONLY. Every name, price, cost and licence number below is made up for trying the
@@ -109,6 +111,12 @@ const STAFF: [string, string, string, string, 'outlet1' | 'all'][] = [
   ['cashier@demo.test', 'Vinay (Cashier, sample)', 'Cashier', '6666', 'outlet1'],
   ['accounts@demo.test', 'Farah (Accounts, sample)', 'Accounts', '7777', 'all'],
 ];
+
+// Stock left today, fixed for the demo: at Indiranagar (offers on) Royal Stag is down to four
+// 60 ml pegs, so Blenders Pride (priced just above it, plenty in stock) is on offer.
+const LEFT_TODAY: Record<string, Record<string, number>> = {
+  BLR1: { 'Royal Stag 750 ml': 240, 'Blenders Pride 750 ml': 4500 },
+};
 
 // Repeatable "random" numbers so the sample week is the same every time.
 function rng(seed: number) {
@@ -249,7 +257,6 @@ export async function seedDemo(opts: { reset?: boolean; log?: (s: string) => voi
 
       await tx.insert(t.diningTable).values(Array.from({ length: 10 }, (_, i) => ({ outletId: o.id, name: `T${i + 1}`, sortOrder: i })));
       await tx.insert(t.marginTarget).values({ outletId: o.id, targetPct: '65' });
-      await tx.insert(t.priceRule).values({ outletId: o.id, name: 'Beverage offers (example settings from the handoff)' });
     }
     // Liquor offers switched on at the first sample outlet only, to show both states.
     await tx.insert(t.setting).values({ outletId: outlets[0].id, key: 'offers.liquorEnabled', value: true });
@@ -316,7 +323,7 @@ export async function seedDemo(opts: { reset?: boolean; log?: (s: string) => voi
       for (const s of items.values()) {
         const storeId = storeOf(o.id, s.department === 'food' ? 'kitchen' : 'bar').id;
         const used = ledger.filter((l) => l.storeId === storeId && l.stockItemId === s.id).reduce((a, l) => a.minus(l.qty), dec(0));
-        const left = dec(pars.get(s.name)!).times(0.1 + rand() * 1.2);
+        const left = LEFT_TODAY[o.code]?.[s.name] != null ? dec(LEFT_TODAY[o.code][s.name]) : dec(pars.get(s.name)!).times(0.1 + rand() * 1.2);
         opening.push({ outletId: o.id, storeId, stockItemId: s.id, qty: used.plus(left).toFixed(0), unitCost: s.currentCost, movement: 'opening', reason: 'Sample opening stock', at: firstDay });
       }
     }
@@ -330,5 +337,22 @@ export async function seedDemo(opts: { reset?: boolean; log?: (s: string) => voi
       group by l.store_id, l.stock_item_id`);
     log(`Sample data: 2 outlets, ${items.size} stock items, ${FOOD_MENU.length + BAR_MENU.length + 1} menu items per outlet, ${billCount} bills over ${days} days`);
   });
+  // Menu order and offers as they would be after a normal day, and this morning's vegetable
+  // delivery waiting at the Indiranagar gate for the receiving app.
+  const sys = Ctx.system(customer.id, db, 'system:seed');
+  const outlets = await db.select().from(t.outlet).orderBy(t.outlet.code);
+  for (const o of outlets) {
+    await rerankOutlet(sys, o.id);
+    await runOffers(sys, o.id);
+  }
+  const blr = outlets.find((o) => o.code === 'BLR1')!;
+  const today = istDate(new Date());
+  await buildIndents(sys, blr.id, today);
+  const [veg] = await db
+    .select({ id: t.indent.id })
+    .from(t.indent)
+    .innerJoin(t.vendor, eq(t.vendor.id, t.indent.vendorId))
+    .where(and(eq(t.indent.outletId, blr.id), eq(t.indent.forDate, today), eq(t.vendor.name, 'Sample Vegetable Supplier')));
+  if (veg) await sys.tx((tx) => approveIndent(sys, tx, veg.id));
   log(`Demo customer ready. Sign in as owner@demo.test / ${DEMO.password}`);
 }

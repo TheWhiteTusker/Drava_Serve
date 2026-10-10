@@ -1,0 +1,212 @@
+/* Touch-first styles for the field apps. Colours, fonts and radii come only from @fnb/theme. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  background: var(--brand-bg);
+  color: var(--brand-text);
+  font: 16px/1.45 var(--brand-font);
+  -webkit-tap-highlight-color: transparent;
+}
+h1,
+h2,
+h3 {
+  font-family: var(--brand-font-heading);
+  margin: 0 0 0.35rem;
+  line-height: 1.2;
+}
+.muted {
+  color: var(--brand-text-muted);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  min-height: 48px;
+  border-radius: var(--brand-radius);
+}
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--brand-border);
+  background: var(--brand-surface);
+}
+button {
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--brand-primary);
+  background: var(--brand-primary);
+  color: var(--brand-primary-contrast);
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+button.secondary {
+  background: var(--brand-surface-2);
+  border-color: var(--brand-border);
+  color: var(--brand-text);
+}
+button.ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--brand-primary);
+}
+button.good {
+  background: var(--brand-success);
+  border-color: var(--brand-success);
+  color: #fff;
+}
+button.warn {
+  background: var(--brand-warning);
+  border-color: var(--brand-warning);
+  color: #fff;
+}
+button.bad {
+  background: var(--brand-danger);
+  border-color: var(--brand-danger);
+  color: #fff;
+}
+button.huge {
+  min-height: 72px;
+  font-size: 1.25rem;
+}
+:focus-visible {
+  outline: 3px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+.logo {
+  display: block;
+  height: 30px;
+  width: 150px;
+  background: var(--brand-logo) left center / contain no-repeat;
+}
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  background: var(--brand-surface);
+  border-bottom: 1px solid var(--brand-border);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.bar .spacer {
+  flex: 1;
+}
+.offline {
+  background: var(--brand-warning);
+  color: #fff;
+  padding: 0.5rem 0.75rem;
+  font-weight: 600;
+}
+.offline.ok {
+  background: var(--brand-success);
+}
+.wrap {
+  padding: 0.75rem;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.card {
+  background: var(--brand-surface);
+  border: 1px solid var(--brand-border);
+  border-radius: var(--brand-radius);
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+}
+.tap {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--brand-surface);
+  color: var(--brand-text);
+  border: 1px solid var(--brand-border);
+  margin-bottom: 0.6rem;
+  padding: 1rem;
+}
+.row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.row > * {
+  flex: 1;
+}
+.stack > * + * {
+  margin-top: 0.6rem;
+}
+.big {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.chips button[aria-pressed='true'] {
+  background: var(--brand-primary);
+  color: var(--brand-primary-contrast);
+}
+.note {
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--brand-radius);
+  border: 1px solid currentColor;
+}
+.note.danger {
+  color: var(--brand-danger);
+}
+label.field {
+  display: block;
+  font-weight: 600;
+}
+label.field > input,
+label.field > select {
+  margin-top: 0.25rem;
+  font-weight: 400;
+}
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  border: 1px solid var(--brand-border);
+  background: var(--brand-surface-2);
+}
+.diet-mark {
+  flex: none;
+  vertical-align: -3px;
+}
+.progress {
+  height: 6px;
+  background: var(--brand-surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress > span {
+  display: block;
+  height: 100%;
+  background: var(--brand-primary);
+}

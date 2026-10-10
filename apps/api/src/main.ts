@@ -5,6 +5,7 @@ import { createAdapter } from '@socket.io/redis-adapter';
 import { createClient } from 'redis';
 import type { ServerOptions } from 'socket.io';
 import { AppModule } from './app.module.js';
+import { startJobs } from './jobs.js';
 
 // Live updates fan out through Redis so every API instance reaches every device.
 class RedisIoAdapter extends IoAdapter {
@@ -30,6 +31,7 @@ if (process.env.REDIS_URL) {
   const adapter = new RedisIoAdapter(app);
   await adapter.connect(process.env.REDIS_URL);
   app.useWebSocketAdapter(adapter);
+  if (process.env.JOBS !== 'off') await startJobs(process.env.REDIS_URL);
 }
 await app.listen(Number(process.env.PORT ?? 3000));
 console.log(`API listening on ${await app.getUrl()}`);

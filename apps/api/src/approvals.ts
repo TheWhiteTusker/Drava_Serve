@@ -30,7 +30,7 @@ export interface Proposal {
 }
 
 // Applies straight away when the proposer may decide (unless forceQueue); otherwise queues it.
-export async function proposeOrApply(ctx: Ctx, tx: Tx, post: PostStock, p: Proposal, opts: { forceQueue?: boolean } = {}) {
+export async function proposeOrApply(ctx: Ctx, tx: Tx, post: PostStock | null, p: Proposal, opts: { forceQueue?: boolean } = {}) {
   if (!handlers.has(p.type)) throw new Error(`No approval handler for ${p.type}`);
   const direct = !opts.forceQueue && ctx.can('approvals.decide', p.outletId);
   if (!direct && !ctx.userId) throw new Error('System requests must be applied directly');
@@ -42,13 +42,13 @@ export async function proposeOrApply(ctx: Ctx, tx: Tx, post: PostStock, p: Propo
       proposedBy: ctx.userId!, ...(direct ? { decidedBy: ctx.userId!, decidedAt: new Date(), decisionNote: 'Applied directly by an approver' } : {}),
     })
     .returning();
-  if (direct) await handlers.get(p.type)!.apply(ctx, tx, req, post);
+  if (direct) await handlers.get(p.type)!.apply(ctx, tx, req, post ?? noStock);
   else if (p.outletId) publish(ctx.customerId, p.outletId, 'approval', { id: req.id, type: p.type });
   return { status: direct ? ('applied' as const) : ('pending' as const), id: req.id };
 }
 
 // Requests raised by the system itself (e.g. a price flag after re-costing) always wait for a person.
-export async function queueSystemRequest(tx: Tx, p: Proposal & { proposedBy: string }) {
+export async function queueSystemRequest(tx: Tx, p: Proposal & { proposedBy: string | null }) {
   const [existing] = await tx
     .select()
     .from(t.approvalRequest)
@@ -63,6 +63,10 @@ export async function queueSystemRequest(tx: Tx, p: Proposal & { proposedBy: str
     .returning();
   return req.id;
 }
+
+const noStock: PostStock = async () => {
+  throw new Error('This request cannot move stock');
+};
 
 const proposer = alias(t.appUser, 'proposer');
 const decider = alias(t.appUser, 'decider');
@@ -80,7 +84,7 @@ export class ApprovalsController {
     const rows = await ctx.db
       .select({ r: t.approvalRequest, proposedByName: proposer.name, decidedByName: decider.name, outletName: t.outlet.name })
       .from(t.approvalRequest)
-      .innerJoin(proposer, eq(proposer.id, t.approvalRequest.proposedBy))
+      .leftJoin(proposer, eq(proposer.id, t.approvalRequest.proposedBy))
       .leftJoin(decider, eq(decider.id, t.approvalRequest.decidedBy))
       .leftJoin(t.outlet, eq(t.outlet.id, t.approvalRequest.outletId))
       .where(
@@ -92,20 +96,21 @@ export class ApprovalsController {
       )
       .orderBy(desc(t.approvalRequest.proposedAt))
       .limit(200);
-    return rows.map((x) => ({ ...x.r, proposedByName: x.proposedByName, decidedByName: x.decidedByName, outletName: x.outletName, label: handlers.get(x.r.type)?.label ?? x.r.type }));
+    return rows.map((x) => ({ ...x.r, proposedByName: x.proposedByName ?? 'System', decidedByName: x.decidedByName, outletName: x.outletName, label: handlers.get(x.r.type)?.label ?? x.r.type }));
   }
 
   @Post(':id/decide')
   async decide(@C() ctx: Ctx, @Param('id') id: string, @Body() body: unknown) {
     const { approve, note } = parse(z.object({ approve: z.boolean(), note: z.string().max(500).optional() }), body);
     const req = await findOr404(ctx.db.select().from(t.approvalRequest).where(eq(t.approvalRequest.id, id)));
-    if (req.proposedBy === ctx.userId && approve) throw new ForbiddenException('Someone other than the proposer must approve this');
-    if (req.proposedBy !== ctx.userId) ctx.assert('approvals.decide', req.outletId);
+    const own = req.proposedBy != null && req.proposedBy === ctx.userId;
+    if (own && approve) throw new ForbiddenException('Someone other than the proposer must approve this');
+    if (!own) ctx.assert('approvals.decide', req.outletId);
     const result = await stockTx(ctx, async (tx, post) => {
       // Lock the request so two approvers cannot both apply it.
       const [locked] = await tx.select().from(t.approvalRequest).where(eq(t.approvalRequest.id, id)).for('update');
       if (locked.status !== 'pending') throw new ConflictException(`This request is already ${locked.status}`);
-      const status = approve ? 'approved' : req.proposedBy === ctx.userId ? 'cancelled' : 'rejected';
+      const status = approve ? 'approved' : own ? 'cancelled' : 'rejected';
       if (approve) {
         const h = handlers.get(locked.type);
         if (!h) throw new BadRequestException(`Unknown request type ${locked.type}`);

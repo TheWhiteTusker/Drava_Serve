@@ -42,7 +42,7 @@ services:
       postgres: { condition: service_healthy }
       redis: { condition: service_started }
 
-  admin:
+  web:
     build: { context: ., dockerfile: apps/admin/Dockerfile }
     ports: ["5173:80"]
     depends_on: [api]

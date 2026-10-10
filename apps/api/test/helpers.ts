@@ -27,7 +27,7 @@ export function client(app: INestApplication, token?: string, device = 'test-dev
   const http = request(app.getHttpServer());
   return {
     get: (p: string) => auth(http.get(`/api${p}`)),
-    post: (p: string, body?: object) => auth(http.post(`/api${p}`)).send(body ?? {}),
+    post: (p: string, body?: object) => (body === undefined ? auth(http.post(`/api${p}`)) : auth(http.post(`/api${p}`)).send(body)),
     put: (p: string, body?: object) => auth(http.put(`/api${p}`)).send(body ?? {}),
   };
 }

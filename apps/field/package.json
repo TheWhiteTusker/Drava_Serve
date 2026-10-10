@@ -1,0 +1,25 @@
+{
+  "name": "@fnb/field",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@fnb/shared": "workspace:*",
+    "@fnb/theme": "workspace:*",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "socket.io-client": "4.8.3"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "typescript": "6.0.3",
+    "vite": "8.3.4"
+  }
+}

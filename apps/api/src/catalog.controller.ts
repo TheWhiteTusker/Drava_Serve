@@ -4,7 +4,10 @@ import {
   dec, withVersion, zBrand, zCategory, zMenuItem, zStockItem, zTaxClass, type Permission, type StockItemInput,
 } from '@fnb/shared';
 import type { ZodType } from 'zod';
+import { getSettings } from './access.controller.js';
+import { proposeOrApply } from './approvals.js';
 import { C, Ctx, findOr404, parse, Permit, updateVersioned } from './common.js';
+import { afterMenuChange } from './pricing.controller.js';
 import { tenantSchema as t, type Tx } from './db/index.js';
 
 interface CrudOpts {
@@ -15,12 +18,14 @@ interface CrudOpts {
   manage: Permission;
   outletScoped?: boolean; // rows carry outletId and users only see their outlets
   orderBy: (table: any) => any[];
-  check?: (ctx: Ctx, tx: Tx, data: any, before?: any) => Promise<void>;
+  // Validates, may adjust data, and may return extra fields for the response.
+  check?: (ctx: Ctx, tx: Tx, data: any, before?: any) => Promise<Record<string, unknown> | void>;
+  after?: (ctx: Ctx, row: any) => void;
 }
 
 // List / get / create / update for simple tables. Customer-wide tables (no outletId) need the
 // permission at any outlet; outlet tables need it at the row's outlet.
-function crud(o: CrudOpts) {
+export function crud(o: CrudOpts) {
   @Controller(o.path)
   class CrudController {
     @Get()
@@ -51,6 +56,7 @@ function crud(o: CrudOpts) {
       return ctx.tx(async (tx) => {
         await o.check?.(ctx, tx, data);
         const [row] = (await tx.insert(o.table).values(data).returning()) as any[];
+        o.after?.(ctx, row);
         return row;
       });
     }
@@ -65,8 +71,10 @@ function crud(o: CrudOpts) {
           ctx.assert(o.manage, before.outletId);
           ctx.assert(o.manage, data.outletId);
         }
-        await o.check?.(ctx, tx, data, before);
-        return updateVersioned(tx, o.table, id, version, data);
+        const extra = await o.check?.(ctx, tx, data, before);
+        const row = await updateVersioned(tx, o.table, id, version, data);
+        o.after?.(ctx, row);
+        return { ...row, ...extra };
       });
     }
   }
@@ -129,9 +137,27 @@ export const MenuItemsController = crud({
         data.department === 'food' ? 'Food items go under a course' : 'Beverage items go under a liquor type or sub-type',
       );
     }
-    // Changing a price is its own permission. Limits and approval arrive with the pricing engine.
-    if (before && !dec(before.sellingPrice).eq(data.sellingPrice)) ctx.assert('prices.manage', data.outletId);
+    if (!before || dec(before.sellingPrice).eq(data.sellingPrice)) return;
+    // Changing a price is its own permission. A change bigger than the limit waits for approval
+    // unless the person sets pricing rules (the owner); the rest of the edit saves now.
+    ctx.assert('prices.manage', data.outletId);
+    const limit = Number((await getSettings(tx, data.outletId)).effective['approvals.priceChangeLimitPct']);
+    const changePct = dec(data.sellingPrice).minus(before.sellingPrice).abs().div(dec(before.sellingPrice).gt(0) ? before.sellingPrice : 1).times(100);
+    if (changePct.gt(limit) && !ctx.can('pricing.rules', data.outletId)) {
+      const r = await proposeOrApply(
+        ctx, tx, null,
+        {
+          outletId: data.outletId, type: 'price_change', entity: 'menu_item', entityId: before.id,
+          current: { sellingPrice: before.sellingPrice }, proposed: { menuItemId: before.id, sellingPrice: data.sellingPrice },
+          reason: `Price change of ${changePct.toFixed(1)}% is above the ${limit}% limit`,
+        },
+        { forceQueue: true },
+      );
+      data.sellingPrice = before.sellingPrice;
+      return { priceApproval: r.id };
+    }
   },
+  after: (ctx, row) => afterMenuChange(ctx, row, 'menu item saved'),
 });
 
 // ---------- Stock items (with purchase units and per-outlet levels) ----------

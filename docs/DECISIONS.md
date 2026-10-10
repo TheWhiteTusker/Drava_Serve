@@ -73,3 +73,36 @@ Nothing in this system or its documents says that discounts on liquor are legall
 - **Business day** starts at 05:00 India time by default (a setting), so a bar's 1:30 am sales belong to the evening before. The liquor register and day close use the business day.
 - **Liquor register** lists every beverage stock item with an alcohol % above zero. Transfers inside the outlet are not shown (they net to zero for the licence); wastage, breakage, counts and reversals show as "Other". The format must be checked with an excise consultant.
 - **Live updates** use WebSocket (socket.io) with the Redis adapter, one room per customer and outlet.
+
+## Phase 3
+
+- **Indent timing.** The nightly indent is for the next 5:00 am delivery and is built at the cut-off the evening before (a cut-off after midnight and before 5:00 am counts as that same night). A one-minute scheduler checks every outlet; each night's indent is built exactly once and catches up if the server was down.
+- **"On order"** = approved deliveries not yet gate-checked, plus other days' indents still awaiting approval. Rebuilding an indent replaces it only while it is awaiting approval.
+- **Items with a par level but no vendor** are listed after a manual build so a manager can assign one.
+- **In "send automatically" mode** the indent is approved automatically. At launch there is no automatic channel, so someone still taps Share; once a WhatsApp Business channel is added, approval sends it.
+- **Delivery channel.** One working channel, "manual share", covers Share (the phone's share sheet, so WhatsApp works), Download and Print. Every attempt is recorded with channel, method, time, person and result. A share the person cancels is recorded as failed.
+- **The vendor PDF shows items and quantities, not prices.** A copy is kept in the customer's private storage.
+- **Gate reasons** (watchman): not fresh, spoiled, wrong item, damaged, short weight, other. **Re-check reasons** (staff): spoiled, expired, unusable.
+- **The vendor's bill is assumed to include what staff later rejected** (the delivery person has gone), so the goods received note shows bill − returns = payable. Items rejected at the gate left with the delivery person and are not on the bill.
+- **Watchman and staff must be two different people** to sign the goods received note.
+- **The rate check compares each billed rate (per base unit) with the last rate paid for that item from any vendor.** Above the tolerance (default 10%), the note is held and a manager must release it before accounts can pay it.
+- **Received stock goes into the item's issuing store** (kitchen for food, bar for beverages), so it is sellable at once.
+- **Photos and bills** are stored in a private bucket per customer and only served through the API. The watchman can see gate photos but not the vendor's bill.
+- **Vendor payment modes:** bank transfer, UPI, cheque, cash. A note is "paid" once payments reach the payable amount.
+- **The receiving app works offline.** Each action is saved on the phone and sent in order when the connection returns; photos taken offline wait on the phone too.
+- **Unplanned deliveries** (a vendor arriving with no indent) are not handled yet. Open item.
+- **Background jobs** run through BullMQ on Redis (one runner across API instances).
+
+## Phase 4
+
+- **Menu costing uses the latest billed rate;** stock value uses the weighted average, as the handoff says.
+- **Ranking ties** beyond units sold are broken by name, so the order is stable. **Pins:** a pinned dish goes to the top of its course, in pin-number order.
+- **Ranking runs** after re-costing, after a price, recipe or pin change, and when a dish sells out or comes back. Beverages are ordered by type, sub-type, brand, serve size and name.
+- **Suggested price** = portion cost ÷ (1 − target), rounded up to the next whole rupee. A dish is flagged when its margin is under target by more than 2 points (setting "pricing.flagTolerancePct").
+- **Price-change limit:** a manager's price change of more than 10% (setting) goes for approval; the owner (who sets pricing rules) changes prices directly. A flag raised by re-costing is a system request any approver can approve.
+- **Recipe changes** that take a dish under target go for approval unless the person can approve.
+- **Offer matching:** "same type and serve size" means the same liquor type (e.g. whisky) and the same ml. The rule can be narrowed to the same sub-type. Each beverage is on at most one offer at a time.
+- **Offers start** on every beverage stock movement, when the owner switches offers on, and when a rule or price changes. **They end** when the low item is above trigger + buffer ("restocked"), when a substitute itself runs low, when the switch is turned off, and at the start of the next business day.
+- **"Applies only to new bills":** the offer price applies to bills opened after the offer started. Lines already on a bill keep their price.
+- **Every new outlet gets one offer rule** with the handoff's example settings. Nothing runs until the owner switches offers on for that outlet.
+- **The guest menu shows sold-out items greyed** (not hidden), at `/m/<business code>/<outlet code>`. It refreshes every minute, says prices are before taxes, and shows the FSSAI number. It sets no cookies and collects nothing about guests.

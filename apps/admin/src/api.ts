@@ -108,3 +108,19 @@ export function useCurrentOutlet() {
   );
   return s?.outlets.find((o) => o.id === stored)?.id ?? s?.outlets[0]?.id ?? null;
 }
+
+// Files behind sign-in (PDFs, photos, CSV exports).
+export async function apiBlob(path: string): Promise<Blob> {
+  const res = await fetch(`/api${path}`, {
+    headers: { 'x-device-id': deviceId, ...(session ? { authorization: `Bearer ${session.token}` } : {}) },
+  });
+  if (!res.ok) throw new ApiError(res.status, (await res.json().catch(() => null))?.message ?? `Request failed (${res.status})`);
+  return res.blob();
+}
+
+export function saveBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement('a'), { href: url, download: filename });
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><!-- Placeholder app icon; replace with the brand icon -->
+  <rect width="64" height="64" rx="14" fill="#2f5d8a"/>
+  <path d="M18 42c6-16 22-16 28 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="32" cy="22" r="5" fill="#fff"/>
+</svg>

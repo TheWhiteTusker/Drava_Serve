@@ -13,6 +13,9 @@ import {
 import { AuthGuard, ErrorFilter, Public } from './common.js';
 import { LiveGateway } from './events.js';
 import { InventoryController } from './inventory.controller.js';
+import { PricingController, PublicMenuController } from './pricing.controller.js';
+import { IndentsController, VendorItemsController, VendorRatesController, VendorsController } from './purchasing.controller.js';
+import { AttachmentsController, DeliveriesController, GrnsController } from './receiving.controller.js';
 
 @Controller('health')
 class HealthController {
@@ -35,6 +38,8 @@ export function jwtSecret() {
     HealthController, AuthController, UsersController, RolesController, OutletsController, SettingsController,
     AuditController, CategoriesController, BrandsController, TaxClassesController, StockItemsController,
     MenuItemsController, LiquorTreeController, ApprovalsController, InventoryController,
+    VendorsController, VendorItemsController, VendorRatesController, IndentsController,
+    DeliveriesController, GrnsController, AttachmentsController, PricingController, PublicMenuController,
   ],
   providers: [
     LiveGateway,

@@ -6,6 +6,7 @@ import {
 } from '@fnb/shared';
 import { z } from 'zod';
 import { createOutlet } from './bootstrap.js';
+import { runOffers } from './pricing.js';
 import { C, Ctx, findOr404, hashSecret, parse, Permit, updateVersioned } from './common.js';
 import { controlDb, controlSchema, tenantSchema as t, type Q, type Tx } from './db/index.js';
 
@@ -255,6 +256,8 @@ export class SettingsController {
         .values({ outletId, key, value: v })
         .onConflictDoUpdate({ target: [t.setting.outletId, t.setting.key], set: { value: v, updatedAt: new Date() } });
     });
+    // The owner's switch takes effect at once: offers start (or end) now.
+    if (key === 'offers.liquorEnabled' && outletId) await runOffers(ctx, outletId);
     return getSettings(ctx.db, outletId);
   }
 }

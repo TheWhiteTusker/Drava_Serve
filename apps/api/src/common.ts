@@ -54,13 +54,27 @@ export class Ctx {
   }
 
   // Every write goes through here so the audit trigger knows who and which device.
-  tx<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
-    return this.db.transaction(async (tx) => {
-      await tx.execute(
-        sql`select set_config('app.user_id', ${this.userId ?? ''}, true), set_config('app.device_id', ${this.deviceId ?? ''}, true)`,
-      );
-      return fn(tx);
-    });
+  async tx<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
+    let result: T;
+    try {
+      result = await this.db.transaction(async (tx) => {
+        await tx.execute(
+          sql`select set_config('app.user_id', ${this.userId ?? ''}, true), set_config('app.device_id', ${this.deviceId ?? ''}, true)`,
+        );
+        return fn(tx);
+      });
+    } catch (e) {
+      this.hooks = [];
+      throw e;
+    }
+    for (const h of this.hooks.splice(0)) await Promise.resolve(h()).catch((e) => console.error('after-commit task failed', e));
+    return result;
+  }
+
+  // Work that should only happen once the data is committed (re-ranking, live pushes).
+  private hooks: (() => unknown)[] = [];
+  afterCommit(fn: () => unknown) {
+    this.hooks.push(fn);
   }
 }
 

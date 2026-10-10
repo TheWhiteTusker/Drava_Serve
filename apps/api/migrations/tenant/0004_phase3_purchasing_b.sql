@@ -1,0 +1,1 @@
+ALTER TABLE "approval_request" ALTER COLUMN "proposed_by" DROP NOT NULL;

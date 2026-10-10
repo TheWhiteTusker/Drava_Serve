@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import QRCode from 'qrcode';
+import { useEffect, useState } from 'react';
 import { api, can, useApi, useCurrentOutlet, useSession } from '../api';
-import { CrudPage, ErrorNote, Page, yesNo } from '../ui';
+import { CrudPage, ErrorNote, Modal, Page, yesNo } from '../ui';
 
 export function OutletsPage() {
   const s = useSession();
+  const [qr, setQr] = useState<any | null>(null);
   return (
+    <>
     <CrudPage
       title="Outlets"
       intro="Each outlet gets a main store, a kitchen store and a bar store. The FSSAI number prints on every bill."
@@ -16,6 +19,14 @@ export function OutletsPage() {
         { label: 'State', render: (r: any) => r.state },
         { label: 'FSSAI', render: (r: any) => r.fssaiNumber ?? '—' },
         { label: 'Excise licence', render: (r: any) => r.exciseLicence ?? '—' },
+        {
+          label: 'Guest menu',
+          render: (r: any) => (
+            <button className="ghost" onClick={() => setQr(r)}>
+              QR code
+            </button>
+          ),
+        },
         { label: 'Status', render: (r: any) => yesNo(r.active) },
       ]}
       defaults={{ state: 'Karnataka', active: true }}
@@ -30,6 +41,29 @@ export function OutletsPage() {
         { name: 'active', label: 'Active', type: 'checkbox' },
       ]}
     />
+    <Modal open={!!qr} title={`Guest menu: ${qr?.name ?? ''}`} onClose={() => setQr(null)}>
+      {qr && <MenuQr url={`${location.origin}/m/${s?.customer.code}/${qr.code}`} />}
+    </Modal>
+    </>
+  );
+}
+
+// Guests scan this at the table; the menu needs no sign-in and collects nothing about them.
+function MenuQr({ url }: { url: string }) {
+  const [src, setSrc] = useState<string | null>(null);
+  useEffect(() => {
+    QRCode.toDataURL(url, { width: 320, margin: 2 }).then(setSrc);
+  }, [url]);
+  return (
+    <div style={{ textAlign: 'center' }}>
+      {src && <img src={src} alt={`QR code for ${url}`} width={320} height={320} />}
+      <p>
+        <a href={url} target="_blank" rel="noreferrer">
+          {url}
+        </a>
+      </p>
+      <button onClick={() => window.print()}>Print</button>
+    </div>
   );
 }
 

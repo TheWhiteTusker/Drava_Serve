@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm';
 import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import pg from 'pg';
+import { deleteBucket } from '../storage.js';
 import * as controlSchema from './control-schema.js';
 import * as tenantSchema from './tenant-schema.js';
 
@@ -125,6 +126,7 @@ export async function dropCustomer(code: string) {
   customerCache.delete(c.id);
   await controlDb().delete(controlSchema.customer).where(eq(controlSchema.customer.id, c.id)); // login routes cascade
   await withServer((s) => s.query(`drop database if exists "${c.dbName}" with (force)`));
+  await deleteBucket(c.code);
   return true;
 }
 

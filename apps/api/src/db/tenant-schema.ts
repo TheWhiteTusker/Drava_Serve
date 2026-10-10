@@ -104,7 +104,7 @@ export const approvalRequest = pgTable(
     proposed: jsonb().notNull(),
     reason: text(),
     status: text().$type<'pending' | 'approved' | 'rejected' | 'cancelled'>().notNull().default('pending'),
-    proposedBy: uuid().notNull().references(() => appUser.id),
+    proposedBy: uuid().references(() => appUser.id), // null when raised by the system (e.g. a margin flag)
     proposedAt: ts().notNull().defaultNow(),
     decidedBy: uuid().references(() => appUser.id),
     decidedAt: ts(),
@@ -503,7 +503,7 @@ export const deliverySend = pgTable('delivery_send', {
 export const receiptCheck = pgTable('receipt_check', {
   id: id(),
   outletId: uuid().notNull().references(() => outlet.id),
-  indentId: uuid().references(() => indent.id),
+  indentId: uuid().unique().references(() => indent.id),
   vendorId: uuid().notNull().references(() => vendor.id),
   expectedOn: date().notNull(),
   status: text().$type<'expected' | 'gate_checked' | 'rechecked' | 'closed'>().notNull().default('expected'),
@@ -780,4 +780,20 @@ export const salesDaily = pgTable(
     alcoholMl: qty().notNull().default('0'),
   },
   (t) => [primaryKey({ columns: [t.outletId, t.businessDate, t.department] })],
+);
+
+// ---------- Jobs ----------
+
+// Marks a scheduled job as done for a scope and key (e.g. indent / outlet / 2026-10-11),
+// so the minute-by-minute scheduler runs each one exactly once and catches up after downtime.
+export const jobRun = pgTable(
+  'job_run',
+  {
+    job: text().notNull(),
+    scope: text().notNull(),
+    key: text().notNull(),
+    ranAt: ts().notNull().defaultNow(),
+    detail: jsonb(),
+  },
+  (t) => [primaryKey({ columns: [t.job, t.scope, t.key] })],
 );

@@ -58,6 +58,9 @@ export async function createOutlet(tx: Tx, data: OutletInput) {
   const [o] = await tx.insert(t.outlet).values(data).returning();
   const names = { main: 'Main store', kitchen: 'Kitchen', bar: 'Bar' };
   await tx.insert(t.store).values(STORE_KINDS.map((kind) => ({ outletId: o.id, kind, name: names[kind] })));
+  // Beverage offer rule with the handoff's example settings. Nothing runs until the owner
+  // switches offers on for this outlet.
+  await tx.insert(t.priceRule).values({ outletId: o.id, name: 'Beverage offers (example settings)' });
   return o;
 }
 

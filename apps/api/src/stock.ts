@@ -7,6 +7,7 @@ import {
 import type { Ctx } from './common.js';
 import { tenantSchema as t, type Q, type Tx } from './db/index.js';
 import { publish } from './events.js';
+import { rerankOutlet, runOffers } from './pricing.js';
 
 // The only way stock changes. Every movement is a ledger row; the balance row is locked,
 // updated and written in the same transaction, so two counters can never both take the last
@@ -224,7 +225,15 @@ export async function afterStock(ctx: Ctx, changed: Changed[]) {
     byOutlet.set(c.outletId, (byOutlet.get(c.outletId) ?? new Set()).add(c.stockItemId));
     publish(ctx.customerId, c.outletId, 'stock', c);
   }
-  for (const [outletId, stockIds] of byOutlet) await refreshAvailability(ctx, outletId, [...stockIds]);
+  const beverage = new Set(
+    (await ctx.db.select({ id: t.stockItem.id }).from(t.stockItem).where(and(inArray(t.stockItem.id, changed.map((c) => c.stockItemId)), eq(t.stockItem.department, 'beverage')))).map((x) => x.id),
+  );
+  for (const [outletId, stockIds] of byOutlet) {
+    const { flipped } = await refreshAvailability(ctx, outletId, [...stockIds]);
+    // Sold out or back in: the course order changes. Any beverage movement: check offers.
+    if (flipped.length) await rerankOutlet(ctx, outletId);
+    if ([...stockIds].some((id) => beverage.has(id))) await runOffers(ctx, outletId);
+  }
 }
 
 export async function refreshAvailability(ctx: Ctx, outletId: string, stockItemIds?: string[]) {

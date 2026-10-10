@@ -10,6 +10,8 @@ import { AuditPage } from './pages/audit';
 import { ApprovalsPage, CountsPage, LiquorRegisterPage, StockPage } from './pages/inventory';
 import { BrandsPage, CategoriesPage, LiquorTreePage, TaxClassesPage } from './pages/catalog';
 import { MenuItemsPage } from './pages/menu-items';
+import { CostingPage, MarginTargetsPage, OffersPage } from './pages/pricing';
+import { DeliveriesPage, GrnsPage, IndentsPage, VendorsPage } from './pages/purchasing';
 import { OutletsPage, SettingsPage } from './pages/outlets';
 import { StockItemsPage } from './pages/stock-items';
 import { RolesPage, UsersPage } from './pages/users';
@@ -147,6 +149,13 @@ const NAV: { to: string; label: string; perm?: Permission; group: string; page: 
   { to: '/stock', label: 'Stock', group: 'Inventory', perm: 'inventory.view', page: StockPage },
   { to: '/counts', label: 'Stock counts', group: 'Inventory', perm: 'inventory.view', page: CountsPage },
   { to: '/liquor-register', label: 'Liquor register', group: 'Inventory', perm: 'inventory.view', page: LiquorRegisterPage },
+  { to: '/indents', label: 'Nightly indent', group: 'Purchasing', perm: 'indent.manage', page: IndentsPage },
+  { to: '/deliveries', label: 'Deliveries', group: 'Purchasing', perm: 'indent.manage', page: DeliveriesPage },
+  { to: '/vendors', label: 'Vendors and rates', group: 'Purchasing', perm: 'vendors.manage', page: VendorsPage },
+  { to: '/accounts', label: 'Accounts', group: 'Purchasing', perm: 'rates.view', page: GrnsPage },
+  { to: '/costing', label: 'Menu costs and order', group: 'Pricing', perm: 'rates.view', page: CostingPage },
+  { to: '/margin-targets', label: 'Margin targets', group: 'Pricing', perm: 'rates.view', page: MarginTargetsPage },
+  { to: '/offers', label: 'Beverage offers', group: 'Pricing', perm: 'rates.view', page: OffersPage },
   { to: '/menu-items', label: 'Menu items', group: 'Catalog', perm: 'catalog.view', page: MenuItemsPage },
   { to: '/stock-items', label: 'Stock items', group: 'Catalog', perm: 'catalog.view', page: StockItemsPage },
   { to: '/liquor', label: 'Liquor tree', group: 'Catalog', perm: 'catalog.view', page: LiquorTreePage },

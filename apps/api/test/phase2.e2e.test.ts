@@ -160,7 +160,7 @@ describe('phase 2: inventory ledger', () => {
   it('pushes stock and availability changes live to devices at the outlet', async () => {
     const url = `http://127.0.0.1:${app.getHttpServer().address().port}`;
     const socket = connect(url, { path: '/api/socket', auth: { token: f.ownerToken }, transports: ['websocket'] });
-    await new Promise((res) => socket.on('connect', res));
+    await new Promise<void>((res) => socket.on('connect', () => res()));
     await new Promise((res) => setTimeout(res, 200)); // let the server finish joining rooms
     const got = new Promise<any>((res) => socket.on('availability', res));
     await f.people.chef.post('/inventory/movements', { storeId: f.store('bar'), stockItemId: f.s.whiskyA, qty: '60', movement: 'spillage', reason: 'Dropped' });
