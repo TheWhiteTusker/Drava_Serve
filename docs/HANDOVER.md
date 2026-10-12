@@ -53,7 +53,7 @@ The customer code (`sharma`) is permanent. It appears in the database name, the 
 ## 4. Dropping in the brand theme
 
 Edit only `packages/theme/`:
-- `theme.css`: every `--brand-*` token in the light block and in both dark blocks; `--brand-font` / `--brand-font-heading` (add a Google Fonts `@import` at the top if needed); the `--chart-*` tokens if the brand's blue should change. Re-check chart colours with a colour-blind-safety validator before changing them.
+- `theme.css`: every `--brand-*` token in the light block and in both dark blocks; the font `@import` lines at the top and `--brand-font` / `--brand-font-heading` (fonts are bundled via `@fontsource` packages in `packages/theme/package.json`, so add the brand's font the same way rather than linking Google Fonts); the `--chart-*` tokens if the accent changes. Re-check chart colours with a colour-blind-safety validator before changing them.
 - `logo.svg` (for light backgrounds) and `logo-dark.svg` (for dark), or point `--brand-logo` at other files.
 - `apps/field/public/icon.svg` is the installed-app icon. The `theme_color` values in `apps/field/public/{pos,receiving}/manifest.webmanifest` should match the brand colour.
 - Don't change the `--mark-veg` / `--mark-nonveg` tokens; they follow FSSAI conventions.

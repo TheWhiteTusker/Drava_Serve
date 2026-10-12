@@ -1,7 +1,7 @@
 import QRCode from 'qrcode';
 import { useEffect, useState } from 'react';
 import { api, can, useApi, useCurrentOutlet, useSession } from '../api';
-import { CrudPage, ErrorNote, Modal, Page, yesNo } from '../ui';
+import { CrudPage, ErrorNote, Modal, Page, toast, yesNo } from '../ui';
 
 export function OutletsPage() {
   const s = useSession();
@@ -9,6 +9,7 @@ export function OutletsPage() {
   return (
     <>
     <CrudPage
+      singular="outlet"
       title="Outlets"
       intro="Each outlet gets a main store, a kitchen store and a bar store. The FSSAI number prints on every bill."
       path="/outlets"
@@ -81,6 +82,7 @@ export function SettingsPage() {
       setError(null);
       await api('/settings', { method: 'PUT', body: { outletId: forOutlet ? outletId : null, key, value } });
       await Promise.all([biz.reload(), outlet.reload()]);
+      toast('Setting saved');
     } catch (e) {
       setError((e as Error).message);
     }

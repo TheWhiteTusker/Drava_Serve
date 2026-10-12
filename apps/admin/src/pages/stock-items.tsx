@@ -17,15 +17,17 @@ export function StockItemsPage() {
     .sort((a, b) => a.label.localeCompare(b.label));
 
   return (
-    <>
-      <div className="tabs" role="tablist">
-        {(['food', 'beverage'] as const).map((d) => (
-          <button key={d} role="tab" aria-selected={dept === d} className={dept === d ? '' : 'ghost'} onClick={() => setDept(d)}>
-            {d === 'food' ? 'Food' : 'Beverage'}
-          </button>
-        ))}
-      </div>
-      <CrudPage
+    <CrudPage
+        before={
+          <div className="tabs" role="tablist">
+            {(['food', 'beverage'] as const).map((d) => (
+              <button key={d} role="tab" aria-selected={dept === d} className={dept === d ? '' : 'ghost'} onClick={() => setDept(d)}>
+                {d === 'food' ? 'Food' : 'Beverage'}
+              </button>
+            ))}
+          </div>
+        }
+        singular="stock item"
         key={dept}
         title={dept === 'food' ? 'Food stock items' : 'Beverage stock items'}
         intro="Stock is held in a base unit (grams, millilitres or pieces). Purchase units convert what vendors sell into base units. For liquor, each bottle size of a label is one item, held in ml."
@@ -68,7 +70,6 @@ export function StockItemsPage() {
           </>
         )}
       />
-    </>
   );
 }
 

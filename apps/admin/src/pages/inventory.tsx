@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { businessDate } from '@fnb/shared';
 import { api, can, useApi, useCurrentOutlet, useSession } from '../api';
 import { useLive } from '../live';
-import { Badge, ErrorNote, Modal, Page, rupee } from '../ui';
+import { AskDialog, Badge, ErrorNote, Modal, Page, rupee, toast } from '../ui';
 
 // Base units read better as kg / L once they are large.
 export function fmtQty(q: string | number | null | undefined, unit: string) {
@@ -116,14 +116,13 @@ function WastageForm({ outletId, stores, onDone }: { outletId: string; stores: a
   const items = useStockItems();
   const [v, setV] = useState<any>({ movement: 'wastage', storeId: stores.find((x) => x.kind === 'kitchen')?.id });
   const [error, setError] = useState<string | null>(null);
-  const [msg, setMsg] = useState<string | null>(null);
   const unit = items.data?.find((i) => i.id === v.stockItemId)?.baseUnit ?? '';
   async function save(e: React.FormEvent) {
     e.preventDefault();
     try {
       const r = await api('/inventory/movements', { body: v });
-      setMsg(r.status === 'pending' ? 'Sent to a manager for approval.' : 'Recorded.');
-      setTimeout(onDone, 900);
+      toast(r.status === 'pending' ? 'Sent to a manager for approval' : 'Wastage recorded');
+      onDone();
     } catch (err) {
       setError((err as Error).message);
     }
@@ -177,7 +176,6 @@ function WastageForm({ outletId, stores, onDone }: { outletId: string; stores: a
           : 'This changes stock straight away.'}
       </p>
       <ErrorNote error={error} />
-      {msg && <p className="note">{msg}</p>}
       <footer className="row end">
         <button>Save</button>
       </footer>
@@ -196,6 +194,7 @@ function TransferForm({ stores, onDone }: { stores: any[]; onDone: () => void })
     e.preventDefault();
     try {
       await api('/inventory/transfers', { body: { fromStoreId: from, toStoreId: to, note, lines: lines.filter((l) => l.stockItemId) } });
+      toast('Transfer done');
       onDone();
     } catch (err) {
       setError((err as Error).message);
@@ -260,12 +259,12 @@ function Ledger({ outletId, item }: { outletId: string; item: any }) {
   const s = useSession();
   const rows = useApi<any[]>(`/inventory/ledger?outletId=${outletId}&stockItemId=${item.id}`);
   const [error, setError] = useState<string | null>(null);
-  async function reverse(id: number) {
-    const reason = prompt('Why reverse this entry?');
-    if (!reason) return;
+  const [reversing, setReversing] = useState<number | null>(null);
+  async function reverse(id: number, reason: string) {
+    setReversing(null);
     try {
       const r = await api('/inventory/reversals', { body: { ledgerId: id, reason } });
-      alert(r.status === 'pending' ? 'Sent for approval.' : 'Reversed.');
+      toast(r.status === 'pending' ? 'Reversal sent for approval' : 'Entry reversed');
       rows.reload();
     } catch (e) {
       setError((e as Error).message);
@@ -300,7 +299,7 @@ function Ledger({ outletId, item }: { outletId: string; item: any }) {
                 <td>{r.reason}</td>
                 <td>
                   {can(s, 'inventory.wastage', outletId) && !['sale', 'reversal'].includes(r.movement) && (
-                    <button className="ghost" onClick={() => reverse(r.id)}>
+                    <button className="link" onClick={() => setReversing(r.id)}>
                       Reverse
                     </button>
                   )}
@@ -310,6 +309,14 @@ function Ledger({ outletId, item }: { outletId: string; item: any }) {
           </tbody>
         </table>
       </div>
+      <AskDialog
+        open={reversing != null}
+        title="Reverse this entry"
+        label="Why? (for example: entered twice)"
+        confirm="Reverse"
+        onAnswer={(reason) => reverse(reversing!, reason)}
+        onClose={() => setReversing(null)}
+      />
     </>
   );
 }
@@ -499,6 +506,7 @@ export function ApprovalsPage() {
     try {
       setError(null);
       await api(`/approvals/${id}/decide`, { body: { approve } });
+      toast(approve ? 'Approved' : 'Rejected');
       list.reload();
     } catch (e) {
       setError((e as Error).message);

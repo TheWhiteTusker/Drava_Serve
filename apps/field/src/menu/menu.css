@@ -1,65 +1,175 @@
-/* Guest menu. Brand comes only from @fnb/theme tokens. */
+/* Guest menu: a printed menu card on a phone. Brand comes only from @fnb/theme tokens. */
 * {
   box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 170px;
 }
 body {
   margin: 0;
   background: var(--brand-bg);
   color: var(--brand-text);
-  font: 16px/1.5 var(--brand-font);
+  font: 16px/1.55 var(--brand-font);
+  -webkit-font-smoothing: antialiased;
 }
 #root {
-  max-width: 640px;
+  max-width: 680px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 0 1.1rem;
 }
-header {
+.hero {
   text-align: center;
-  margin-bottom: 0.75rem;
+  padding: 2.25rem 0 1.25rem;
 }
 .logo {
   display: inline-block;
   height: 30px;
-  width: 150px;
+  width: 160px;
   background: var(--brand-logo) center / contain no-repeat;
 }
-h1 {
-  font: 700 1.5rem/1.2 var(--brand-font-heading);
-  margin: 0.25rem 0 0;
+.hero h1 {
+  font: 600 2.1rem/1.15 var(--brand-font-heading);
+  margin: 1rem 0 0.35rem;
+  letter-spacing: -0.01em;
 }
-h2 {
-  font: 700 1.2rem/1.2 var(--brand-font-heading);
-  margin: 1.5rem 0 0.5rem;
-  padding-bottom: 0.25rem;
-  border-bottom: 2px solid var(--brand-primary);
-}
-h3 {
-  font-size: 1rem;
-  margin: 0.75rem 0 0.25rem;
+.hero p {
+  margin: 0;
   color: var(--brand-text-muted);
+  font-size: 0.9rem;
 }
-nav {
+.ornament {
   display: flex;
-  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: var(--brand-accent);
+  margin-top: 1rem;
+  font-size: 0.7rem;
+}
+.ornament span {
+  width: 64px;
+  height: 1px;
+  background: var(--brand-accent);
+  opacity: 0.6;
+}
+.sticky {
   position: sticky;
   top: 0;
-  background: var(--brand-bg);
-  padding: 0.5rem 0;
   z-index: 2;
+  background: var(--brand-bg);
+  padding: 0.6rem 0 0.4rem;
+  border-bottom: 1px solid var(--brand-border);
 }
-nav button {
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: var(--brand-surface-2);
+  border-radius: 999px;
+}
+.tabs button {
   flex: 1;
-  min-height: 48px;
-  border-radius: var(--brand-radius);
-  border: 1px solid var(--brand-border);
+  min-height: 44px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  color: var(--brand-text-muted);
+  font: 650 1rem var(--brand-font);
+  cursor: pointer;
+}
+.tabs button[aria-selected='true'] {
   background: var(--brand-surface);
   color: var(--brand-text);
-  font: 600 1rem var(--brand-font);
+  box-shadow: var(--brand-shadow);
 }
-nav button[aria-selected='true'] {
-  background: var(--brand-primary);
-  border-color: var(--brand-primary);
-  color: var(--brand-primary-contrast);
+.tools {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin-top: 0.6rem;
+}
+.tools input[type='search'] {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--brand-border-strong);
+  background: var(--brand-surface);
+  color: var(--brand-text);
+  font: inherit;
+}
+.tools input[type='search']:focus {
+  outline: none;
+  border-color: var(--brand-accent);
+  box-shadow: 0 0 0 3px var(--brand-accent-soft);
+}
+.veg {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--brand-border-strong);
+  background: var(--brand-surface);
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+.veg input {
+  accent-color: var(--mark-veg);
+  width: 18px;
+  height: 18px;
+}
+.jump {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  margin-top: 0.6rem;
+  padding-bottom: 0.2rem;
+  scrollbar-width: none;
+}
+.jump a {
+  flex: none;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  color: var(--brand-text-muted);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border: 1px solid var(--brand-border);
+}
+.jump a:hover {
+  color: var(--brand-accent-strong);
+  border-color: var(--brand-accent);
+}
+section {
+  margin-top: 1.75rem;
+}
+h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font: 600 1.45rem var(--brand-font-heading);
+  margin: 0 0 0.4rem;
+}
+h2::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--brand-accent), transparent);
+  opacity: 0.55;
+}
+h3 {
+  font: 650 0.75rem var(--brand-font);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--brand-accent-strong);
+  margin: 1rem 0 0.15rem;
 }
 ul {
   list-style: none;
@@ -67,40 +177,82 @@ ul {
   padding: 0;
 }
 .item {
-  padding: 0.65rem 0;
+  padding: 0.75rem 0;
   border-bottom: 1px solid var(--brand-border);
+}
+.item:last-child {
+  border-bottom: 0;
 }
 .item .line {
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
 }
+.item .mark {
+  flex: none;
+  align-self: center;
+}
 .item .name {
+  font-weight: 650;
+  font-size: 1.02rem;
+}
+.item .dots {
   flex: 1;
-  font-weight: 600;
+  border-bottom: 1.5px dotted var(--brand-border-strong);
+  transform: translateY(-4px);
+  min-width: 1rem;
 }
 .item .price {
-  font-weight: 700;
+  font: 600 1.05rem var(--brand-font-heading);
   white-space: nowrap;
 }
-.item p {
-  margin: 0.15rem 0 0 1.5rem;
+.item .desc {
+  margin: 0.2rem 0 0 1.45rem;
   color: var(--brand-text-muted);
+  font-style: italic;
   font-size: 0.92rem;
+}
+.item .meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.35rem 0 0 1.45rem;
+}
+.item .meta span {
+  font-size: 0.75rem;
+  padding: 0.05rem 0.55rem;
+  border-radius: 999px;
+  background: var(--brand-surface-2);
+  color: var(--brand-text-muted);
+}
+.item .meta .allergen {
+  background: var(--brand-warning-soft);
+  color: var(--brand-warning);
 }
 .item.out {
   opacity: 0.45;
 }
-.mark {
-  flex: none;
-  vertical-align: -2px;
+.item.out .price {
+  font: 600 0.8rem var(--brand-font);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 footer {
-  margin: 2rem 0 1rem;
+  margin: 2.5rem 0 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--brand-border);
   font-size: 0.85rem;
   color: var(--brand-text-muted);
   text-align: center;
 }
-.muted {
+footer p {
+  margin: 0.35rem 0;
+}
+footer .mark {
+  vertical-align: -3px;
+}
+.empty {
+  text-align: center;
   color: var(--brand-text-muted);
+  padding: 3rem 1rem;
 }

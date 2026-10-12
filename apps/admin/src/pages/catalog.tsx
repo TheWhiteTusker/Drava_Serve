@@ -16,15 +16,17 @@ export function CategoriesPage() {
   const name = (id: string | null) => cats.data?.find((c) => c.id === id)?.name ?? '';
   const [kind, setKind] = useState('course');
   return (
-    <>
-      <div className="tabs" role="tablist">
-        {Object.entries(KIND_LABEL).map(([k, label]) => (
-          <button key={k} role="tab" aria-selected={kind === k} className={kind === k ? '' : 'ghost'} onClick={() => setKind(k)}>
-            {label}s
-          </button>
-        ))}
-      </div>
-      <CrudPage
+    <CrudPage
+        before={
+          <div className="tabs" role="tablist">
+            {Object.entries(KIND_LABEL).map(([k, label]) => (
+              <button key={k} role="tab" aria-selected={kind === k} className={kind === k ? '' : 'ghost'} onClick={() => setKind(k)}>
+                {label}s
+              </button>
+            ))}
+          </div>
+        }
+        singular="category"
         key={kind}
         title={`${KIND_LABEL[kind]}s`}
         intro={kind === 'course' ? 'Food courses, in the order they appear on the menu. Diet type is a separate field on each dish.' : undefined}
@@ -47,7 +49,6 @@ export function CategoriesPage() {
           { name: 'active', label: 'Active', type: 'checkbox' },
         ]}
       />
-    </>
   );
 }
 
@@ -55,6 +56,7 @@ export function BrandsPage() {
   const s = useSession();
   return (
     <CrudPage
+      singular="brand"
       title="Brands"
       intro="Liquor and packaged-goods brands. A brand's products (bottle sizes) are stock items."
       path="/brands"
@@ -76,6 +78,7 @@ export function TaxClassesPage() {
   const s = useSession();
   return (
     <CrudPage
+      singular="tax class"
       title="Tax classes"
       intro={
         <>

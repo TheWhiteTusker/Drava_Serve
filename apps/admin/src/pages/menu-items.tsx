@@ -25,16 +25,18 @@ export function MenuItemsPage() {
   if (!outletId) return <p className="muted">You are not assigned to an outlet yet.</p>;
 
   return (
-    <>
-      <div className="tabs" role="tablist">
-        <button role="tab" aria-selected={dept === 'food'} className={dept === 'food' ? '' : 'ghost'} onClick={() => setDept('food')}>
-          Food
-        </button>
-        <button role="tab" aria-selected={dept === 'beverage'} className={dept === 'beverage' ? '' : 'ghost'} onClick={() => setDept('beverage')}>
-          Beverage
-        </button>
-      </div>
-      <CrudPage
+    <CrudPage
+        before={
+          <div className="tabs" role="tablist">
+            <button role="tab" aria-selected={dept === 'food'} className={dept === 'food' ? '' : 'ghost'} onClick={() => setDept('food')}>
+              Food
+            </button>
+            <button role="tab" aria-selected={dept === 'beverage'} className={dept === 'beverage' ? '' : 'ghost'} onClick={() => setDept('beverage')}>
+              Beverage
+            </button>
+          </div>
+        }
+        singular="menu item"
         key={`${outletId}-${dept}`}
         title={dept === 'food' ? 'Food menu' : 'Beverage menu'}
         intro={
@@ -87,7 +89,7 @@ export function MenuItemsPage() {
           ...(dept === 'food'
             ? [
                 { name: 'calories', label: 'Calories (optional)', type: 'number' as const },
-                { name: 'allergens', label: 'Allergens', type: 'checks' as const, options: ALLERGENS.map((a) => ({ value: a, label: a })) },
+                { name: 'allergens', label: 'Allergens', type: 'checks' as const, options: ALLERGENS.map((a) => ({ value: a, label: a[0].toUpperCase() + a.slice(1) })) },
               ]
             : []),
           { name: 'tags', label: 'Tags', type: 'tags', placeholder: 'comma separated', help: `For example: ${TAG_SUGGESTIONS.slice(0, 5).join(', ')}` },
@@ -95,6 +97,5 @@ export function MenuItemsPage() {
           { name: 'active', label: 'On the menu', type: 'checkbox' },
         ]}
       />
-    </>
   );
 }

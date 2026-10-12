@@ -7,7 +7,11 @@ import { io } from 'socket.io-client';
 import { billTotals, dec, istDate, type BillTotals } from '@fnb/shared';
 import { createQueue } from '../lib/queue';
 import { createSession, deviceId, type Session } from '../lib/session';
-import { DietMark, Login, OfflineBar, registerWorker, rupee } from '../lib/ui';
+import {
+  Banknote, CalendarCheck, ClipboardCheck, CreditCard, Keyboard, MoreHorizontal, PauseCircle, Plus, Printer, ReceiptText, Send, Share2,
+  ShoppingBag, Smartphone, Split, Wallet,
+} from 'lucide-react';
+import { DietMark, initials, Login, OfflineBar, registerWorker, rupee, rupeeShort, toast, Toasts } from '../lib/ui';
 import { printReceipt } from './printing';
 
 // Billing POS for a counter tablet or desktop. Touch, mouse and keyboard; keeps billing offline.
@@ -326,7 +330,6 @@ function Till({ outletId }: { outletId: string }) {
   const [group, setGroup] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [dialog, setDialog] = useState<null | 'new' | 'open' | 'pay' | 'receipt' | 'more' | 'pin' | 'close' | 'approvals' | 'help'>(null);
-  const [message, setMessage] = useState<string | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const bill = bills.find((b) => b.clientId === current) ?? null;
 
@@ -345,10 +348,7 @@ function Till({ outletId }: { outletId: string }) {
     setCurrent(id);
     store.set(`current.${outletId}`, id);
   };
-  const flash = (m: string) => {
-    setMessage(m);
-    setTimeout(() => setMessage(null), 5000);
-  };
+  const flash = (m: string) => toast(m, 'danger');
 
   // Catalog: from the server when online, from the device otherwise.
   const loadCatalog = useCallback(async () => {
@@ -492,6 +492,7 @@ function Till({ outletId }: { outletId: string }) {
       await queue.add({ kind: 'json', method: 'POST', path: '/pos/payments', body: body(true), label: `Payment on bill ${bill.number}` });
       update(bill.clientId, (b) => ({ status: 'paid', paidAt, payments, totals: totalsFor(b, cat!, false), unsent: true }));
     }
+    toast(`Bill ${bill.number} paid`);
     setDialog('receipt');
   }
 
@@ -541,40 +542,36 @@ function Till({ outletId }: { outletId: string }) {
     <div className="till">
       <header className="bar">
         <span className="logo" role="img" aria-label="Logo" />
-        <strong>{cat.outlet.name}</strong>
-        <span className={`badge ${q.online ? '' : 'off'}`}>{q.online ? 'Online' : 'OFFLINE'}</span>
+        <span className="outlet-name">{cat.outlet.name}</span>
+        <span className={`status ${q.online ? '' : 'off'}`}>{q.online ? 'Online' : 'Offline'}</span>
         {unsentBills > 0 && (
-          <span className="badge off">
+          <span className="status wait">
             {unsentBills} unsent bill{unsentBills === 1 ? '' : 's'}
           </span>
         )}
         <span className="spacer" />
         <button className="secondary" onClick={() => setDialog('open')}>
-          Open bills ({openBills.length}) <kbd>F4</kbd>
+          <ReceiptText className="icon" aria-hidden /> Open bills <span className="count">{openBills.length}</span>
         </button>
         {session.can('approvals.decide', outletId) && (
           <button className="secondary" onClick={() => setDialog('approvals')}>
-            Approvals
+            <ClipboardCheck className="icon" aria-hidden /> Approvals
           </button>
         )}
         {session.can('pos.dayClose', outletId) && (
           <button className="secondary" onClick={() => setDialog('close')}>
-            Day close
+            <CalendarCheck className="icon" aria-hidden /> Day close
           </button>
         )}
-        <button className="ghost" onClick={() => setDialog('help')}>
-          Keys <kbd>F1</kbd>
+        <button className="ghost icon-only" onClick={() => setDialog('help')} aria-label="Keyboard shortcuts (F1)" title="Keyboard shortcuts (F1)">
+          <Keyboard className="icon" />
         </button>
-        <button className="ghost" onClick={() => setDialog('pin')}>
-          {s.user.name} · Switch
+        <button className="ghost" onClick={() => setDialog('pin')} title="Switch user">
+          <span className="avatar">{initials(s.user.name)}</span>
+          <span className="who">{s.user.name.replace(/\s*\(.*\)/, '')}</span>
         </button>
       </header>
       <OfflineBar q={q} />
-      {message && (
-        <div className="note danger flash" role="alert">
-          {message}
-        </div>
-      )}
       <main className="till-body">
         <section className="items" aria-label="Menu">
           <div className="row tight-row">
@@ -616,11 +613,18 @@ function Till({ outletId }: { outletId: string }) {
                   {list.map((m) => (
                     <button key={m.id} className={`item ${m.status}`} disabled={m.status === 'out'} onClick={() => add(m)} aria-label={`${m.name}, ₹${m.price}${m.status === 'out' ? ', sold out' : m.status === 'low' ? `, ${m.portions} left` : ''}`}>
                       <span className="item-name">
-                        <DietMark diet={m.dietType} size={14} /> {m.name}
+                        <DietMark diet={m.dietType} size={14} />
+                        <span>{m.name}</span>
                       </span>
                       <span className="item-meta">
-                        <span>{rupee(m.price)}</span>
-                        {m.status === 'out' ? <span className="badge off">Sold out</span> : m.status === 'low' ? <span className="badge low">{m.portions} left</span> : null}
+                        <span className="item-price">{rupeeShort(m.price)}</span>
+                        {m.status === 'out' ? (
+                          <span className="badge danger">Sold out</span>
+                        ) : m.status === 'low' ? (
+                          <span className="badge warning">{m.portions} left</span>
+                        ) : m.serveSizeMl ? (
+                          <span className="muted">{Number(m.serveSizeMl)} ml</span>
+                        ) : null}
                       </span>
                     </button>
                   ))}
@@ -632,23 +636,27 @@ function Till({ outletId }: { outletId: string }) {
 
         <aside className="ticket" aria-label="Current bill">
           {!bill ? (
-            <div className="stack">
-              <p className="muted">No bill open on this counter.</p>
-              <button className="huge" onClick={() => setDialog('new')}>
-                New bill <kbd>F2</kbd>
+            <div className="ticket-empty">
+              <span className="ticket-empty-icon" aria-hidden>
+                <ReceiptText className="icon" />
+              </span>
+              <h2>Ready for the next guest</h2>
+              <p className="muted">Start a bill for a table or a takeaway, then tap dishes to add them.</p>
+              <button className="huge gold" onClick={() => setDialog('new')} style={{ width: '100%' }}>
+                <Plus className="icon" aria-hidden /> New bill <kbd>F2</kbd>
               </button>
             </div>
           ) : (
             <>
               <div className="row">
                 <div style={{ flex: 3 }}>
-                  <strong>{bill.kind === 'takeaway' ? 'Takeaway' : `Table ${bill.table}`}</strong>
-                  <div className="muted">
+                  <h2 style={{ margin: 0 }}>{bill.kind === 'takeaway' ? 'Takeaway' : `Table ${bill.table}`}</h2>
+                  <div className="muted" style={{ fontSize: '0.85rem' }}>
                     {bill.number} {bill.openedAt && `· since ${new Date(bill.openedAt).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}`}
                   </div>
                 </div>
-                <button className="secondary" onClick={() => select(null)} style={{ flex: 1 }}>
-                  Park
+                <button className="secondary" onClick={() => select(null)} style={{ flex: '0 0 auto' }} title="Keep this bill open and start another">
+                  <PauseCircle className="icon" aria-hidden /> Park
                 </button>
               </div>
               <ul className="lines">
@@ -706,15 +714,15 @@ function Till({ outletId }: { outletId: string }) {
                 </div>
               )}
               <div className="row">
-                <button className="secondary" disabled={!bill.cart.length} onClick={sendOrder}>
-                  Send order <kbd>F9</kbd>
+                <button className="secondary huge" disabled={!bill.cart.length} onClick={sendOrder}>
+                  <Send className="icon" aria-hidden /> Send <kbd>F9</kbd>
                 </button>
-                <button className="huge" disabled={!bill.lines.length && !bill.cart.length} onClick={() => setDialog('pay')}>
-                  Pay <kbd>F8</kbd>
+                <button className="huge gold" disabled={!bill.lines.length && !bill.cart.length} onClick={() => setDialog('pay')}>
+                  <Wallet className="icon" aria-hidden /> Pay <kbd>F8</kbd>
                 </button>
               </div>
               <button className="ghost" onClick={() => setDialog('more')}>
-                Discount, remove item or cancel…
+                <MoreHorizontal className="icon" aria-hidden /> Discount, remove an item or cancel
               </button>
             </>
           )}
@@ -723,16 +731,31 @@ function Till({ outletId }: { outletId: string }) {
 
       {dialog === 'new' && (
         <Dialog title="New bill" onClose={() => setDialog(null)} wide>
-          <button className="huge" onClick={() => newBill('takeaway')} style={{ width: '100%', marginBottom: '0.75rem' }}>
-            Takeaway
+          <button className="huge gold" autoFocus onClick={() => newBill('takeaway')} style={{ width: '100%', marginBottom: '1rem' }}>
+            <ShoppingBag className="icon" aria-hidden /> Takeaway
           </button>
-          <div className="grid-buttons">
+          <p className="muted" style={{ margin: '0 0 0.6rem' }}>
+            Or pick a table. A table with a bill running shows its total and how long the guests have been seated.
+          </p>
+          <div className="tables">
             {cat.tables.map((tb) => {
-              const busy = openBills.some((b) => b.tableId === tb.id);
+              const open = openBills.find((b) => b.tableId === tb.id);
               return (
-                <button key={tb.id} className={busy ? 'warn' : 'secondary'} onClick={() => (busy ? select(openBills.find((b) => b.tableId === tb.id)!.clientId) : newBill('dine_in', tb), setDialog(null))}>
-                  {tb.name}
-                  {busy && ' · open'}
+                <button
+                  key={tb.id}
+                  className={`table ${open ? 'busy' : ''}`}
+                  onClick={() => {
+                    if (open) select(open.clientId);
+                    else newBill('dine_in', tb);
+                    setDialog(null);
+                  }}
+                >
+                  <span className="table-name">{tb.name}</span>
+                  <span className="table-meta">
+                    {open
+                      ? `${rupeeShort(totalsFor(open, cat).grandTotal)} · ${open.openedAt ? since(open.openedAt) : 'new'}`
+                      : 'Free'}
+                  </span>
                 </button>
               );
             })}
@@ -742,12 +765,20 @@ function Till({ outletId }: { outletId: string }) {
       {dialog === 'open' && (
         <Dialog title="Open bills" onClose={() => setDialog(null)} wide>
           {openBills.length === 0 && <p className="muted">No open bills.</p>}
-          <div className="grid-buttons">
+          <div className="tables">
             {openBills.map((b) => (
-              <button key={b.clientId} className={b.clientId === current ? '' : 'secondary'} onClick={() => (select(b.clientId), setDialog(null))}>
-                {b.kind === 'takeaway' ? 'Takeaway' : `Table ${b.table}`} · {b.number.split('-').pop()}
-                <br />
-                {rupee(totalsFor(b, cat).grandTotal)}
+              <button
+                key={b.clientId}
+                className={`table busy ${b.clientId === current ? 'current' : ''}`}
+                onClick={() => {
+                  select(b.clientId);
+                  setDialog(null);
+                }}
+              >
+                <span className="table-name">{b.kind === 'takeaway' ? 'Takeaway' : b.table}</span>
+                <span className="table-meta">
+                  {rupeeShort(totalsFor(b, cat).grandTotal)} · #{b.number.split('-').pop()}
+                </span>
               </button>
             ))}
           </div>
@@ -759,14 +790,22 @@ function Till({ outletId }: { outletId: string }) {
           <Receipt bill={bill} cat={cat} cashier={s.user.name} />
           <div className="row" style={{ marginTop: '0.75rem' }}>
             <button className="secondary" onClick={() => printReceipt(document.getElementById('receipt')!)}>
-              Print
+              <Printer className="icon" aria-hidden /> Print
             </button>
             {'share' in navigator && (
               <button className="secondary" onClick={() => navigator.share({ title: `Bill ${bill.number}`, text: receiptText(bill, cat) }).catch(() => {})}>
-                Send
+                <Share2 className="icon" aria-hidden /> Send
               </button>
             )}
-            <button onClick={() => (setDialog(null), select(null), setDialog('new'))}>New bill</button>
+            <button
+              className="gold"
+              onClick={() => {
+                select(null);
+                setDialog('new');
+              }}
+            >
+              <Plus className="icon" aria-hidden /> New bill
+            </button>
           </div>
         </Dialog>
       )}
@@ -802,6 +841,14 @@ function Till({ outletId }: { outletId: string }) {
   );
 }
 
+// How long a table has been seated: "25 min", "1 h 40 min", "2 days".
+function since(at: string) {
+  const min = Math.max(1, Math.round((Date.now() - new Date(at).getTime()) / 60_000));
+  if (min < 60) return `${min} min`;
+  if (min < 24 * 60) return `${Math.floor(min / 60)} h${min % 60 ? ` ${min % 60} min` : ''}`;
+  return `${Math.floor(min / 1440)} day${min >= 2880 ? 's' : ''}`;
+}
+
 function fromServer(srv: any): LocalBill {
   return {
     clientId: srv.clientId, id: srv.id, number: srv.number, kind: srv.kind, tableId: srv.tableId, table: srv.table, openedAt: srv.openedAt,
@@ -824,19 +871,41 @@ function PayDialog({ total, onPay, onClose }: { total: string; onPay: (p: { mode
   }
   return (
     <Dialog title={`Pay ${rupee(total)}`} onClose={onClose}>
-      <div className="row">
-        {(['cash', 'upi', 'card', 'split'] as const).map((m) => (
-          <button key={m} className={mode === m ? '' : 'secondary'} onClick={() => setMode(m)}>
-            {m === 'upi' ? 'UPI' : m[0].toUpperCase() + m.slice(1)}
+      <div className="pay-modes">
+        {(
+          [
+            ['cash', 'Cash', Banknote],
+            ['upi', 'UPI', Smartphone],
+            ['card', 'Card', CreditCard],
+            ['split', 'Split', Split],
+          ] as const
+        ).map(([m, label, Icon]) => (
+          <button key={m} className={`pay-mode ${mode === m ? 'on' : ''}`} aria-pressed={mode === m} onClick={() => setMode(m)}>
+            <Icon className="icon" aria-hidden />
+            {label}
           </button>
         ))}
       </div>
       {mode === 'cash' && (
-        <label className="field" style={{ marginTop: '0.75rem' }}>
-          Cash received (optional)
-          <input inputMode="decimal" autoFocus value={tendered} onChange={(e) => setTendered(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && ok && confirm()} />
-          {change && change.gte(0) && <span className="big">Change {rupee(change.toString())}</span>}
-        </label>
+        <div className="stack" style={{ marginTop: '1rem' }}>
+          <label className="field">
+            Cash received (optional)
+            <input inputMode="decimal" autoFocus value={tendered} onChange={(e) => setTendered(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && ok && confirm()} />
+          </label>
+          <div className="quick-cash">
+            {[...new Set([Math.ceil(Number(total)), Math.ceil(Number(total) / 100) * 100, Math.ceil(Number(total) / 500) * 500, Math.ceil(Number(total) / 2000) * 2000])].map((v) => (
+              <button key={v} className="secondary" onClick={() => setTendered(String(v))}>
+                {v === Math.ceil(Number(total)) ? 'Exact' : rupeeShort(v)}
+              </button>
+            ))}
+          </div>
+          {change && change.gte(0) && (
+            <div className="change">
+              <span>Give back</span>
+              <strong>{rupee(change.toString())}</strong>
+            </div>
+          )}
+        </div>
       )}
       {mode === 'split' && (
         <div className="stack" style={{ marginTop: '0.75rem' }}>
@@ -851,8 +920,8 @@ function PayDialog({ total, onPay, onClose }: { total: string; onPay: (p: { mode
           </p>
         </div>
       )}
-      <button className="huge" disabled={!ok} onClick={confirm} style={{ width: '100%', marginTop: '0.75rem' }}>
-        Confirm payment
+      <button className="huge gold" disabled={!ok} onClick={confirm} style={{ width: '100%', marginTop: '1rem' }}>
+        Confirm {mode === 'split' ? 'split payment' : `${mode === 'upi' ? 'UPI' : mode} payment`}
       </button>
     </Dialog>
   );
@@ -1000,7 +1069,7 @@ function Approvals({ outletId, onClose }: { outletId: string; onClose: () => voi
 function App() {
   const s = session.use();
   const [outletId, setOutletId] = useState<string | null>(() => session.outletId());
-  if (!s) return <Login session={session} title="Billing" />;
+  if (!s) return <Login session={session} title="Billing counter" subtitle="Sign in once; after that, staff switch with their PIN." />;
   const allowed = s.outlets.filter((o) => session.can('pos.bill', o.id));
   if (!allowed.length) return <p className="wrap">You do not have billing access at any outlet.</p>;
   if (allowed.length === 1) return <Till key={`${allowed[0].id}-${s.user.id}`} outletId={allowed[0].id} />;
@@ -1019,8 +1088,17 @@ function App() {
   return <Till key={`${outletId}-${s.user.id}`} outletId={outletId} />;
 }
 
+function Root() {
+  return (
+    <>
+      <App />
+      <Toasts />
+    </>
+  );
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <Root />
   </StrictMode>,
 );

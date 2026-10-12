@@ -1,13 +1,15 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { AlertCircle, CheckCircle2, Inbox, Plus, Search, X } from 'lucide-react';
 import { api, useApi } from './api';
 
 // ---------- Small pieces ----------
 
-export function Page({ title, intro, actions, children }: { title: string; intro?: ReactNode; actions?: ReactNode; children: ReactNode }) {
+export function Page({ title, eyebrow, intro, actions, children }: { title: ReactNode; eyebrow?: string; intro?: ReactNode; actions?: ReactNode; children: ReactNode }) {
   return (
     <section className="page">
       <header className="page-head">
         <div>
+          {eyebrow && <div className="eyebrow">{eyebrow}</div>}
           <h1>{title}</h1>
           {intro && <p className="muted">{intro}</p>}
         </div>
@@ -21,9 +23,69 @@ export function Page({ title, intro, actions, children }: { title: string; intro
 export function ErrorNote({ error }: { error?: string | null }) {
   return error ? (
     <p className="note danger" role="alert">
-      {error}
+      <AlertCircle className="icon" aria-hidden /> {error}
     </p>
   ) : null;
+}
+
+export function Empty({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {
+  return (
+    <div className="empty">
+      <span className="empty-icon" aria-hidden>
+        <Inbox className="icon" />
+      </span>
+      <strong>{title}</strong>
+      {children && <div>{children}</div>}
+      {action && <div style={{ marginTop: '1rem' }}>{action}</div>}
+    </div>
+  );
+}
+
+export function SkeletonRows({ cols, rows = 5 }: { cols: number; rows?: number }) {
+  return (
+    <>
+      {Array.from({ length: rows }, (_, i) => (
+        <tr key={i} aria-hidden>
+          {Array.from({ length: cols }, (_, j) => (
+            <td key={j}>
+              <div className="skeleton" style={{ width: `${50 + ((i * 7 + j * 13) % 40)}%` }} />
+            </td>
+          ))}
+        </tr>
+      ))}
+    </>
+  );
+}
+
+// ---------- Toasts: short confirmations instead of pop-ups ----------
+
+type Toast = { id: number; text: string; tone: 'ok' | 'danger' };
+let toasts: Toast[] = [];
+const toastListeners = new Set<() => void>();
+export function toast(text: string, tone: Toast['tone'] = 'ok') {
+  const t = { id: Date.now() + Math.random(), text, tone };
+  toasts = [...toasts, t];
+  toastListeners.forEach((l) => l());
+  setTimeout(() => {
+    toasts = toasts.filter((x) => x.id !== t.id);
+    toastListeners.forEach((l) => l());
+  }, 3800);
+}
+export function Toasts() {
+  const list = useSyncExternalStore(
+    (l) => (toastListeners.add(l), () => toastListeners.delete(l)),
+    () => toasts,
+  );
+  return (
+    <div className="toasts" role="status" aria-live="polite">
+      {list.map((t) => (
+        <div key={t.id} className={`toast ${t.tone === 'danger' ? 'danger' : ''}`}>
+          {t.tone === 'danger' ? <AlertCircle className="icon" aria-hidden /> : <CheckCircle2 className="icon" aria-hidden />}
+          {t.text}
+        </div>
+      ))}
+    </div>
+  );
 }
 
 // Native <dialog>: focus trapping, Escape to close and a backdrop come with the platform.
@@ -31,19 +93,50 @@ export function Modal({ open, title, onClose, children, wide }: { open: boolean;
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const d = ref.current;
-    if (open && !d?.open) d?.showModal();
+    if (open && !d?.open) {
+      d?.showModal();
+      // Start in the first field, not on the close button.
+      setTimeout(() => d?.querySelector<HTMLElement>('.dialog-body input:not([type=checkbox]), .dialog-body select, .dialog-body textarea')?.focus(), 0);
+    }
     if (!open && d?.open) d.close();
   }, [open]);
   return (
     <dialog ref={ref} className={wide ? 'wide' : ''} onClose={onClose} aria-labelledby="dialog-title">
-      <header className="row between">
+      <header className="dialog-head">
         <h2 id="dialog-title">{title}</h2>
-        <button type="button" className="ghost" onClick={onClose} aria-label="Close">
-          ✕
+        <button type="button" className="ghost icon-only" onClick={onClose} aria-label="Close">
+          <X className="icon" />
         </button>
       </header>
-      {open && children}
+      <div className="dialog-body">{open && children}</div>
     </dialog>
+  );
+}
+
+// A question with a typed answer (used instead of the browser's prompt box).
+export function AskDialog({ open, title, label, confirm, onAnswer, onClose }: { open: boolean; title: string; label: string; confirm: string; onAnswer: (v: string) => void; onClose: () => void }) {
+  const [v, setV] = useState('');
+  return (
+    <Modal open={open} title={title} onClose={() => (setV(''), onClose())}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onAnswer(v);
+          setV('');
+        }}
+      >
+        <div className="field">
+          <label htmlFor="ask">{label}</label>
+          <input id="ask" autoFocus required minLength={3} value={v} onChange={(e) => setV(e.target.value)} />
+        </div>
+        <footer className="row end">
+          <button type="button" className="ghost" onClick={() => (setV(''), onClose())}>
+            Cancel
+          </button>
+          <button>{confirm}</button>
+        </footer>
+      </form>
+    </Modal>
   );
 }
 
@@ -57,13 +150,13 @@ export function DietMark({ diet }: { diet?: string | null }) {
   return (
     <svg className="diet-mark" viewBox="0 0 16 16" width="16" height="16" role="img" aria-label={label}>
       <title>{label}</title>
-      <rect x="1" y="1" width="14" height="14" fill="none" stroke={color} strokeWidth="1.6" />
+      <rect x="1" y="1" width="14" height="14" fill="none" stroke={color} strokeWidth="1.6" rx="2" />
       {veg ? <circle cx="8" cy="8" r="3.6" fill={color} /> : <path d="M8 3.8 12.2 11.6H3.8Z" fill={color} />}
     </svg>
   );
 }
 
-export function Badge({ children, tone = 'neutral' }: { children: ReactNode; tone?: 'neutral' | 'success' | 'warning' | 'danger' }) {
+export function Badge({ children, tone = 'neutral' }: { children: ReactNode; tone?: 'neutral' | 'success' | 'warning' | 'danger' | 'gold' }) {
   return <span className={`badge ${tone}`}>{children}</span>;
 }
 
@@ -156,7 +249,7 @@ export function Field({ spec, value, onChange }: { spec: FieldSpec; value: any; 
     <div className="field">
       <label htmlFor={id}>
         {spec.label}
-        {spec.required && <span aria-hidden> *</span>}
+        {spec.required && <span aria-hidden style={{ color: 'var(--brand-accent-strong)' }}> *</span>}
       </label>
       {input}
       {help}
@@ -176,6 +269,16 @@ export function Fields({ specs, values, set }: { specs: FieldSpec[]; values: Rec
   );
 }
 
+export function SearchBox({ value, onChange, placeholder = 'Search' }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+  return (
+    <label className="searchbox">
+      <Search className="icon" aria-hidden />
+      <span className="sr-only">{placeholder}</span>
+      <input type="search" placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} />
+    </label>
+  );
+}
+
 // ---------- List + edit page for simple records ----------
 
 export interface Column<T> {
@@ -185,6 +288,8 @@ export interface Column<T> {
 
 export function CrudPage<T extends { id: string; version?: number }>(props: {
   title: string;
+  singular?: string; // "menu item", for "Add menu item"
+  eyebrow?: string;
   intro?: ReactNode;
   path: string; // API collection path
   query?: string; // extra list query, e.g. ?outletId=
@@ -193,21 +298,31 @@ export function CrudPage<T extends { id: string; version?: number }>(props: {
   defaults: Record<string, any>;
   canManage: boolean;
   filter?: (row: T) => boolean;
+  searchText?: (row: T) => string;
   extra?: (values: Record<string, any>, set: (k: string, v: any) => void) => ReactNode;
+  before?: ReactNode; // shown above the table, e.g. tabs
 }) {
   const list = useApi<T[]>(`${props.path}${props.query ?? ''}`);
   const [editing, setEditing] = useState<Record<string, any> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const rows = (list.data ?? []).filter(props.filter ?? (() => true));
+  const [q, setQ] = useState('');
+  const noun = props.singular ?? props.title.toLowerCase();
+  const text = props.searchText ?? ((r: any) => String(r.name ?? ''));
+  const rows = (list.data ?? []).filter(props.filter ?? (() => true)).filter((r) => !q || text(r).toLowerCase().includes(q.toLowerCase()));
+  const open = (r: Record<string, any>) => {
+    setError(null);
+    setEditing({ ...r });
+  };
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     try {
       const { id, createdAt, updatedAt, ...body } = editing!;
-      await api(id ? `${props.path}/${id}` : props.path, { method: id ? 'PUT' : 'POST', body });
+      const r = await api(id ? `${props.path}/${id}` : props.path, { method: id ? 'PUT' : 'POST', body });
       setEditing(null);
+      toast(r?.priceApproval ? 'Saved. The new price has gone to a manager for approval.' : id ? 'Changes saved' : `${noun[0].toUpperCase()}${noun.slice(1)} added`);
       await list.reload();
     } catch (err) {
       setError((err as Error).message);
@@ -216,23 +331,18 @@ export function CrudPage<T extends { id: string; version?: number }>(props: {
     }
   }
 
+  const add = props.canManage && (
+    <button onClick={() => open({ ...props.defaults })}>
+      <Plus className="icon" aria-hidden /> Add {noun}
+    </button>
+  );
   return (
-    <Page
-      title={props.title}
-      intro={props.intro}
-      actions={
-        props.canManage && (
-          <button
-            onClick={() => {
-              setError(null);
-              setEditing({ ...props.defaults });
-            }}
-          >
-            Add
-          </button>
-        )
-      }
-    >
+    <Page title={props.title} eyebrow={props.eyebrow} intro={props.intro} actions={add}>
+      {props.before}
+      <div className="toolbar">
+        <SearchBox value={q} onChange={setQ} placeholder={`Search ${props.title.toLowerCase()}`} />
+        <span className="muted">{list.data ? `${rows.length} shown` : ''}</span>
+      </div>
       <ErrorNote error={list.error} />
       <div className="table-wrap">
         <table>
@@ -245,37 +355,30 @@ export function CrudPage<T extends { id: string; version?: number }>(props: {
             </tr>
           </thead>
           <tbody>
+            {!list.data && list.loading && <SkeletonRows cols={props.columns.length + 1} />}
             {rows.map((r) => (
-              <tr key={r.id}>
+              <tr key={r.id} className={props.canManage ? 'clickable' : ''} onClick={props.canManage ? () => open(r) : undefined}>
                 {props.columns.map((c) => (
                   <td key={c.label}>{c.render(r)}</td>
                 ))}
                 {props.canManage && (
                   <td className="actions">
-                    <button
-                      className="ghost"
-                      onClick={() => {
-                        setError(null);
-                        setEditing({ ...r });
-                      }}
-                    >
+                    <button className="link" onClick={(e) => (e.stopPropagation(), open(r))}>
                       Edit
                     </button>
                   </td>
                 )}
               </tr>
             ))}
-            {!rows.length && !list.loading && (
-              <tr>
-                <td colSpan={props.columns.length + 1} className="muted">
-                  Nothing here yet.
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
+        {list.data && !rows.length && (
+          <Empty title={q ? 'Nothing matches that search' : `No ${props.title.toLowerCase()} yet`} action={!q && add}>
+            {q ? 'Try a different word.' : props.canManage ? `Add your first ${noun} to get started.` : null}
+          </Empty>
+        )}
       </div>
-      <Modal open={!!editing} title={editing?.id ? `Edit ${props.title.toLowerCase()}` : `Add ${props.title.toLowerCase()}`} onClose={() => setEditing(null)} wide>
+      <Modal open={!!editing} title={editing?.id ? `Edit ${noun}` : `Add ${noun}`} onClose={() => setEditing(null)} wide>
         {editing && (
           <form onSubmit={save}>
             <Fields specs={props.fields} values={editing} set={(k, v) => setEditing((e) => ({ ...e!, [k]: v }))} />
@@ -285,7 +388,7 @@ export function CrudPage<T extends { id: string; version?: number }>(props: {
               <button type="button" className="ghost" onClick={() => setEditing(null)}>
                 Cancel
               </button>
-              <button disabled={busy}>{busy ? 'Saving…' : 'Save'}</button>
+              <button disabled={busy}>{busy ? 'Saving…' : editing.id ? 'Save changes' : `Add ${noun}`}</button>
             </footer>
           </form>
         )}

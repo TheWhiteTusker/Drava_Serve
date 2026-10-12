@@ -131,3 +131,12 @@ Nothing in this system or its documents says that discounts on liquor are legall
 - **Pour cost** = cost of liquor-tax items sold ÷ their sales.
 - **Backups** run nightly at 02:00 India time: one compressed `pg_dump` per customer into the private `fnb-backups` bucket, kept 30 days (setting `BACKUP_KEEP_DAYS`). Restore and per-customer deletion are command-line operations for White Tusker staff, not buttons in the app.
 - **Data export** for the owner is a zip of every table as CSV (password and PIN hashes left out).
+
+## Design refresh (12 October 2026)
+
+- **Look: "warm luxury"**, chosen by the product owner as the placeholder until White Tusker's brand arrives: ivory surfaces, espresso text and buttons, a brass-gold accent, Playfair Display headings and Inter for everything else. Dark mode is deep espresso with gold. All of it lives in `packages/theme/theme.css`.
+- **Fonts are bundled with the apps** (`@fontsource` packages), not loaded from Google, so the offline POS keeps its typeface and the guest menu makes no third-party requests.
+- **Numbers use the sans typeface** (with even-width digits) on dashboard tiles and charts, for quick reading; headings stay serif.
+- **Chart colours** are a gold single hue and a gold light-to-dark ramp, checked for colour-blind safety and contrast on the ivory and espresso surfaces.
+- **Icons:** Lucide (`lucide-react`), one consistent outline set across admin, POS and receiving.
+- **Ease of use:** Ctrl+K to jump to any admin screen; a getting-started checklist on the owner's dashboard; search on every list; clicking a row opens it for editing; short confirmations instead of browser pop-ups; friendly empty states; quick cash buttons and a large "give back" amount on the POS; a table picker that shows running totals and how long each table has been seated; step labels ("Step 1 of 3 · Gate check") in the receiving app; a "Veg only" filter, search and course shortcuts on the guest menu.

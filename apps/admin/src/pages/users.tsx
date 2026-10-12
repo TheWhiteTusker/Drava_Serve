@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { PERMISSIONS, type Permission } from '@fnb/shared';
 import { api, can, useApi, useSession } from '../api';
-import { Badge, CrudPage, ErrorNote, Modal, Page, yesNo } from '../ui';
+import { Badge, CrudPage, ErrorNote, Modal, Page, toast, yesNo } from '../ui';
 
 export function UsersPage() {
   const s = useSession();
@@ -11,6 +11,7 @@ export function UsersPage() {
   const outletName = (id: string | null) => (id ? (outlets.data?.find((o) => o.id === id)?.name ?? '?') : 'All outlets');
   return (
     <CrudPage
+      singular="user"
       title="Users"
       intro="Each person signs in with their email or phone. A PIN (4 to 6 digits) lets staff switch user quickly on a shared tablet."
       path="/users"
@@ -102,6 +103,7 @@ export function RolesPage() {
       const { id, name, description, permissions, version } = editing;
       await api(id ? `/roles/${id}` : '/roles', { method: id ? 'PUT' : 'POST', body: { name, description, permissions, version } });
       setEditing(null);
+      toast('Role saved');
       roles.reload();
     } catch (e) {
       setError((e as Error).message);

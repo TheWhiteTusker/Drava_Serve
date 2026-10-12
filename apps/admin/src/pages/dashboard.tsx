@@ -1,4 +1,8 @@
 import { useState, type ReactNode } from 'react';
+import {
+  Boxes, Check, ClipboardCheck, IndianRupee, type LucideIcon, Receipt, ReceiptText, ShoppingBasket, Trash2, Utensils, Wine, X,
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { businessDate, istDate } from '@fnb/shared';
 import { apiBlob, can, saveBlob, useApi, useCurrentOutlet, useSession } from '../api';
 import { useLive } from '../live';
@@ -154,10 +158,13 @@ function Heatmap({ cells }: { cells: { weekday: number; hour: number; units: num
   );
 }
 
-function Tile({ label, value, note }: { label: string; value: ReactNode; note?: ReactNode }) {
+function Tile({ label, value, note, icon: Icon }: { label: string; value: ReactNode; note?: ReactNode; icon?: LucideIcon }) {
   return (
     <div className="tile">
-      <span className="muted">{label}</span>
+      <span className="tile-label">
+        {Icon && <Icon className="icon" aria-hidden />}
+        {label}
+      </span>
       <strong>{value}</strong>
       {note && <small className="muted">{note}</small>}
     </div>
@@ -170,6 +177,87 @@ function Block({ title, children, wide }: { title: string; children: ReactNode; 
       <h2>{title}</h2>
       {children}
     </section>
+  );
+}
+
+// ---------- Welcome: greeting, setup checklist, quick links ----------
+
+function greeting() {
+  const h = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', hour12: false }).format(new Date()));
+  return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+}
+
+// The steps a new business takes before its first service, ticked off as they happen.
+function Welcome({ outletId }: { outletId: string | null }) {
+  const s = useSession();
+  const owner = can(s, 'users.manage', null);
+  const [hidden, setHidden] = useState(() => localStorage.getItem('fnb.setupHidden') === '1');
+  const show = owner && !hidden;
+  const outlets = useApi<any[]>(show ? '/outlets' : null);
+  const users = useApi<any[]>(show ? '/users' : null);
+  const items = useApi<any[]>(show ? '/stock-items' : null);
+  const vendors = useApi<any[]>(show ? '/vendors' : null);
+  const costing = useApi<any[]>(show && outletId ? `/costing?outletId=${outletId}` : null);
+  const counts = useApi<any[]>(show && outletId ? `/inventory/counts?outletId=${outletId}` : null);
+  const targets = useApi<any[]>(show && outletId ? `/margin-targets?outletId=${outletId}` : null);
+  const steps: [string, boolean, string][] = [
+    ['Add your outlets, with FSSAI and licence numbers', !!outlets.data?.length, '/outlets'],
+    ['Add your team and give them roles and PINs', (users.data?.length ?? 0) > 1, '/users'],
+    ['Add stock items with par levels', !!items.data?.some((i) => i.levels.length), '/stock-items'],
+    ['Add menu items and their recipes', !!costing.data?.some((c) => Number(c.portionCost) > 0), '/costing'],
+    ['Add vendors and what they supply', !!vendors.data?.length, '/vendors'],
+    ['Count your opening stock', !!counts.data?.some((c) => c.status === 'approved'), '/counts'],
+    ['Set your margin targets', !!targets.data?.length, '/margin-targets'],
+  ];
+  const done = steps.filter((x) => x[1]).length;
+  const loading = [outlets, users, items, vendors].some((x) => !x.data);
+  const quick = (
+    <div className="card">
+      <h2>Quick links</h2>
+      <div className="quick">
+        <a href="/pos/" target="_blank" rel="noreferrer">
+          <Receipt className="icon" aria-hidden /> Open the POS
+        </a>
+        <Link to="/stock">
+          <Trash2 className="icon" aria-hidden /> Record wastage
+        </Link>
+        <Link to="/indents">
+          <ShoppingBasket className="icon" aria-hidden /> Tonight's indent
+        </Link>
+        <Link to="/approvals">
+          <ClipboardCheck className="icon" aria-hidden /> Approvals
+        </Link>
+      </div>
+    </div>
+  );
+  if (!show || loading || done === steps.length) return owner || can(s, 'pos.bill') ? <div style={{ marginBottom: '1.25rem' }}>{quick}</div> : null;
+  return (
+    <div className="welcome">
+      <div className="card">
+        <div className="row between">
+          <h2>Getting started</h2>
+          <button className="ghost icon-only" aria-label="Hide the checklist" onClick={() => (localStorage.setItem('fnb.setupHidden', '1'), setHidden(true))}>
+            <X className="icon" />
+          </button>
+        </div>
+        <p className="muted" style={{ margin: 0 }}>
+          {done} of {steps.length} done. Each step takes a few minutes.
+        </p>
+        <div className="progress" aria-hidden>
+          <span style={{ width: `${(done / steps.length) * 100}%` }} />
+        </div>
+        <ul className="checklist">
+          {steps.map(([label, ok, to]) => (
+            <li key={label} className={ok ? 'done' : ''}>
+              <span className="tick">{ok && <Check className="icon" style={{ width: 14, height: 14 }} aria-hidden />}</span>
+              <span className="label">{label}</span>
+              {!ok && <Link to={to}>Start</Link>}
+            </li>
+          ))}
+        </ul>
+      </div>
+      {quick}
+    </div>
   );
 }
 
@@ -193,7 +281,8 @@ export function DashboardPage() {
   const shown = (r: any) => (topBy === 'units' ? num(r.units) : rupee(r.revenue));
 
   return (
-    <Page title="Dashboard" intro="Figures before tax, from the summary tables that every paid bill updates. Updates live while you watch.">
+    <Page eyebrow={greeting()} title={s ? `Hello, ${s.user.name.replace(/\s*\(.*\)/, '')}` : 'Dashboard'} intro="Here's how the business is doing. Figures are before tax and update live as bills are paid.">
+      <Welcome outletId={current} />
       <div className="filters card">
         <div className="row">
           {PRESETS.map(([label, fn]) => {
@@ -225,13 +314,13 @@ export function DashboardPage() {
       {x && (
         <>
           <div className="tiles">
-            <Tile label="Sales" value={rupee(x.sales.revenue)} note={`${range[0] === range[1] ? range[0] : `${range[0]} to ${range[1]}`}`} />
-            <Tile label="Bills" value={num(x.sales.bills)} />
-            <Tile label="Average bill" value={rupee(x.sales.averageBill)} />
-            <Tile label="Food" value={rupee(x.totals.foodRevenue)} note={`${num(x.totals.plates)} plates`} />
-            <Tile label="Beverage" value={rupee(x.totals.beverageRevenue)} note={`${x.totals.alcoholLitres} litres of alcohol`} />
-            <Tile label="Stock value now" value={rupee(Number(x.stock.value.food ?? 0) + Number(x.stock.value.beverage ?? 0))} note={`Food ${rupee(x.stock.value.food ?? 0)} · Beverage ${rupee(x.stock.value.beverage ?? 0)}`} />
-            <Tile label="Wastage" value={rupee(x.stock.wastage.reduce((a: number, w: any) => a + Number(w.value), 0))} note={x.stock.wastage.map((w: any) => `${w.movement} ${rupee(w.value)}`).join(' · ') || 'none'} />
+            <Tile icon={IndianRupee} label="Sales" value={rupee(x.sales.revenue)} note={`${range[0] === range[1] ? range[0] : `${range[0]} to ${range[1]}`}`} />
+            <Tile icon={Receipt} label="Bills" value={num(x.sales.bills)} />
+            <Tile icon={ReceiptText} label="Average bill" value={rupee(x.sales.averageBill)} />
+            <Tile icon={Utensils} label="Food" value={rupee(x.totals.foodRevenue)} note={`${num(x.totals.plates)} plates`} />
+            <Tile icon={Wine} label="Beverage" value={rupee(x.totals.beverageRevenue)} note={`${x.totals.alcoholLitres} litres of alcohol`} />
+            <Tile icon={Boxes} label="Stock value now" value={rupee(Number(x.stock.value.food ?? 0) + Number(x.stock.value.beverage ?? 0))} note={`Food ${rupee(x.stock.value.food ?? 0)} · Beverage ${rupee(x.stock.value.beverage ?? 0)}`} />
+            <Tile icon={Trash2} label="Wastage" value={rupee(x.stock.wastage.reduce((a: number, w: any) => a + Number(w.value), 0))} note={x.stock.wastage.map((w: any) => `${w.movement} ${rupee(w.value)}`).join(' · ') || 'none'} />
           </div>
 
           <div className="blocks">

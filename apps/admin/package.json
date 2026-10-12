@@ -12,6 +12,7 @@
   "dependencies": {
     "@fnb/shared": "workspace:*",
     "@fnb/theme": "workspace:*",
+    "lucide-react": "^1.55.0",
     "qrcode": "^1.5.4",
     "react": "19.3.0",
     "react-dom": "19.3.0",

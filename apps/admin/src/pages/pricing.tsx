@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { margin, portionCost } from '@fnb/shared';
 import { api, can, useApi, useCurrentOutlet, useSession } from '../api';
 import { useLive } from '../live';
-import { Badge, DietMark, ErrorNote, Modal, Page, rupee } from '../ui';
+import { Badge, DietMark, ErrorNote, Modal, Page, rupee, toast } from '../ui';
 
 // ---------- Menu costs, margins and order ----------
 
@@ -131,7 +131,10 @@ function RecipeEditor({ item, onDone }: { item: any; onDone: () => void }) {
     try {
       const r = await api(`/menu-items/${item.id}/recipe`, { method: 'PUT', body: { recipeVersion: recipe.data.recipeVersion, lines: valid } });
       if (r.status === 'pending') setMsg('This takes the margin under target, so it has gone to a manager for approval.');
-      else onDone();
+      else {
+        toast('Recipe saved and re-costed');
+        onDone();
+      }
     } catch (e) {
       setError((e as Error).message);
     }
@@ -320,6 +323,7 @@ export function OffersPage() {
       const { createdAt: _c, updatedAt: _u, ...body } = rule;
       for (const [k] of RULE_FIELDS) if (['triggerServes', 'minSubstituteServes', 'maxItems', 'releaseBufferServes'].includes(k)) body[k] = Number(body[k]);
       await api('/price-rules', { method: 'PUT', body });
+      toast('Offer rule saved');
       rules.reload();
       offers.reload();
     } catch (e) {

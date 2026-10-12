@@ -5,7 +5,8 @@ import { createRoot } from 'react-dom/client';
 import { istDate } from '@fnb/shared';
 import { createQueue, useWhenSynced } from '../lib/queue';
 import { createSession } from '../lib/session';
-import { Login, OfflineBar, registerWorker } from '../lib/ui';
+import { ArrowLeft, ArrowRight, Camera, Check, ChevronRight, LogOut, Minus, PackageCheck, RefreshCw, Truck, X } from 'lucide-react';
+import { initials, Login, OfflineBar, registerWorker, toast, Toasts } from '../lib/ui';
 
 // Receiving app (phone): today's deliveries, the watchman's gate check, the staff re-check
 // with photos and the billed rate, and the goods received note sign-off. Works offline.
@@ -75,8 +76,8 @@ function PhotoButton({ deliveryId, lineId, purpose, label = 'Photo' }: { deliver
         }}
       />
       <button type="button" className="secondary" onClick={() => input.current?.click()}>
-        📷 {label}
-        {count > 0 && ` (${count})`}
+        <Camera className="icon" aria-hidden /> {label}
+        {count > 0 && <span className="badge gold">{count} taken</span>}
       </button>
     </>
   );
@@ -124,15 +125,15 @@ function Gate({ d, save }: { d: any; save: (d: any) => void }) {
         )}
         {!mode && (
           <div className="stack">
-            <button className="good huge" onClick={() => decide('accepted')}>
-              ✓ Accept all
+            <button className="good huge" onClick={() => decide('accepted')} style={{ width: '100%' }}>
+              <Check className="icon" aria-hidden /> All here and good
             </button>
             <div className="row">
               <button className="warn huge" onClick={() => setMode('short')}>
-                Short
+                <Minus className="icon" aria-hidden /> Short
               </button>
               <button className="bad huge" onClick={() => setMode('reject')}>
-                ✕ Reject
+                <X className="icon" aria-hidden /> Send back
               </button>
             </div>
           </div>
@@ -177,21 +178,23 @@ function Gate({ d, save }: { d: any; save: (d: any) => void }) {
       </div>
       <div className="row">
         <button className="secondary" disabled={i === 0} onClick={() => setI(i - 1)}>
-          ← Previous
+          <ArrowLeft className="icon" aria-hidden /> Previous
         </button>
         <button className="secondary" disabled={i === d.lines.length - 1} onClick={() => setI(i + 1)}>
-          Next →
+          Next <ArrowRight className="icon" aria-hidden />
         </button>
       </div>
       <button
-        className="huge"
+        className="huge gold"
+        style={{ width: '100%' }}
         disabled={done < d.lines.length}
         onClick={async () => {
           save({ ...d, status: 'gate_checked' });
           await queue.add({ kind: 'json', method: 'POST', path: `/deliveries/${d.id}/gate/complete`, label: 'Finish gate check' });
+          toast('Gate check done. Staff will re-check it next.');
         }}
       >
-        Finish gate check ({done}/{d.lines.length})
+        <PackageCheck className="icon" aria-hidden /> Finish gate check ({done}/{d.lines.length})
       </button>
     </div>
   );
@@ -288,10 +291,10 @@ function Recheck({ d, save, showRates }: { d: any; save: (d: any) => void; showR
       </div>
       <div className="row">
         <button className="secondary" disabled={i === 0} onClick={() => setI(i - 1)}>
-          ← Previous
+          <ArrowLeft className="icon" aria-hidden /> Previous
         </button>
         <button className="secondary" disabled={i === lines.length - 1} onClick={() => setI(i + 1)}>
-          Next →
+          Next <ArrowRight className="icon" aria-hidden />
         </button>
       </div>
       <div className="card stack">
@@ -303,14 +306,16 @@ function Recheck({ d, save, showRates }: { d: any; save: (d: any) => void; showR
         <PhotoButton deliveryId={d.id} purpose="vendor_bill" label="Photo of the bill" />
       </div>
       <button
-        className="huge"
+        className="huge gold"
+        style={{ width: '100%' }}
         disabled={doneCount < lines.length}
         onClick={async () => {
           save({ ...d, status: 'rechecked', vendorBillNo: billNo });
           await queue.add({ kind: 'json', method: 'POST', path: `/deliveries/${d.id}/recheck/complete`, body: { vendorBillNo: billNo || null }, label: 'Finish re-check' });
+          toast('Re-check done. Now both of you sign the goods received note.');
         }}
       >
-        Finish re-check ({doneCount}/{lines.length})
+        <PackageCheck className="icon" aria-hidden /> Finish re-check ({doneCount}/{lines.length})
       </button>
     </div>
   );
@@ -360,18 +365,22 @@ function SignOff({ d, outletId, reload }: { d: any; outletId: string; reload: ()
         <div className="row">
           {session.can('receiving.gate', outletId) && !g.watchmanConfirmedAt && (
             <button className="good huge" onClick={() => confirm('watchman')}>
-              Sign as watchman
+              <Check className="icon" aria-hidden /> Sign as watchman
             </button>
           )}
           {session.can('receiving.recheck', outletId) && !g.staffConfirmedAt && (
             <button className="good huge" onClick={() => confirm('staff')}>
-              Sign as staff
+              <Check className="icon" aria-hidden /> Sign as staff
             </button>
           )}
         </div>
       )}
       {g?.status === 'held_rate' && <p className="note">A billed rate is well above the last one. A manager needs to release this note.</p>}
-      {g?.status === 'approved' && <p className="note">In stock and sent to accounts.</p>}
+      {g?.status === 'approved' && (
+        <p className="note success">
+          <PackageCheck className="icon" aria-hidden /> All done: the goods are in stock and the note has gone to accounts.
+        </p>
+      )}
     </div>
   );
 }
@@ -388,11 +397,18 @@ function DeliveryScreen({ id, outletId, back }: { id: string; outletId: string; 
   const canRecheck = session.can('receiving.recheck', outletId);
   return (
     <div className="wrap stack">
-      <button className="ghost" onClick={back}>
-        ← Deliveries
+      <button className="ghost" onClick={back} style={{ paddingLeft: 0 }}>
+        <ArrowLeft className="icon" aria-hidden /> All deliveries
       </button>
-      <h1>{delivery.vendor.name}</h1>
-      <p className="muted">Expected {delivery.expectedOn}</p>
+      <div>
+        <div className="muted" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+          {STEP[delivery.status] ?? ''}
+        </div>
+        <h1>{delivery.vendor.name}</h1>
+        <p className="muted" style={{ margin: 0 }}>
+          Expected {delivery.expectedOn}
+        </p>
+      </div>
       {delivery.status === 'expected' &&
         (canGate ? <Gate d={delivery} save={d.setData} /> : <p className="note">Waiting for the watchman's gate check.</p>)}
       {delivery.status === 'gate_checked' &&
@@ -402,7 +418,13 @@ function DeliveryScreen({ id, outletId, back }: { id: string; outletId: string; 
   );
 }
 
-const STATUS: Record<string, string> = { expected: 'Waiting at the gate', gate_checked: 'Gate checked', rechecked: 'Re-checked: sign the note', closed: 'Done' };
+const STATUS: Record<string, [string, string]> = {
+  expected: ['Waiting at the gate', 'warning'],
+  gate_checked: ['Ready for staff re-check', 'gold'],
+  rechecked: ['Waiting for signatures', 'gold'],
+  closed: ['Done', 'success'],
+};
+const STEP: Record<string, string> = { expected: 'Step 1 of 3 · Gate check', gate_checked: 'Step 2 of 3 · Staff re-check', rechecked: 'Step 3 of 3 · Sign the note', closed: 'Finished' };
 
 function Home() {
   const s = session.use()!;
@@ -426,8 +448,10 @@ function Home() {
             ))}
           </select>
         )}
-        <button className="ghost" onClick={() => session.set(null)}>
-          {s.user.name} · Sign out
+        <button className="ghost" onClick={() => session.set(null)} title="Sign out">
+          <span className="avatar">{initials(s.user.name)}</span>
+          <LogOut className="icon" aria-hidden />
+          <span className="sr-only">Sign out</span>
         </button>
       </header>
       <OfflineBar q={q} />
@@ -435,25 +459,42 @@ function Home() {
         <DeliveryScreen id={open} outletId={outletId} back={() => (setOpen(null), list.load())} />
       ) : (
         <main className="wrap">
-          <div className="row" style={{ marginBottom: '0.75rem' }}>
-            <h1 style={{ flex: 3 }}>Deliveries</h1>
-            <button className="secondary" onClick={list.load}>
-              Refresh
+          <div className="row" style={{ marginBottom: '0.9rem' }}>
+            <div style={{ flex: 3 }}>
+              <div className="muted" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+                Hello, {s.user.name.replace(/\s*\(.*\)/, '')}
+              </div>
+              <h1>Deliveries</h1>
+            </div>
+            <button className="secondary icon-only" onClick={list.load} aria-label="Refresh" style={{ flex: '0 0 auto' }}>
+              <RefreshCw className="icon" />
             </button>
           </div>
           {list.error && <p className="note danger">{list.error}</p>}
           {(list.data ?? []).map((d) => (
             <button key={d.id} className="tap" onClick={() => setOpen(d.id)}>
-              <div className="big" style={{ fontSize: '1.2rem' }}>
-                {d.vendor}
-              </div>
-              <div className="muted">
-                {d.expectedOn === today ? 'Today' : d.expectedOn} · {d.lineCount} items
-              </div>
-              <span className="badge">{STATUS[d.status] ?? d.status}</span>
+              <span className="tap-icon" aria-hidden>
+                <Truck className="icon" />
+              </span>
+              <span className="tap-body">
+                <strong style={{ display: 'block', fontSize: '1.1rem' }}>{d.vendor}</strong>
+                <span className="muted">
+                  {d.expectedOn === today ? 'Today' : d.expectedOn} · {d.lineCount} items
+                </span>
+                <span style={{ display: 'block', marginTop: '0.35rem' }}>
+                  <span className={`badge ${STATUS[d.status]?.[1] ?? ''}`}>{STATUS[d.status]?.[0] ?? d.status}</span>
+                </span>
+              </span>
+              <ChevronRight className="icon muted" aria-hidden />
             </button>
           ))}
-          {list.data?.length === 0 && <p className="muted">No deliveries waiting.</p>}
+          {list.data?.length === 0 && (
+            <div className="card" style={{ textAlign: 'center' }}>
+              <PackageCheck className="icon" aria-hidden style={{ width: 36, height: 36, color: 'var(--brand-accent-strong)' }} />
+              <h2>All caught up</h2>
+              <p className="muted">No deliveries are waiting. New ones appear here before 5:00 am.</p>
+            </div>
+          )}
         </main>
       )}
     </>
@@ -462,7 +503,7 @@ function Home() {
 
 function App() {
   const s = session.use();
-  if (!s) return <Login session={session} title="Receiving" />;
+  if (!s) return <Login session={session} title="Receiving" subtitle="For the gate check and the morning re-check of deliveries." />;
   if (!s.outlets.length) return <p className="wrap">You are not assigned to an outlet.</p>;
   return <Home />;
 }
@@ -470,5 +511,6 @@ function App() {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
+    <Toasts />
   </StrictMode>,
 );

@@ -1,57 +1,73 @@
 /*
  * White Tusker brand theme — THE ONE FILE TO EDIT.
  *
- * The logo and brand colours have not been shared yet, so everything below is a neutral
- * placeholder. To drop in the brand:
+ * Until the real logo and colours arrive, this is a "warm luxury" placeholder: ivory surfaces,
+ * espresso ink, a brass-gold accent, serif headings (Playfair Display) and a clean sans for
+ * everything else (Inter). To drop in the brand:
  *   1. Replace logo.svg (light backgrounds) and logo-dark.svg (dark backgrounds) in this folder,
  *      or point --brand-logo at other files.
  *   2. Change the --brand-* values in the light block, then in both dark blocks.
- *   3. Change --brand-font / --brand-font-heading (add a Google Fonts @import at the top if needed).
+ *   3. Change the font imports below and --brand-font / --brand-font-heading. Fonts are bundled
+ *      with the apps (no Google requests), so the offline POS and the guest menu keep them.
+ *   4. If the accent changes, re-validate the --chart-* colours for colour-blind safety.
  * Every app (admin, POS, receiving, guest menu) reads only these tokens.
  *
  * Do NOT restyle the --mark-* tokens: the veg / non-veg marks follow FSSAI conventions
  * (green circle in a green square, brown triangle in a brown square).
  */
 
+@import '@fontsource-variable/inter';
+@import '@fontsource/playfair-display/500.css';
+@import '@fontsource/playfair-display/600.css';
+@import '@fontsource/playfair-display/700.css';
+
 :root {
   color-scheme: light;
 
   /* Brand */
   --brand-logo: url('./logo.svg');
-  --brand-primary: #2f5d8a;
-  --brand-primary-hover: #264d73;
-  --brand-primary-contrast: #ffffff;
-  --brand-accent: #b7791f;
+  --brand-primary: #2b241d; /* espresso: main buttons */
+  --brand-primary-hover: #3d342a;
+  --brand-primary-contrast: #fbf6ec;
+  --brand-accent: #a77a2c; /* brass gold: highlights, active states */
+  --brand-accent-strong: #855f1c; /* gold dark enough for text and links */
+  --brand-accent-soft: rgb(167 122 44 / 0.12);
 
   /* Surfaces and text */
-  --brand-bg: #f5f6f8;
-  --brand-surface: #ffffff;
-  --brand-surface-2: #eef0f3;
-  --brand-border: #d5d9e0;
-  --brand-text: #1c2430;
-  --brand-text-muted: #5b6573;
+  --brand-bg: #f6f1e8;
+  --brand-surface: #fffdf9;
+  --brand-surface-2: #f3ece0;
+  --brand-surface-3: #ebe2d2;
+  --brand-border: #e3d9c8;
+  --brand-border-strong: #cfc1a8;
+  --brand-text: #1f1a15;
+  --brand-text-muted: #6e6455;
 
-  /* Status */
-  --brand-success: #1f7a4d;
-  --brand-warning: #a35f00;
-  --brand-danger: #b42318;
-  --brand-info: #2f5d8a;
+  /* Status (text colour, and a soft background for badges) */
+  --brand-success: #2e7550;
+  --brand-success-soft: #e3f0e6;
+  --brand-warning: #9a6312;
+  --brand-warning-soft: #f7ead2;
+  --brand-danger: #b0402b;
+  --brand-danger-soft: #f8e1dc;
+  --brand-info: #855f1c;
 
-  /* Shape and type */
-  --brand-radius: 8px;
-  --brand-radius-small: 4px;
-  --brand-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', sans-serif;
-  --brand-font-heading: var(--brand-font);
+  /* Shape, type and depth */
+  --brand-radius: 12px;
+  --brand-radius-small: 8px;
+  --brand-radius-large: 18px;
+  --brand-font: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --brand-font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --brand-font-mono: ui-monospace, 'Cascadia Mono', Consolas, monospace;
-  --brand-shadow: 0 1px 2px rgb(16 24 40 / 0.06), 0 1px 3px rgb(16 24 40 / 0.1);
+  --brand-shadow: 0 1px 2px rgb(60 40 20 / 0.05), 0 2px 8px -2px rgb(60 40 20 / 0.08);
+  --brand-shadow-lg: 0 2px 6px rgb(60 40 20 / 0.06), 0 18px 40px -12px rgb(60 40 20 / 0.22);
 
-
-  /* Charts (validated for colour-blind safety and contrast on the surfaces above) */
-  --chart-series: #2a78d6;
-  --chart-seq-low: #cde2fb;
-  --chart-seq-high: #0d366b;
-  --chart-grid: #e1e0d9;
-  --chart-axis: #c3c2b7;
+  /* Charts (validated for colour-blind safety and contrast on these surfaces) */
+  --chart-series: #a77a2c;
+  --chart-seq-low: #f3e6c8;
+  --chart-seq-high: #563b12;
+  --chart-grid: #ece4d6;
+  --chart-axis: #cfc1a8;
 
   /* Compliance marks (not brand) */
   --mark-veg: #1a8a3a;
@@ -62,27 +78,34 @@
   :root:not([data-theme='light']) {
     color-scheme: dark;
     --brand-logo: url('./logo-dark.svg');
-    --brand-primary: #7fb0e0;
-    --brand-primary-hover: #9cc3ea;
-    --brand-primary-contrast: #0d1520;
-    --brand-accent: #e0a64a;
-    --brand-bg: #11151b;
-    --brand-surface: #1a2028;
-    --brand-surface-2: #232a34;
-    --brand-border: #343d4a;
-    --brand-text: #e6e9ee;
-    --brand-text-muted: #9aa4b2;
-    --brand-success: #4cc38a;
-    --brand-warning: #e0a64a;
-    --brand-danger: #f07167;
-    --brand-info: #7fb0e0;
+    --brand-primary: #d3ad62;
+    --brand-primary-hover: #e0bf7c;
+    --brand-primary-contrast: #1a150f;
+    --brand-accent: #d3ad62;
+    --brand-accent-strong: #e2c487;
+    --brand-accent-soft: rgb(211 173 98 / 0.14);
+    --brand-bg: #15120e;
+    --brand-surface: #201b16;
+    --brand-surface-2: #2a241d;
+    --brand-surface-3: #342c23;
+    --brand-border: #3a3127;
+    --brand-border-strong: #54473a;
+    --brand-text: #f3ebde;
+    --brand-text-muted: #b5a893;
+    --brand-success: #7fcf9c;
+    --brand-success-soft: #1f3327;
+    --brand-warning: #e6b765;
+    --brand-warning-soft: #3a2d17;
+    --brand-danger: #f08f7b;
+    --brand-danger-soft: #3d221c;
+    --brand-info: #e2c487;
     --brand-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
-
-    --chart-series: #3987e5;
-    --chart-seq-low: #1d3049;
-    --chart-seq-high: #b7d3f6;
-    --chart-grid: #2c2c2a;
-    --chart-axis: #383835;
+    --brand-shadow-lg: 0 18px 40px -12px rgb(0 0 0 / 0.6);
+    --chart-series: #bb8b33;
+    --chart-seq-low: #2e261b;
+    --chart-seq-high: #ead3a0;
+    --chart-grid: #2f281f;
+    --chart-axis: #4a3f33;
     --mark-veg: #3dbb5f;
     --mark-nonveg: #c47a3d;
   }
@@ -91,27 +114,34 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
   --brand-logo: url('./logo-dark.svg');
-  --brand-primary: #7fb0e0;
-  --brand-primary-hover: #9cc3ea;
-  --brand-primary-contrast: #0d1520;
-  --brand-accent: #e0a64a;
-  --brand-bg: #11151b;
-  --brand-surface: #1a2028;
-  --brand-surface-2: #232a34;
-  --brand-border: #343d4a;
-  --brand-text: #e6e9ee;
-  --brand-text-muted: #9aa4b2;
-  --brand-success: #4cc38a;
-  --brand-warning: #e0a64a;
-  --brand-danger: #f07167;
-  --brand-info: #7fb0e0;
+  --brand-primary: #d3ad62;
+  --brand-primary-hover: #e0bf7c;
+  --brand-primary-contrast: #1a150f;
+  --brand-accent: #d3ad62;
+  --brand-accent-strong: #e2c487;
+  --brand-accent-soft: rgb(211 173 98 / 0.14);
+  --brand-bg: #15120e;
+  --brand-surface: #201b16;
+  --brand-surface-2: #2a241d;
+  --brand-surface-3: #342c23;
+  --brand-border: #3a3127;
+  --brand-border-strong: #54473a;
+  --brand-text: #f3ebde;
+  --brand-text-muted: #b5a893;
+  --brand-success: #7fcf9c;
+  --brand-success-soft: #1f3327;
+  --brand-warning: #e6b765;
+  --brand-warning-soft: #3a2d17;
+  --brand-danger: #f08f7b;
+  --brand-danger-soft: #3d221c;
+  --brand-info: #e2c487;
   --brand-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
-
-  --chart-series: #3987e5;
-  --chart-seq-low: #1d3049;
-  --chart-seq-high: #b7d3f6;
-  --chart-grid: #2c2c2a;
-  --chart-axis: #383835;
+  --brand-shadow-lg: 0 18px 40px -12px rgb(0 0 0 / 0.6);
+  --chart-series: #bb8b33;
+  --chart-seq-low: #2e261b;
+  --chart-seq-high: #ead3a0;
+  --chart-grid: #2f281f;
+  --chart-axis: #4a3f33;
   --mark-veg: #3dbb5f;
   --mark-nonveg: #c47a3d;
 }

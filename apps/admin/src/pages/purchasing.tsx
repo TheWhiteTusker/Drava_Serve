@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { businessDate, istDate } from '@fnb/shared';
 import { api, apiBlob, can, saveBlob, useApi, useCurrentOutlet, useSession } from '../api';
 import { useLive } from '../live';
-import { Badge, CrudPage, ErrorNote, Modal, Page, rupee, yesNo } from '../ui';
+import { Badge, CrudPage, ErrorNote, Modal, Page, rupee, toast, yesNo } from '../ui';
 import { fmtQty } from './inventory';
 
 const qty = (v: string | null | undefined) => (v == null ? '—' : Number(v).toLocaleString('en-IN', { maximumFractionDigits: 3 }));
@@ -33,6 +33,7 @@ export function VendorsPage() {
       </div>
       {tab === 'vendors' ? (
         <CrudPage
+          singular="vendor"
           title="Vendors"
           intro="Who supplies what. Each vendor's items set the purchase unit and pack size the nightly indent rounds up to."
           path="/vendors"
@@ -213,7 +214,8 @@ export function IndentsPage() {
   async function build() {
     try {
       const r = await api('/indents/build', { body: { outletId, forDate: date } });
-      setMsg(`${r.indents.length} vendor order(s) built.${r.unassigned.length ? ` No vendor set for: ${r.unassigned.join(', ')}.` : ''}`);
+      toast(`${r.indents.length} vendor order${r.indents.length === 1 ? '' : 's'} built`);
+      setMsg(r.unassigned.length ? `No vendor is set for: ${r.unassigned.join(', ')}. Add them under Vendors and rates.` : null);
       list.reload();
     } catch (e) {
       setError((e as Error).message);
@@ -562,6 +564,7 @@ function GrnDetail({ id }: { id: string }) {
     e.preventDefault();
     try {
       await api(`/grns/${id}/payments`, { body: { ...pay, amount: pay.amount ?? (Number(x.amountPayable) - paid).toFixed(2) } });
+      toast('Payment recorded');
       g.reload();
     } catch (err) {
       setError((err as Error).message);
