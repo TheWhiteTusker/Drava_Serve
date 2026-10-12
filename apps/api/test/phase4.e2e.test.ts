@@ -161,3 +161,34 @@ describe('phase 4: costing, ranking and beverage offers', () => {
     expect((await f.owner.get(`/offers?outletId=${f.outlet.id}&status=active`)).body).toEqual([]);
   });
 });
+
+describe('activity feed: what happened and why', () => {
+  const feed = async (kind?: string) => (await f.owner.get(`/activity?outletId=${f.outlet.id}${kind ? `&kind=${kind}` : ''}`)).body as any[];
+
+  it('explains each offer: which drink ran low, how many serves were left, and the new prices', async () => {
+    const started = await feed('offer_started');
+    expect(started.at(-1).message).toBe(
+      'Whisky A 60 ml is running low (4 left), so 2 similar drinks are 10% off: Whisky C 60 ml ₹340 → ₹306 and Whisky B 60 ml ₹360 → ₹324.',
+    );
+    expect(started.at(-1).data).toMatchObject({ triggerName: 'Whisky A 60 ml', triggerServes: 4 });
+  });
+
+  it('explains why an offer ended', async () => {
+    const ended = (await feed('offer_ended')).map((e: any) => e.message);
+    expect(ended).toContain('Whisky A 60 ml was restocked (10 left), so Whisky C 60 ml is back to ₹340 and Whisky B 60 ml is back to ₹360.');
+    expect(ended.some((m: string) => m.startsWith('The business day ended'))).toBe(true);
+    expect(ended.some((m: string) => m.startsWith('Beverage offers were switched off for this outlet'))).toBe(true);
+  });
+
+  it('records dishes selling out and coming back, and price suggestions', async () => {
+    const all = (await feed()).map((e: any) => e.message);
+    expect(all).toContain('Tomato Soup has sold out. It is greyed out on the POS and the guest menu.');
+    expect(all.some((m: string) => m.startsWith('Tomato Soup is available again'))).toBe(true);
+    expect(all.some((m: string) => m.startsWith("Tomato Soup's margin fell to 71.56% (target 75%)"))).toBe(true);
+  });
+
+  it('is for owners and managers, not the counter; and cannot be edited', async () => {
+    expect((await f.people.cashier.get(`/activity?outletId=${f.outlet.id}`)).status).toBe(403);
+    await expect(f.db.execute('delete from activity')).rejects.toThrow();
+  });
+});

@@ -3,6 +3,7 @@ import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
 import { billTotals, businessDate, dec, grossQty, istDate, rupees, zMoney, zPct, zQty, PAYMENT_MODES } from '@fnb/shared';
 import { z } from 'zod';
 import { getSettings } from './access.controller.js';
+import { logActivity, money } from './activity.js';
 import { proposeOrApply, registerApproval } from './approvals.js';
 import { C, Ctx, findOr404, parse } from './common.js';
 import { tenantSchema as t, type Q, type Tx } from './db/index.js';
@@ -406,6 +407,11 @@ export class PosController {
     const [row] = await ctx.tx((tx) =>
       tx.insert(t.dayClose).values({ outletId: b.outletId, businessDate: b.businessDate, closedBy: ctx.userId!, totals: full, cashCounted: b.cashCounted ?? null, notes: b.notes ?? null }).returning(),
     );
+    await logActivity(ctx, ctx.db, {
+      outletId: b.outletId, kind: 'day_closed', title: 'Day closed',
+      message: `${b.businessDate} was closed: ${totals.bills} bills, ${money(totals.total)} in total${full.cashDifference && Number(full.cashDifference) !== 0 ? `, cash ${Number(full.cashDifference) > 0 ? 'over' : 'short'} by ${money(Math.abs(Number(full.cashDifference)))}` : ''}.`,
+      data: { businessDate: b.businessDate },
+    });
     await endOffersForDay(ctx, b.outletId);
     return row;
   }

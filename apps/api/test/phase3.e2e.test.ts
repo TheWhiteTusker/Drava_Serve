@@ -174,6 +174,12 @@ describe('phase 3: purchasing and receiving', () => {
     expect((await f.people.accounts.get(`/grns/${grnId}`)).body.status).toBe('approved');
   });
 
+  it('the activity feed says when a delivery went into stock and when one was held', async () => {
+    const feed = (await f.owner.get(`/activity?outletId=${f.outlet.id}`)).body.map((e: any) => e.message) as string[];
+    expect(feed.some((m) => /^The delivery from Veg supplier went into stock \(GRN-TST-00001: (Tomato and Sweet corn|Sweet corn and Tomato)\)\. ₹507 is now due/.test(m))).toBe(true);
+    expect(feed.some((m) => m.includes('is held for a manager: Tomato was billed ₹50, against ₹22 last time'))).toBe(true);
+  });
+
   it('accounts records the payment and exports the notes', async () => {
     const r = (await f.people.accounts.post(`/grns/${grn1}/payments`, { paidOn: '2026-10-21', mode: 'bank_transfer', reference: 'UTR123', amount: '507' })).body;
     expect(r.status).toBe('paid');

@@ -3,6 +3,7 @@ import {
   Boxes, Check, ClipboardCheck, IndianRupee, type LucideIcon, Receipt, ReceiptText, ShoppingBasket, Trash2, Utensils, Wine, X,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { ActivityCard } from './activity';
 import { businessDate, istDate } from '@fnb/shared';
 import { apiBlob, can, saveBlob, useApi, useCurrentOutlet, useSession } from '../api';
 import { useLive } from '../live';
@@ -324,6 +325,7 @@ export function DashboardPage() {
           </div>
 
           <div className="blocks">
+            <ActivityCard outletId={outlet || null} />
             <Block title="Margin by course or drink type">
               <BarList
                 label="Margin % by course"

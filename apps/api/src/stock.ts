@@ -7,7 +7,8 @@ import {
 import type { Ctx } from './common.js';
 import { tenantSchema as t, type Q, type Tx } from './db/index.js';
 import { publish } from './events.js';
-import { rerankOutlet, runOffers } from './pricing.js';
+import { logActivity } from './activity.js';
+import { namesOf, rerankOutlet, runOffers } from './pricing.js';
 
 // The only way stock changes. Every movement is a ledger row; the balance row is locked,
 // updated and written in the same transaction, so two counters can never both take the last
@@ -266,6 +267,15 @@ export async function refreshAvailability(ctx: Ctx, outletId: string, stockItemI
       .insert(t.menuRank)
       .values({ menuItemId: id, outletId, position: 9999, availablePortions: portions })
       .onConflictDoUpdate({ target: t.menuRank.menuItemId, set: { availablePortions: portions } });
+  }
+  if (flipped.length) {
+    const names = await namesOf(db, flipped);
+    for (const id of flipped) {
+      const p = avail.get(id)?.portions ?? 0;
+      await logActivity(ctx, db, p <= 0
+        ? { outletId, kind: 'sold_out', title: 'Sold out', message: `${names.get(id)} has sold out. It is greyed out on the POS and the guest menu.`, data: { menuItemId: id } }
+        : { outletId, kind: 'back_in_stock', title: 'Back in stock', message: `${names.get(id)} is available again (${p} ${p === 1 ? 'portion' : 'portions'}).`, data: { menuItemId: id, portions: p } });
+    }
   }
   publish(ctx.customerId, outletId, 'availability', {
     items: [...avail].map(([menuItemId, a]) => ({ menuItemId, portions: a.portions, status: a.status })),

@@ -14,7 +14,8 @@ import { controlDb, controlSchema, tenantSchema as t, type Q, type Tx } from './
 import { lastRates } from './purchasing.controller.js';
 import { issuingStores, stockTx, type Post as PostStock } from './stock.js';
 import { getObject, putObject } from './storage.js';
-import { recostAfterReceipt } from './pricing.js';
+import { logActivity, money } from './activity.js';
+import { listOf, recostAfterReceipt } from './pricing.js';
 
 // Two-stage receiving (handoff 6.8): the watchman's gate check at 5:00 am, then the staff
 // re-check with weights, photos and the billed rate. Only what both accepted enters stock.
@@ -79,6 +80,13 @@ export async function receiveGrn(ctx: Ctx, tx: Tx, post: PostStock, grnId: strin
   await tx.update(t.goodsReceivedNote).set({ status: 'approved', approvedAt: new Date(), updatedAt: new Date() }).where(eq(t.goodsReceivedNote.id, grnId));
   await tx.update(t.receiptCheck).set({ status: 'closed', updatedAt: new Date() }).where(eq(t.receiptCheck.id, grn.receiptCheckId));
   await recostAfterReceipt(ctx, tx, lines.map((l) => l.stockItemId));
+  const [vendor] = await tx.select({ name: t.vendor.name }).from(t.vendor).where(eq(t.vendor.id, grn.vendorId));
+  const names = await tx.select({ id: t.stockItem.id, name: t.stockItem.name }).from(t.stockItem).where(inArray(t.stockItem.id, lines.map((l) => l.stockItemId)));
+  await logActivity(ctx, tx, {
+    outletId: grn.outletId, kind: 'delivery', title: 'Delivery in stock',
+    message: `The delivery from ${vendor?.name} went into stock (${grn.number}: ${listOf(names.map((n) => n.name))}). ${money(grn.amountPayable)} is now due to the vendor, and dishes using these items were re-costed.`,
+    data: { grnId, vendorId: grn.vendorId },
+  });
 }
 
 registerApproval('grn_rate_hold', 'Release a goods received note held for a rate rise', async (ctx, tx, req, post) => {
@@ -315,6 +323,11 @@ export class GrnsController {
       const risen = lines.filter((x) => x.l.lastRatePerBase && dec(x.l.ratePerBase).gt(dec(x.l.lastRatePerBase).times(1 + tolerance / 100)));
       if (risen.length) {
         await tx.update(t.goodsReceivedNote).set({ status: 'held_rate' }).where(eq(t.goodsReceivedNote.id, id));
+        await logActivity(ctx, tx, {
+          outletId: g.outletId, kind: 'delivery_held', title: 'Delivery held',
+          message: `${g.number} is held for a manager: ${listOf(risen.map((x) => `${x.name} was billed ${money(x.l.billedRate)}, against ${money(dec(x.l.lastRatePerBase!).times(dec(x.l.billedRate).div(x.l.ratePerBase)).toString())} last time`))}, more than ${tolerance}% higher.`,
+          data: { grnId: id },
+        });
         await proposeOrApply(
           ctx, tx, post,
           {

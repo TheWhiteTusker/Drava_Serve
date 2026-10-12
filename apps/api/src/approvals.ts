@@ -55,13 +55,13 @@ export async function queueSystemRequest(tx: Tx, p: Proposal & { proposedBy: str
     .where(and(eq(t.approvalRequest.type, p.type), eq(t.approvalRequest.entityId, p.entityId ?? ''), eq(t.approvalRequest.status, 'pending')));
   if (existing) {
     await tx.update(t.approvalRequest).set({ proposed: p.proposed as object, current: p.current ?? null, reason: p.reason ?? null, updatedAt: new Date() }).where(eq(t.approvalRequest.id, existing.id));
-    return existing.id;
+    return { id: existing.id, created: false };
   }
   const [req] = await tx
     .insert(t.approvalRequest)
     .values({ outletId: p.outletId, type: p.type, entity: p.entity, entityId: p.entityId ?? null, current: p.current ?? null, proposed: p.proposed as object, reason: p.reason ?? null, proposedBy: p.proposedBy })
     .returning();
-  return req.id;
+  return { id: req.id, created: true };
 }
 
 const noStock: PostStock = async () => {

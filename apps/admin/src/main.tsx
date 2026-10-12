@@ -2,7 +2,7 @@ import '@fnb/theme/theme.css';
 import './app.css';
 import logoDark from '@fnb/theme/logo-dark.svg';
 import {
-  Beer, BookOpen, Boxes, ChartColumn, ChefHat, ClipboardCheck, ClipboardList, FileBarChart, Gauge, History, Laptop, LayoutGrid,
+  Activity as ActivityIcon, Beer, BookOpen, Boxes, ChartColumn, ChefHat, ClipboardCheck, ClipboardList, FileBarChart, Gauge, History, Laptop, LayoutGrid,
   LogOut, Menu, Moon, Percent, Receipt, Scale, Search, Settings, ShieldCheck, ShoppingBasket, Sparkles, Store, Sun, Tag, Tags,
   Truck, UserCog, Users, Wallet, Wine,
   type LucideIcon,
@@ -13,6 +13,7 @@ import { BrowserRouter, Navigate, NavLink, Route, Routes, useLocation, useNaviga
 import type { Permission } from '@fnb/shared';
 import { api, can, setCurrentOutlet, setSession, useApi, useCurrentOutlet, useSession, type Session } from './api';
 import { ErrorNote, Modal, Toasts } from './ui';
+import { ActivityPage } from './pages/activity';
 import { AuditPage } from './pages/audit';
 import { DashboardPage, ReportsPage } from './pages/dashboard';
 import { ApprovalsPage, CountsPage, LiquorRegisterPage, StockPage } from './pages/inventory';
@@ -206,6 +207,7 @@ interface NavItem {
 const NAV: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard', icon: Gauge, group: 'Overview', perm: 'reports.view', page: DashboardPage, keywords: 'sales today home' },
   { to: '/reports', label: 'Reports', icon: FileBarChart, group: 'Overview', perm: 'reports.view', page: ReportsPage, keywords: 'menu engineering pour cost csv export day close' },
+  { to: '/activity', label: 'Activity', icon: ActivityIcon, group: 'Overview', perm: 'reports.view', page: ActivityPage, keywords: 'offers log history sold out what happened' },
   { to: '/approvals', label: 'Approvals', icon: ClipboardCheck, group: 'Overview', page: ApprovalsPage, keywords: 'approve reject pending' },
   { to: '/menu-items', label: 'Menu items', icon: BookOpen, group: 'Menu', perm: 'catalog.view', page: MenuItemsPage, keywords: 'dishes drinks prices food' },
   { to: '/costing', label: 'Costs and order', icon: ChartColumn, group: 'Menu', perm: 'rates.view', page: CostingPage, keywords: 'recipes margin ranking pin' },

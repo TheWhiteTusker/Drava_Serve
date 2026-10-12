@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import {
   AuditController, OutletsController, RolesController, SettingsController, UsersController,
 } from './access.controller.js';
+import { ActivityController } from './activity.js';
 import { ApprovalsController } from './approvals.js';
 import { AuthController } from './auth.controller.js';
 import {
@@ -43,7 +44,7 @@ export function jwtSecret() {
     MenuItemsController, LiquorTreeController, ApprovalsController, InventoryController,
     VendorsController, VendorItemsController, VendorRatesController, IndentsController,
     DeliveriesController, GrnsController, AttachmentsController, PricingController, PublicMenuController,
-    PosController, ReportsController, DataController,
+    PosController, ReportsController, DataController, ActivityController,
   ],
   providers: [
     LiveGateway,

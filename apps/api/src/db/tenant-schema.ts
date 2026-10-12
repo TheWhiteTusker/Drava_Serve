@@ -813,3 +813,22 @@ export const billHourly = pgTable(
   },
   (t) => [primaryKey({ columns: [t.outletId, t.businessDate, t.hour] })],
 );
+
+// ---------- Activity ----------
+
+// A plain-language timeline of what happened and why: offers starting and ending (with the
+// drink that triggered them), dishes selling out or coming back, deliveries, price flags,
+// day close. Append-only, written as the events happen.
+export const activity = pgTable(
+  'activity',
+  {
+    id: bigint({ mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+    outletId: uuid().references(() => outlet.id),
+    at: ts().notNull().defaultNow(),
+    kind: text().notNull(), // offer_started, offer_ended, sold_out, back_in_stock, delivery, delivery_held, price_flag, day_closed
+    title: text().notNull(),
+    message: text().notNull(),
+    data: jsonb(),
+  },
+  (t) => [index().on(t.outletId, t.at), index().on(t.kind)],
+);

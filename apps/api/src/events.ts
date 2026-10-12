@@ -15,7 +15,8 @@ export type LiveEvent =
   | 'availability' // { items: [{ menuItemId, portions, status }] }
   | 'menu' // menu order, prices or offers changed: reload the catalog
   | 'bill' // a bill changed (open bills list)
-  | 'approval'; // approval queue changed
+  | 'approval' // approval queue changed
+  | 'activity'; // a new entry in the activity feed
 
 let io: Server | undefined;
 
