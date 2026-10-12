@@ -1,2 +1,4 @@
 * text=auto eol=lf
 *.png binary
+run.cmd text eol=crlf
+run.ps1 text eol=crlf

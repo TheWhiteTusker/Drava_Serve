@@ -5,11 +5,16 @@ The agreed design is in [docs/FNB-Management-System-Handoff.md](docs/FNB-Managem
 
 ## Run it
 
-Requires Docker Desktop.
+Requires Docker Desktop. On Windows, one command does everything: starts Docker if needed, builds and starts the system, waits until it is ready, opens the apps and prints the sign-ins.
 
-```sh
-docker compose up --build
+```powershell
+.un.ps1            # or double-click run.cmd
+.un.ps1 stop       # stop (data is kept)
+.un.ps1 reset      # wipe all data and start fresh with the sample data
+.un.ps1 logs       # follow the server's messages
 ```
+
+On any system the plain equivalent is `docker compose up --build`.
 
 | App | Address | For |
 | --- | --- | --- |
