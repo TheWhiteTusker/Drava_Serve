@@ -13,6 +13,8 @@ Set-Location $PSScriptRoot
 $base = 'http://localhost:5173'
 
 function Test-Docker {
+  # PowerShell 5.1 turns redirected native stderr into a terminating error under 'Stop'.
+  $ErrorActionPreference = 'Continue'
   docker info *> $null
   return $LASTEXITCODE -eq 0
 }
