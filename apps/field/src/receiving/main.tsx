@@ -3,6 +3,7 @@ import '../lib/field.css';
 import { StrictMode, useCallback, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { istDate } from '@fnb/shared';
+import { shrinkPhoto } from '../lib/image';
 import { createQueue, useWhenSynced } from '../lib/queue';
 import { createSession } from '../lib/session';
 import { ArrowLeft, ArrowRight, Camera, Check, ChevronRight, LogOut, Minus, PackageCheck, RefreshCw, Truck, X } from 'lucide-react';
@@ -65,10 +66,12 @@ function PhotoButton({ deliveryId, lineId, purpose, label = 'Photo' }: { deliver
         capture="environment"
         hidden
         onChange={async (e) => {
-          const file = e.target.files?.[0];
-          if (!file) return;
+          const picked = e.target.files?.[0];
+          if (!picked) return;
+          // Shrunk on the phone first: smaller to keep offline and quicker to send on a weak signal.
+          const { file, filename } = await shrinkPhoto(picked);
           await queue.add({
-            kind: 'upload', path: '/attachments', label: `Photo (${purpose.replace('_', ' ')})`, file, filename: file.name || 'photo.jpg',
+            kind: 'upload', path: '/attachments', label: `Photo (${purpose.replace('_', ' ')})`, file, filename: filename || 'photo.jpg',
             fields: { entity: 'receipt_check', entityId: deliveryId, purpose, ...(lineId ? { lineId } : {}) },
           });
           setCount((c) => c + 1);
