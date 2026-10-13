@@ -1,0 +1,87 @@
+#sidenav {
+  background: var(--brand-surface);
+  border-right: 1px solid var(--brand-border);
+  padding: 1rem 0.75rem 2rem;
+  position: sticky;
+  top: 57px;
+  height: calc(100vh - 57px);
+  overflow-y: auto;
+}
+#sidenav h2 {
+  font: 650 0.7rem var(--brand-font);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--brand-text-muted);
+  margin: 1.1rem 0.75rem 0.35rem;
+}
+#sidenav a {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 42px;
+  padding: 0 0.75rem;
+  border-radius: var(--brand-radius-small);
+  color: var(--brand-text);
+  text-decoration: none;
+  font-weight: 500;
+  position: relative;
+}
+#sidenav a svg {
+  color: var(--brand-text-muted);
+}
+#sidenav a:hover {
+  background: var(--brand-surface-2);
+}
+#sidenav a.active {
+  background: var(--brand-accent-soft);
+  color: var(--brand-text);
+  font-weight: 650;
+}
+#sidenav a.active svg {
+  color: var(--brand-accent-strong);
+}
+#sidenav a.active::before {
+  content: '';
+  position: absolute;
+  left: -0.75rem;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--brand-accent);
+}
+.content {
+  padding: 2rem 2.25rem 4rem;
+  min-width: 0;
+  max-width: 1440px;
+}
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+  .menu-toggle {
+    display: inline-flex;
+  }
+  .topbar .customer,
+  .search-trigger span,
+  .search-trigger kbd {
+    display: none;
+  }
+  .search-trigger {
+    min-width: 0;
+  }
+  #sidenav {
+    display: none;
+    position: fixed;
+    inset: 57px auto 0 0;
+    width: 280px;
+    z-index: 15;
+    box-shadow: var(--brand-shadow-lg);
+  }
+  #sidenav.open {
+    display: block;
+  }
+  .content {
+    padding: 1.25rem 1rem 3rem;
+  }
+}

@@ -1,0 +1,160 @@
+/* ---------- Dashboard ---------- */
+.filters {
+  padding: 0.85rem 1rem;
+}
+.filters .row > input,
+.filters .row > select {
+  flex: 0 1 auto;
+  width: auto;
+}
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.tile {
+  background: var(--brand-surface);
+  border: 1px solid var(--brand-border);
+  border-radius: var(--brand-radius);
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  box-shadow: var(--brand-shadow);
+}
+.tile .tile-label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--brand-text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.tile .tile-label svg {
+  color: var(--brand-accent-strong);
+  width: 16px;
+  height: 16px;
+}
+.tile strong {
+  font: 650 1.6rem/1.2 var(--brand-font);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.blocks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 1.25rem;
+}
+.block {
+  margin: 0;
+  min-width: 0;
+}
+.block h2 {
+  margin-bottom: 0.9rem;
+}
+.block.wide {
+  grid-column: 1 / -1;
+}
+.table-wrap.scroll {
+  max-height: 360px;
+  overflow-y: auto;
+}
+.barlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.barlist li {
+  display: grid;
+  grid-template-columns: minmax(8rem, 1.2fr) 2fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.3rem 0;
+}
+.barlist-track {
+  height: 10px;
+  border-left: 1px solid var(--chart-axis);
+}
+.barlist-bar {
+  display: block;
+  height: 100%;
+  background: var(--chart-series);
+  border-radius: 0 4px 4px 0;
+}
+.barlist-value {
+  font-variant-numeric: tabular-nums;
+  color: var(--brand-text-muted);
+  white-space: nowrap;
+}
+.chart {
+  position: relative;
+}
+.chart-tip {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 6px));
+  background: var(--brand-primary);
+  color: var(--brand-primary-contrast);
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--brand-radius-small);
+  font-size: 0.84rem;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 3;
+  box-shadow: var(--brand-shadow-lg);
+}
+.columns {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 190px;
+  border-bottom: 1px solid var(--chart-axis);
+  padding-top: 1.25rem;
+}
+.col {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  position: relative;
+}
+.col-bar {
+  width: min(70%, 28px);
+  background: var(--chart-series);
+  border-radius: 4px 4px 0 0;
+}
+.col-hour {
+  position: absolute;
+  bottom: -1.3rem;
+  font-size: 0.75rem;
+  color: var(--brand-text-muted);
+}
+.col-label {
+  font-size: 0.75rem;
+  color: var(--brand-text-muted);
+}
+.axis-note {
+  margin: 1.5rem 0 0;
+  font-size: 0.8rem;
+}
+.heat {
+  display: grid;
+  gap: 2px;
+  clear: both;
+}
+.heat-cell {
+  height: 26px;
+  border-radius: 4px;
+}
+.heat-hour,
+.heat-day {
+  font-size: 0.75rem;
+  color: var(--brand-text-muted);
+  text-align: center;
+}
+.heat-day {
+  text-align: left;
+  align-self: center;
+}

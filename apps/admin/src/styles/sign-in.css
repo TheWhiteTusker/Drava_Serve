@@ -1,0 +1,100 @@
+/* ---------- Sign in ---------- */
+.login {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+}
+.login-brand {
+  background:
+    radial-gradient(900px 500px at 15% 10%, rgb(211 173 98 / 0.22), transparent 60%),
+    linear-gradient(160deg, #2b241d, #15120e);
+  color: #f3ebde;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2rem;
+}
+.login-brand img {
+  height: 34px;
+  width: auto;
+  align-self: flex-start;
+}
+.login-brand h1 {
+  font-size: clamp(2rem, 3.4vw, 3rem);
+  max-width: 14ch;
+  color: #f3ebde;
+}
+.login-brand p {
+  color: #cdbfa8;
+  max-width: 38ch;
+  font-size: 1.05rem;
+}
+.login-brand ul {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
+  display: grid;
+  gap: 0.6rem;
+  color: #e7dccb;
+}
+.login-brand li {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+.login-brand li svg {
+  color: #d3ad62;
+}
+.login-form {
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+.login-form form {
+  width: min(400px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.login-form h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.25rem;
+}
+@media (max-width: 860px) {
+  .login {
+    grid-template-columns: 1fr;
+  }
+  .login-brand {
+    padding: 2rem 1.5rem;
+  }
+  .login-brand ul {
+    display: none;
+  }
+}
+
+/* ---------- PIN switch ---------- */
+.people {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.6rem;
+}
+.people button {
+  white-space: normal;
+  min-height: 64px;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.pinpad .keys {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+.pin-dots {
+  display: block;
+  font-size: 1.9rem;
+  letter-spacing: 0.45em;
+  text-align: center;
+  min-height: 2.6rem;
+  color: var(--brand-accent-strong);
+}
