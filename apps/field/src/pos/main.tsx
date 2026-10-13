@@ -8,7 +8,7 @@ import { billTotals, dec, istDate, type BillTotals } from '@fnb/shared';
 import { createQueue } from '../lib/queue';
 import { createSession, deviceId, type Session } from '../lib/session';
 import {
-  Banknote, CalendarCheck, ClipboardCheck, CreditCard, Keyboard, MoreHorizontal, PauseCircle, Plus, Printer, ReceiptText, Send, Share2,
+  Banknote, BellRing, CalendarCheck, ClipboardCheck, CreditCard, Keyboard, MoreHorizontal, PauseCircle, Plus, Printer, ReceiptText, Send, Share2,
   ShoppingBag, Smartphone, Split, Wallet,
 } from 'lucide-react';
 import { DietMark, initials, Login, OfflineBar, registerWorker, rupee, rupeeShort, toast, Toasts } from '../lib/ui';
@@ -57,6 +57,13 @@ interface Line {
   taxClassId?: string;
   status?: string;
   activeDiscountId?: string | null;
+}
+interface GuestOrder {
+  id: string;
+  tableId: string;
+  table: string;
+  createdAt: string;
+  lines: { menuItemId: string; qty: number }[];
 }
 interface LocalBill {
   clientId: string;
@@ -329,7 +336,8 @@ function Till({ outletId }: { outletId: string }) {
   const [dept, setDept] = useState<'food' | 'beverage'>('food');
   const [group, setGroup] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [dialog, setDialog] = useState<null | 'new' | 'open' | 'pay' | 'receipt' | 'more' | 'pin' | 'close' | 'approvals' | 'help'>(null);
+  const [dialog, setDialog] = useState<null | 'new' | 'open' | 'pay' | 'receipt' | 'more' | 'pin' | 'close' | 'approvals' | 'help' | 'guest'>(null);
+  const [guest, setGuest] = useState<GuestOrder[]>([]);
   const searchRef = useRef<HTMLInputElement>(null);
   const bill = bills.find((b) => b.clientId === current) ?? null;
 
@@ -376,11 +384,30 @@ function Till({ outletId }: { outletId: string }) {
       /* offline */
     }
   }, [outletId, saveBills]);
+  // One bill from a live event. A bill with changes still waiting on this device keeps its own copy.
+  const mergeServerBill = useCallback(
+    (srv: any) =>
+      saveBills((all) => {
+        const b = all.find((x) => x.clientId === srv.clientId);
+        if (b) return b.unsent ? all : all.map((x) => (x === b ? { ...x, ...fromServer(srv), cart: x.cart } : x));
+        return srv.status === 'open' ? [...all, { ...fromServer(srv), cart: [] }] : all;
+      }),
+    [saveBills],
+  );
+  const loadGuestOrders = useCallback(
+    () =>
+      session
+        .api<GuestOrder[]>(`/pos/guest-orders?outletId=${outletId}`)
+        .then(setGuest)
+        .catch(() => {}),
+    [outletId],
+  );
   useEffect(() => {
     loadCatalog();
     loadServerBills();
+    loadGuestOrders();
     const timer = setInterval(loadCatalog, 120_000);
-    const sock = io({ path: '/api/socket', auth: { token: s.token }, transports: ['websocket', 'polling'] });
+    const sock = io({ path: '/api/socket', auth: { token: s.token }, transports: ['websocket'] });
     sock.on('availability', (d: { items: { menuItemId: string; portions: number | null; status: MenuItem['status'] }[] }) =>
       setCat((c) => {
         if (!c) return c;
@@ -390,12 +417,24 @@ function Till({ outletId }: { outletId: string }) {
       }),
     );
     sock.on('menu', loadCatalog);
-    sock.on('bill', loadServerBills);
+    // Events carry the bill or the guest's order itself, so no counter has to ask the server.
+    sock.on('bill', (d: { bill?: any }) => (d.bill ? mergeServerBill(d.bill) : loadServerBills()));
+    sock.on('guestOrder', (d: { order?: GuestOrder; id?: string }) => {
+      if (d.order) {
+        setGuest((list) => (list.some((g) => g.id === d.order!.id) ? list : [...list, d.order!]));
+        toast(`New order from table ${d.order.table}`);
+      } else setGuest((list) => list.filter((g) => g.id !== d.id));
+    });
+    // Anything missed while the connection was down.
+    sock.io.on('reconnect', () => {
+      loadServerBills();
+      loadGuestOrders();
+    });
     return () => {
       clearInterval(timer);
       sock.close();
     };
-  }, [s.token, outletId, loadCatalog, loadServerBills]);
+  }, [s.token, outletId, loadCatalog, loadServerBills, mergeServerBill, loadGuestOrders]);
 
   // Once everything saved on the device has reached the server, nothing is unsent any more.
   useEffect(() => {
@@ -496,6 +535,30 @@ function Till({ outletId }: { outletId: string }) {
     setDialog('receipt');
   }
 
+  // A guest's order joins the table's running bill, or opens one the server numbers. Online only:
+  // the server prices it and checks stock under a lock, as for any order.
+  async function acceptGuest(g: GuestOrder) {
+    const open = openBills.find((b) => b.tableId === g.tableId);
+    try {
+      const srv = await session.api(`/pos/guest-orders/${g.id}/accept`, { body: { bill: { clientId: open?.clientId ?? crypto.randomUUID(), number: open?.number ?? null } } });
+      saveBills((all) => (all.some((b) => b.clientId === srv.clientId) ? all.map((b) => (b.clientId === srv.clientId ? { ...b, ...fromServer(srv), cart: b.cart } : b)) : [...all, { ...fromServer(srv), cart: [] }]));
+      setGuest((list) => list.filter((x) => x.id !== g.id));
+      toast(`Table ${g.table}: added to the bill`);
+    } catch (e: any) {
+      flash(e.message);
+      if (e.status === 409 && !e.data?.soldOut) setGuest((list) => list.filter((x) => x.id !== g.id)); // decided at another counter
+    }
+  }
+
+  async function rejectGuest(g: GuestOrder, reason: string) {
+    try {
+      await session.api(`/pos/guest-orders/${g.id}/reject`, { body: { reason } });
+    } catch (e) {
+      flash((e as Error).message);
+    }
+    setGuest((list) => list.filter((x) => x.id !== g.id));
+  }
+
   async function request(kind: 'cancel' | 'discount' | 'void', extra: Record<string, string>) {
     if (!bill?.id) {
       flash('This bill has not reached the server yet. Try again when online.');
@@ -550,6 +613,11 @@ function Till({ outletId }: { outletId: string }) {
           </span>
         )}
         <span className="spacer" />
+        {guest.length > 0 && (
+          <button className="gold" onClick={() => setDialog('guest')}>
+            <BellRing className="icon" aria-hidden /> Table orders <span className="count">{guest.length}</span>
+          </button>
+        )}
         <button className="secondary" onClick={() => setDialog('open')}>
           <ReceiptText className="icon" aria-hidden /> Open bills <span className="count">{openBills.length}</span>
         </button>
@@ -810,6 +878,7 @@ function Till({ outletId }: { outletId: string }) {
         </Dialog>
       )}
       {dialog === 'more' && bill && <MoreDialog bill={bill} onRequest={request} onClose={() => setDialog(null)} />}
+      {dialog === 'guest' && <GuestOrders orders={guest} cat={cat} online={q.online} onAccept={acceptGuest} onReject={rejectGuest} onClose={() => setDialog(null)} />}
       {dialog === 'pin' && <PinSwitch outletId={outletId} onClose={() => setDialog(null)} />}
       {dialog === 'close' && <DayClose outletId={outletId} onClose={() => setDialog(null)} />}
       {dialog === 'approvals' && <Approvals outletId={outletId} onClose={() => (setDialog(null), loadServerBills())} />}
@@ -1029,6 +1098,69 @@ function DayClose({ outletId, onClose }: { outletId: string; onClose: () => void
         </div>
       )}
       {error && <p className="note danger">{error}</p>}
+    </Dialog>
+  );
+}
+
+// Orders guests sent from the QR code at their table. Nothing is on a bill until accepted here.
+function GuestOrders(props: {
+  orders: GuestOrder[];
+  cat: Catalog;
+  online: boolean;
+  onAccept: (g: GuestOrder) => Promise<void>;
+  onReject: (g: GuestOrder, reason: string) => Promise<void>;
+  onClose: () => void;
+}) {
+  const [reasons, setReasons] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState<string | null>(null);
+  const run = async (id: string, fn: () => Promise<void>) => {
+    setBusy(id);
+    await fn();
+    setBusy(null);
+  };
+  return (
+    <Dialog title="Orders from tables" onClose={props.onClose} wide>
+      {props.orders.length === 0 && <p className="muted">Nothing waiting.</p>}
+      {!props.online && <p className="note danger">Offline: table orders can be accepted once the connection is back.</p>}
+      {props.orders.map((g) => {
+        const lines = g.lines.map((l) => ({ ...l, item: props.cat.menu.find((m) => m.id === l.menuItemId) }));
+        const sum = lines.reduce((a, l) => a.plus(dec(l.item?.price ?? 0).times(l.qty)), dec(0));
+        return (
+          <div key={g.id} className="card">
+            <div className="row">
+              <strong style={{ flex: 3 }}>Table {g.table}</strong>
+              <span className="muted">{since(g.createdAt)} ago</span>
+            </div>
+            <ul className="lines">
+              {lines.map((l) => (
+                <li key={l.menuItemId} className={l.item?.status === 'out' ? 'voided' : ''}>
+                  <span>
+                    <DietMark diet={l.item?.dietType ?? null} size={12} /> {l.item?.name ?? 'Item no longer on the menu'}
+                    {l.item?.status === 'out' && <span className="badge danger"> Sold out</span>}
+                  </span>
+                  <span>× {l.qty}</span>
+                  <span>{l.item ? rupee(dec(l.item.price).times(l.qty).toString()) : ''}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="muted">{rupee(sum.toString())} before tax</p>
+            <input
+              aria-label="Reason for the guest"
+              placeholder="Reason, if turning it down (the guest sees this)"
+              value={reasons[g.id] ?? ''}
+              onChange={(e) => setReasons({ ...reasons, [g.id]: e.target.value })}
+            />
+            <div className="row" style={{ marginTop: '0.5rem' }}>
+              <button className="secondary" disabled={busy === g.id} onClick={() => run(g.id, () => props.onReject(g, reasons[g.id] ?? ''))}>
+                Turn down
+              </button>
+              <button className="gold" disabled={busy === g.id || !props.online} onClick={() => run(g.id, () => props.onAccept(g))}>
+                Accept onto the bill
+              </button>
+            </div>
+          </div>
+        );
+      })}
     </Dialog>
   );
 }

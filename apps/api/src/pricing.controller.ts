@@ -1,11 +1,15 @@
-import { BadRequestException, Body, ConflictException, Controller, Get, NotFoundException, Param, Post, Put, Query } from '@nestjs/common';
+import {
+  BadRequestException, Body, ConflictException, Controller, ForbiddenException, Get, HttpException, HttpStatus, NotFoundException, Param, Post, Put, Query,
+} from '@nestjs/common';
 import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { dec, margin, portionCost, suggestedPrice, zPct, zQty } from '@fnb/shared';
 import { z } from 'zod';
 import { alias } from 'drizzle-orm/pg-core';
+import { getSettings } from './access.controller.js';
 import { proposeOrApply, registerApproval } from './approvals.js';
 import { C, Ctx, findOr404, parse, Permit, Public } from './common.js';
 import { controlDb, controlSchema, tenantDb, tenantSchema as t, type Tx } from './db/index.js';
+import { publish } from './events.js';
 import { costOf, menuForSale, recost, rerankOutlet, runOffers, targetsFor } from './pricing.js';
 
 // After a price or recipe changes: new cost row now; order and offers once committed.
@@ -268,28 +272,106 @@ export class PricingController {
 
 // ---------- Guest QR menu (no sign-in, collects nothing about guests) ----------
 
-const publicCache = new Map<string, { at: number; body: unknown }>();
+type PublicMenu = Awaited<ReturnType<typeof publicMenu>>;
+export const publicCache = new Map<string, { at: number; menu: Promise<PublicMenu> }>();
+
+async function publicMenu(customerCode: string, outletCode: string) {
+  const [c] = await controlDb().select().from(controlSchema.customer).where(eq(controlSchema.customer.code, customerCode));
+  if (!c || c.status !== 'active') throw new NotFoundException('Menu not found');
+  const db = tenantDb(c.dbName);
+  const [outlet] = await db.select().from(t.outlet).where(and(eq(t.outlet.code, outletCode.toUpperCase()), eq(t.outlet.active, true)));
+  if (!outlet) throw new NotFoundException('Menu not found');
+  const [items, settings, tables] = await Promise.all([
+    menuForSale(db, outlet.id),
+    getSettings(db, outlet.id),
+    db
+      .select({ id: t.diningTable.id, name: t.diningTable.name })
+      .from(t.diningTable)
+      .where(and(eq(t.diningTable.outletId, outlet.id), eq(t.diningTable.active, true)))
+      .orderBy(t.diningTable.sortOrder, t.diningTable.name),
+  ]);
+  return {
+    customerId: c.id, db, outletId: outlet.id,
+    ordering: settings.effective['guest.ordering'] as boolean,
+    pickTable: settings.effective['guest.pickTable'] as boolean, // demo switch: list the tables to pick from
+    tables: new Map(tables.map((x) => [x.id, x])), // looked up per phone without touching the database
+    body: {
+      outlet: { name: outlet.name, address: outlet.address, fssaiNumber: outlet.fssaiNumber },
+      items: items.map(({ taxClassId: _t, activeDiscountId: _d, portions, ...i }) => ({ ...i, fewLeft: i.status === 'low' ? portions : null })),
+    },
+  };
+}
+
+// One build per outlet every 15 s, shared by every phone. The promise is cached, so a full
+// restaurant scanning at the moment it expires waits on a single rebuild instead of starting one each.
+function cachedMenu(customerCode: string, outletCode: string) {
+  const key = `${customerCode}/${outletCode.toUpperCase()}`;
+  const hit = publicCache.get(key);
+  if (hit && Date.now() - hit.at < 15_000) return hit.menu;
+  const menu = publicMenu(customerCode, outletCode);
+  publicCache.set(key, { at: Date.now(), menu });
+  menu.catch(() => publicCache.delete(key)); // unknown codes are not remembered
+  return menu;
+}
+
+// The table a QR code was printed for. Its id is random, so it cannot be guessed from outside.
+const publicTable = (m: PublicMenu, tableId: string | undefined) => (tableId && m.tables.get(tableId)) || null;
+
+const zGuestOrder = z.object({
+  clientId: z.uuid(),
+  tableId: z.uuid(),
+  lines: z.array(z.object({ menuItemId: z.uuid(), qty: z.number().int().min(1).max(20) })).min(1, 'Add something first').max(30),
+});
+const MAX_WAITING = 3; // per table: stops a stray phone flooding the counter
 
 @Controller('public')
 export class PublicMenuController {
   @Public()
   @Get('menu/:customer/:outlet')
-  async menu(@Param('customer') customerCode: string, @Param('outlet') outletCode: string) {
-    const key = `${customerCode}/${outletCode}`;
-    const hit = publicCache.get(key);
-    if (hit && Date.now() - hit.at < 15_000) return hit.body;
-    const [c] = await controlDb().select().from(controlSchema.customer).where(eq(controlSchema.customer.code, customerCode));
-    if (!c || c.status !== 'active') throw new NotFoundException('Menu not found');
-    const db = tenantDb(c.dbName);
-    const [outlet] = await db.select().from(t.outlet).where(and(eq(t.outlet.code, outletCode.toUpperCase()), eq(t.outlet.active, true)));
-    if (!outlet) throw new NotFoundException('Menu not found');
-    const items = await menuForSale(db, outlet.id);
-    const body = {
-      outlet: { name: outlet.name, address: outlet.address, fssaiNumber: outlet.fssaiNumber },
-      items: items.map(({ taxClassId: _t, activeDiscountId: _d, portions, ...i }) => ({ ...i, fewLeft: i.status === 'low' ? portions : null })),
-    };
-    publicCache.set(key, { at: Date.now(), body });
-    return body;
+  async menu(@Param('customer') customerCode: string, @Param('outlet') outletCode: string, @Query('table') tableId?: string) {
+    const m = await cachedMenu(customerCode, outletCode);
+    const table = publicTable(m, tableId);
+    const pick = m.ordering && m.pickTable;
+    return { ...m.body, table, ordering: m.ordering && !!table, pickTable: pick, tables: pick && !table ? [...m.tables.values()] : undefined };
+  }
+
+  // A guest's order waits for a cashier; it is not a bill, holds no stock and costs nothing yet.
+  @Public()
+  @Post('orders/:customer/:outlet')
+  async order(@Param('customer') customerCode: string, @Param('outlet') outletCode: string, @Body() body: unknown) {
+    const o = parse(zGuestOrder, body);
+    const m = await cachedMenu(customerCode, outletCode);
+    if (!m.ordering) throw new ForbiddenException('Ordering from the table is switched off here. Please ask your server.');
+    const table = publicTable(m, o.tableId);
+    if (!table) throw new NotFoundException('This table is not taking orders. Please ask your server.');
+    const [seen] = await m.db.select().from(t.guestOrder).where(eq(t.guestOrder.clientId, o.clientId));
+    if (seen) return { id: seen.id, status: seen.status };
+    const lines = [...new Map(o.lines.map((l) => [l.menuItemId, l])).values()];
+    const item = (id: string) => m.body.items.find((i) => i.id === id);
+    const out = lines.filter((l) => (item(l.menuItemId)?.status ?? 'out') === 'out');
+    if (out.length) {
+      const names = out.map((l) => item(l.menuItemId)?.name).filter(Boolean);
+      throw new ConflictException({ statusCode: 409, message: names.length ? `Sold out: ${names.join(', ')}` : 'An item is no longer on the menu', soldOut: out.map((l) => l.menuItemId) });
+    }
+    // ponytail: count-then-insert without a lock; two phones racing can leave MAX_WAITING + 1 waiting.
+    const [{ waiting }] = (await m.db.execute(sql`select count(*)::int as waiting from guest_order where table_id = ${table.id} and status = 'pending'`)).rows as any[];
+    if (waiting >= MAX_WAITING) throw new HttpException('Your earlier orders are still waiting for staff. Please give them a moment.', HttpStatus.TOO_MANY_REQUESTS);
+    const [row] = await m.db.insert(t.guestOrder).values({ outletId: m.outletId, tableId: table.id, clientId: o.clientId, lines }).returning();
+    publish(m.customerId, m.outletId, 'guestOrder', { order: { ...row, table: table.name } }); // counters add it without asking
+    return { id: row.id, status: row.status };
+  }
+
+  // The guest's phone asks how its order is doing. Only the order's own random id finds it.
+  @Public()
+  @Get('orders/:customer/:outlet/:id')
+  async orderStatus(@Param('customer') customerCode: string, @Param('outlet') outletCode: string, @Param('id') id: string) {
+    if (!z.uuid().safeParse(id).success) throw new NotFoundException('Order not found');
+    const m = await cachedMenu(customerCode, outletCode); // cached: this is a single primary-key read
+    const [g] = await m.db
+      .select({ id: t.guestOrder.id, status: t.guestOrder.status, reason: t.guestOrder.reason })
+      .from(t.guestOrder)
+      .where(and(eq(t.guestOrder.id, id), eq(t.guestOrder.outletId, m.outletId)));
+    if (!g) throw new NotFoundException('Order not found');
+    return g;
   }
 }
-

@@ -16,6 +16,7 @@ export type LiveEvent =
   | 'menu' // menu order, prices or offers changed: reload the catalog
   | 'bill' // a bill changed (open bills list)
   | 'approval' // approval queue changed
+  | 'guestOrder' // a guest sent an order from the table QR menu, or one was decided
   | 'activity'; // a new entry in the activity feed
 
 let io: Server | undefined;
@@ -23,6 +24,14 @@ let io: Server | undefined;
 export function publish(customerId: string, outletId: string, event: LiveEvent, data: unknown) {
   io?.to(`${customerId}:${outletId}`).emit(event, data);
 }
+
+// A guest's phone waiting on its order listens in a room named after the order's random id,
+// so the decision reaches it at once without the phone asking again and again.
+export function publishGuest(guestOrderId: string, data: { status: string; reason: string | null }) {
+  io?.to(`guest:${guestOrderId}`).emit('guestOrder', data);
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 @WebSocketGateway({ path: '/api/socket', cors: { origin: true } })
 export class LiveGateway implements OnGatewayInit, OnGatewayConnection {
@@ -35,6 +44,11 @@ export class LiveGateway implements OnGatewayInit, OnGatewayConnection {
   constructor(private jwt: JwtService) {}
 
   async handleConnection(socket: Socket) {
+    const guestOrder = socket.handshake.auth?.guestOrder;
+    if (typeof guestOrder === 'string' && UUID.test(guestOrder)) {
+      await socket.join(`guest:${guestOrder}`); // hears about that one order and nothing else
+      return;
+    }
     try {
       const claims = await this.jwt.verifyAsync<TokenClaims>(socket.handshake.auth?.token);
       const tenant = await resolveCustomer(claims.cid);

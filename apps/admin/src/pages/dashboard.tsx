@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { ActivityCard } from './activity';
 import { businessDate, istDate } from '@fnb/shared';
 import { apiBlob, can, saveBlob, useApi, useCurrentOutlet, useSession } from '../api';
-import { useLive } from '../live';
+import { useLiveReload } from '../live';
 import { Badge, ErrorNote, Page, rupee } from '../ui';
 
 // Dashboard (handoff 6.11). Every block reads the hourly and daily summary tables and follows
@@ -276,7 +276,7 @@ export function DashboardPage() {
   const query = `from=${range[0]}&to=${range[1]}&department=${dept}${outlet ? `&outletId=${outlet}` : ''}`;
   const demandQ = demandFor.startsWith('i:') ? `&itemId=${demandFor.slice(2)}` : demandFor.startsWith('c:') ? `&categoryId=${demandFor.slice(2)}` : '';
   const d = useApi<any>(`/reports/dashboard?${query}${demandQ}`);
-  useLive(['bill', 'stock', 'menu'], () => d.reload());
+  useLiveReload(['bill', 'stock', 'menu'], d.reload);
   const x = d.data;
   const value = (r: any) => (topBy === 'units' ? r.units : Number(r.revenue));
   const shown = (r: any) => (topBy === 'units' ? num(r.units) : rupee(r.revenue));

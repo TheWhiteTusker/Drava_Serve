@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { businessDate, istDate } from '@fnb/shared';
 import { api, apiBlob, can, saveBlob, useApi, useCurrentOutlet, useSession } from '../api';
-import { useLive } from '../live';
+import { useLiveReload } from '../live';
 import { Badge, CrudPage, ErrorNote, Modal, Page, rupee, toast, yesNo } from '../ui';
 import { fmtQty } from './inventory';
 
@@ -408,7 +408,7 @@ export function DeliveriesPage() {
   const [date, setDate] = useState(businessDate(new Date()));
   const list = useApi<any[]>(outletId ? `/deliveries?outletId=${outletId}&date=${date}` : null);
   const [grn, setGrn] = useState<string | null>(null);
-  useLive(['stock'], () => list.reload());
+  useLiveReload(['stock'], list.reload);
   return (
     <Page
       title="Deliveries"

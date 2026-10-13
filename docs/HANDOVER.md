@@ -9,7 +9,7 @@ Browser apps (one nginx container, apps/admin/Dockerfile)
   /            admin + dashboard (apps/admin)
   /pos/        billing POS, installable, offline queue (apps/field/pos)
   /receiving/  receiving app, installable, offline queue (apps/field/receiving)
-  /m/<c>/<o>   guest QR menu, no sign-in (apps/field/menu)
+  /m/<c>/<o>[/<table>]   guest QR menu, no sign-in (apps/field/menu); a table's code also takes orders
         │  REST /api/*      WebSocket /api/socket (socket.io)
         ▼
 API (NestJS, apps/api)  ── Redis: socket.io adapter + BullMQ jobs

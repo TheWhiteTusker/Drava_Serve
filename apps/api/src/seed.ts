@@ -261,6 +261,7 @@ export async function seedDemo(opts: { reset?: boolean; log?: (s: string) => voi
     }
     // Liquor offers switched on at the first sample outlet only, to show both states.
     await tx.insert(t.setting).values({ outletId: outlets[0].id, key: 'offers.liquorEnabled', value: true });
+    await tx.insert(t.setting).values({ outletId: outlets[0].id, key: 'guest.pickTable', value: true }); // demo: pick a table on the guest menu
 
     // A week of sample bills, then opening stock a week earlier sized so that what is left today
     // ranges from about 10% to 130% of par: some items healthy, some to reorder, a few low.

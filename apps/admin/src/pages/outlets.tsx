@@ -49,8 +49,86 @@ export function OutletsPage() {
   );
 }
 
+// Tables at the current outlet. Each table's QR code opens the menu for that table, where
+// guests can send an order; staff accept or turn it down on the POS.
+export function TablesPage() {
+  const s = useSession();
+  const outletId = useCurrentOutlet();
+  const outlet = s?.outlets.find((o) => o.id === outletId);
+  const tables = useApi<any[]>(outletId ? `/tables?outletId=${outletId}` : null);
+  const [qr, setQr] = useState<any | null>(null);
+  const [sheet, setSheet] = useState(false);
+  if (!outletId || !outlet) return <p className="muted">You are not assigned to an outlet yet.</p>;
+  const url = (tb: any) => `${location.origin}/m/${s?.customer.code}/${outlet.code}/${tb.id}`;
+  return (
+    <>
+      <CrudPage
+        key={outletId}
+        singular="table"
+        title={`Tables at ${outlet.name}`}
+        intro="Print each table's QR code and place it on that table. Guests who scan it can send an order; it waits on the POS until staff accept it. Ordering can be switched off in Settings."
+        path="/tables"
+        query={`?outletId=${outletId}`}
+        canManage={can(s, 'outlets.manage', outletId)}
+        before={
+          <button className="ghost" onClick={() => setSheet(true)}>
+            Print all QR codes
+          </button>
+        }
+        columns={[
+          { label: 'Table', render: (r: any) => r.name },
+          { label: 'Order on POS', render: (r: any) => r.sortOrder },
+          {
+            label: 'QR code',
+            render: (r: any) => (
+              <button className="ghost" onClick={() => setQr(r)}>
+                QR code
+              </button>
+            ),
+          },
+          { label: 'In use', render: (r: any) => yesNo(r.active) },
+        ]}
+        defaults={{ outletId, sortOrder: (tables.data?.length ?? 0) + 1, active: true }}
+        fields={[
+          { name: 'name', label: 'Name', required: true, help: 'As staff call it, e.g. T4 or Patio 2' },
+          { name: 'sortOrder', label: 'Position on the POS table picker', type: 'number' },
+          { name: 'active', label: 'In use', type: 'checkbox', help: 'A table not in use takes no orders from its QR code' },
+        ]}
+      />
+      <Modal open={!!qr} title={`Table ${qr?.name ?? ''}`} onClose={() => setQr(null)}>
+        {qr && <MenuQr url={url(qr)} label={`Table ${qr.name}`} />}
+      </Modal>
+      <Modal open={sheet} title={`QR codes for ${outlet.name}`} onClose={() => setSheet(false)} wide>
+        <div className="qr-sheet">
+          {(tables.data ?? [])
+            .filter((tb) => tb.active)
+            .map((tb) => (
+              <QrImage key={tb.id} url={url(tb)} label={`Table ${tb.name}`} size={180} />
+            ))}
+        </div>
+        <button onClick={() => window.print()}>Print</button>
+      </Modal>
+    </>
+  );
+}
+
+function QrImage({ url, label, size }: { url: string; label: string; size: number }) {
+  const [src, setSrc] = useState<string | null>(null);
+  useEffect(() => {
+    QRCode.toDataURL(url, { width: size, margin: 2 }).then(setSrc);
+  }, [url, size]);
+  return (
+    <figure style={{ margin: 0, textAlign: 'center' }}>
+      {src && <img src={src} alt={`QR code for ${label}`} width={size} height={size} />}
+      <figcaption>
+        <strong>{label}</strong>
+      </figcaption>
+    </figure>
+  );
+}
+
 // Guests scan this at the table; the menu needs no sign-in and collects nothing about them.
-function MenuQr({ url }: { url: string }) {
+function MenuQr({ url, label }: { url: string; label?: string }) {
   const [src, setSrc] = useState<string | null>(null);
   useEffect(() => {
     QRCode.toDataURL(url, { width: 320, margin: 2 }).then(setSrc);
@@ -58,6 +136,11 @@ function MenuQr({ url }: { url: string }) {
   return (
     <div style={{ textAlign: 'center' }}>
       {src && <img src={src} alt={`QR code for ${url}`} width={320} height={320} />}
+      {label && (
+        <p>
+          <strong>{label}</strong>
+        </p>
+      )}
       <p>
         <a href={url} target="_blank" rel="noreferrer">
           {url}
@@ -122,6 +205,19 @@ export function SettingsPage() {
           <NumberSetting label="Price changes above this % need approval" k="approvals.priceChangeLimitPct" value={b['approvals.priceChangeLimitPct']} onSave={(v) => put('approvals.priceChangeLimitPct', v, false)} />
           <NumberSetting label='"Few left" when portions are at or below' k="menu.lowThresholdServes" value={b['menu.lowThresholdServes']} onSave={(v) => put('menu.lowThresholdServes', v, false)} />
         </div>
+      </section>
+      <section className="card">
+        <h2>Ordering from the table at {outletName}</h2>
+        <label className="check">
+          <input type="checkbox" checked={!!o?.effective['guest.ordering']} onChange={(e) => put('guest.ordering', e.target.checked, true)} />
+          Guests can send orders from their table's QR code
+        </label>
+        <p className="muted">Every order waits on the POS until staff accept it. The outlet's own QR code shows the menu only, unless the demo switch below is on.</p>
+        <label className="check">
+          <input type="checkbox" checked={!!o?.effective['guest.pickTable']} disabled={!o?.effective['guest.ordering']} onChange={(e) => put('guest.pickTable', e.target.checked, true)} />
+          Demo: let guests pick their table on the outlet's QR menu
+        </label>
+        <p className="muted">For showing how ordering works. Switch it off for real service: with it on, anyone with the outlet's menu link can send an order for any table.</p>
       </section>
       <section className="card">
         <h2>Beverage offers at {outletName}</h2>

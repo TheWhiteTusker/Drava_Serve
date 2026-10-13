@@ -57,6 +57,13 @@
       "when": 1791787162105,
       "tag": "0007_activity_log",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791893809880,
+      "tag": "0008_guest_orders",
+      "breakpoints": true
     }
   ]
 }

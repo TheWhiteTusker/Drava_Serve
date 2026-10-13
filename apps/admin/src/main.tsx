@@ -3,7 +3,7 @@ import './app.css';
 import logoDark from '@fnb/theme/logo-dark.svg';
 import {
   Activity as ActivityIcon, Beer, BookOpen, Boxes, ChartColumn, ChefHat, ClipboardCheck, ClipboardList, FileBarChart, Gauge, History, Laptop, LayoutGrid,
-  LogOut, Menu, Moon, Percent, Receipt, Scale, Search, Settings, ShieldCheck, ShoppingBasket, Sparkles, Store, Sun, Tag, Tags,
+  LogOut, Menu, Moon, Percent, QrCode, Receipt, Scale, Search, Settings, ShieldCheck, ShoppingBasket, Sparkles, Store, Sun, Tag, Tags,
   Truck, UserCog, Users, Wallet, Wine,
   type LucideIcon,
 } from 'lucide-react';
@@ -21,7 +21,7 @@ import { BrandsPage, CategoriesPage, LiquorTreePage, TaxClassesPage } from './pa
 import { MenuItemsPage } from './pages/menu-items';
 import { CostingPage, MarginTargetsPage, OffersPage } from './pages/pricing';
 import { DeliveriesPage, GrnsPage, IndentsPage, VendorsPage } from './pages/purchasing';
-import { OutletsPage, SettingsPage } from './pages/outlets';
+import { OutletsPage, SettingsPage, TablesPage } from './pages/outlets';
 import { StockItemsPage } from './pages/stock-items';
 import { RolesPage, UsersPage } from './pages/users';
 
@@ -226,6 +226,7 @@ const NAV: NavItem[] = [
   { to: '/brands', label: 'Brands', icon: Tag, group: 'Catalog', perm: 'catalog.view', page: BrandsPage },
   { to: '/tax-classes', label: 'Tax classes', icon: Receipt, group: 'Catalog', perm: 'catalog.view', page: TaxClassesPage, keywords: 'gst vat' },
   { to: '/outlets', label: 'Outlets', icon: Store, group: 'Business', page: OutletsPage, keywords: 'qr code fssai' },
+  { to: '/tables', label: 'Tables', icon: QrCode, group: 'Business', perm: 'pos.bill', page: TablesPage, keywords: 'qr code table ordering guest' },
   { to: '/users', label: 'Users', icon: Users, group: 'Business', perm: 'users.manage', page: UsersPage, keywords: 'staff pin password' },
   { to: '/roles', label: 'Roles', icon: UserCog, group: 'Business', perm: 'users.manage', page: RolesPage, keywords: 'permissions' },
   { to: '/settings', label: 'Settings', icon: Settings, group: 'Business', perm: 'settings.manage', page: SettingsPage, keywords: 'cut-off tolerance offers switch' },

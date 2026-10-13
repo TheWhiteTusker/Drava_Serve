@@ -7,6 +7,8 @@ export default defineConfig({
   plugins: [react()],
   server: { port: 5174, proxy: { '/api': { target: process.env.API_URL ?? 'http://localhost:3000', ws: true } } },
   build: {
+    // Not /assets: the admin app uses that, and on Vercel each path belongs to one service.
+    assetsDir: 'field-assets',
     rollupOptions: {
       input: {
         pos: resolve(import.meta.dirname, 'pos/index.html'),

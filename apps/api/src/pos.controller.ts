@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { BadRequestException, Body, ConflictException, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
 import { billTotals, businessDate, dec, grossQty, istDate, rupees, zMoney, zPct, zQty, PAYMENT_MODES } from '@fnb/shared';
@@ -7,7 +8,7 @@ import { logActivity, money } from './activity.js';
 import { proposeOrApply, registerApproval } from './approvals.js';
 import { C, Ctx, findOr404, parse } from './common.js';
 import { tenantSchema as t, type Q, type Tx } from './db/index.js';
-import { publish } from './events.js';
+import { publish, publishGuest } from './events.js';
 import { liquorRegister } from './inventory.controller.js';
 import { costOf, currentOffers, endOffersForDay, menuForSale } from './pricing.js';
 import { rollupBill } from './reports.js';
@@ -88,6 +89,14 @@ export async function billView(q: Q, billId: string) {
   };
 }
 
+// Every counter gets the changed bill in the event itself, so none of them has to ask for it.
+// Sent in the background: the cashier's own response does not wait for it.
+function publishBill(ctx: Ctx, outletId: string, billId: string) {
+  billView(ctx.db, billId)
+    .then((bill) => publish(ctx.customerId, outletId, 'bill', { id: billId, bill }))
+    .catch((e) => console.error('bill event failed', e));
+}
+
 async function nextNumber(tx: Tx, outlet: typeof t.outlet.$inferSelect, at: Date) {
   const day = istDate(at).replaceAll('-', '');
   await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`bill:${outlet.id}:${day}`}))`);
@@ -131,7 +140,7 @@ registerApproval('bill_cancel', 'Cancel a bill', async (ctx, tx, req, post) => {
     await rollupBill(tx, bill, -1);
   }
   await tx.update(t.bill).set({ status: 'cancelled', cancelReason: req.reason, approvalId: req.id, updatedAt: new Date() }).where(eq(t.bill.id, bill.id));
-  ctx.afterCommit(() => publish(ctx.customerId, bill.outletId, 'bill', { id: bill.id }));
+  ctx.afterCommit(() => publishBill(ctx, bill.outletId, bill.id));
 });
 
 registerApproval('refund', 'Refund on a paid bill', async (ctx, tx, req) => {
@@ -149,7 +158,7 @@ registerApproval('manual_discount', 'Manual discount on a bill', async (ctx, tx,
   if (bill.status !== 'open') throw new ConflictException('Discounts apply to open bills only');
   await tx.update(t.bill).set({ manualDiscountPct: p.discountPct, approvalId: req.id }).where(eq(t.bill.id, bill.id));
   await recomputeBill(tx, bill.id);
-  ctx.afterCommit(() => publish(ctx.customerId, bill.outletId, 'bill', { id: bill.id }));
+  ctx.afterCommit(() => publishBill(ctx, bill.outletId, bill.id));
 });
 
 registerApproval('line_void', 'Remove an item from a bill', async (ctx, tx, req) => {
@@ -160,7 +169,7 @@ registerApproval('line_void', 'Remove an item from a bill', async (ctx, tx, req)
   await recomputeBill(tx, bill.id);
   ctx.afterCommit(async () => {
     await refreshAvailability(ctx, bill.outletId);
-    publish(ctx.customerId, bill.outletId, 'bill', { id: bill.id });
+    publishBill(ctx, bill.outletId, bill.id);
   });
 });
 
@@ -212,8 +221,12 @@ export class PosController {
   async order(@C() ctx: Ctx, @Body() body: unknown) {
     const o = parse(zOrder, body);
     ctx.assert('pos.bill', o.outletId);
+    return billView(ctx.db, await this.place(ctx, o));
+  }
+
+  private place(ctx: Ctx, o: z.infer<typeof zOrder>, guest?: (tx: Tx, bill: typeof t.bill.$inferSelect) => Promise<void>) {
     const placedAt = new Date(o.order.placedAt);
-    const billId = await ctx.tx(async (tx) => {
+    return ctx.tx(async (tx) => {
       const outlet = await findOr404(tx.select().from(t.outlet).where(eq(t.outlet.id, o.outletId)));
       // Exactly once: the same order sent twice returns the bill as it is.
       const [seen] = await tx.select({ billId: t.billOrder.billId }).from(t.billOrder).where(eq(t.billOrder.clientId, o.order.clientId));
@@ -233,6 +246,7 @@ export class PosController {
       }
       if (bill.outletId !== o.outletId) throw new BadRequestException('This bill belongs to another outlet');
       if (bill.status !== 'open') throw new ConflictException(`This bill is already ${bill.status}`);
+      await guest?.(tx, bill);
 
       const ids = [...new Set(o.order.lines.map((l) => l.menuItemId))];
       const items = await tx
@@ -262,11 +276,70 @@ export class PosController {
       await recomputeBill(tx, bill.id);
       ctx.afterCommit(async () => {
         await refreshAvailability(ctx, o.outletId); // ordered portions are now reserved
-        publish(ctx.customerId, o.outletId, 'bill', { id: bill.id });
+        publishBill(ctx, o.outletId, bill.id);
       });
       return bill.id;
     });
+  }
+
+  // ---------- Orders guests sent from the table QR menu ----------
+
+  @Get('guest-orders')
+  async guestOrders(@C() ctx: Ctx, @Query('outletId') outletId: string) {
+    ctx.assert('pos.bill', outletId);
+    return ctx.db
+      .select({ g: t.guestOrder, table: t.diningTable.name })
+      .from(t.guestOrder)
+      .innerJoin(t.diningTable, eq(t.diningTable.id, t.guestOrder.tableId))
+      .where(and(eq(t.guestOrder.outletId, outletId), eq(t.guestOrder.status, 'pending')))
+      .orderBy(asc(t.guestOrder.createdAt))
+      .then((rows) => rows.map(({ g, table }) => ({ ...g, table })));
+  }
+
+  // Accepting puts the guest's items on the table's bill exactly as a cashier's order would:
+  // today's prices and a stock check under lock. The bill is the table's open one, or a new one.
+  @Post('guest-orders/:id/accept')
+  async acceptGuest(@C() ctx: Ctx, @Param('id') id: string, @Body() body: unknown) {
+    const b = parse(z.object({ bill: z.object({ clientId: z.uuid(), number: z.string().trim().max(40).nullish() }) }), body);
+    const g = await findOr404(ctx.db.select().from(t.guestOrder).where(eq(t.guestOrder.id, id)));
+    ctx.assert('pos.bill', g.outletId);
+    const o = {
+      outletId: g.outletId,
+      bill: { clientId: b.bill.clientId, kind: 'dine_in' as const, tableId: g.tableId, number: b.bill.number },
+      order: { clientId: randomUUID(), placedAt: new Date().toISOString(), lines: g.lines.map((l) => ({ menuItemId: l.menuItemId, qty: String(l.qty) })) },
+      offline: false,
+    };
+    const billId = await this.place(ctx, o, async (tx, bill) => {
+      const [locked] = await tx.select().from(t.guestOrder).where(eq(t.guestOrder.id, id)).for('update');
+      if (locked.status !== 'pending') throw new ConflictException(`This order was already ${locked.status === 'accepted' ? 'accepted' : 'turned down'}`);
+      if (bill.tableId !== g.tableId) throw new BadRequestException('That bill is for another table');
+      await tx.update(t.guestOrder).set({ status: 'accepted', billId: bill.id, decidedBy: ctx.userId, decidedAt: new Date() }).where(eq(t.guestOrder.id, id));
+    });
+    this.guestDecided(ctx, g.outletId, id, 'accepted');
     return billView(ctx.db, billId);
+  }
+
+  @Post('guest-orders/:id/reject')
+  async rejectGuest(@C() ctx: Ctx, @Param('id') id: string, @Body() body: unknown) {
+    const { reason } = parse(z.object({ reason: z.string().trim().max(200).nullish() }), body);
+    const g = await findOr404(ctx.db.select().from(t.guestOrder).where(eq(t.guestOrder.id, id)));
+    ctx.assert('pos.bill', g.outletId);
+    const [row] = await ctx.tx((tx) =>
+      tx
+        .update(t.guestOrder)
+        .set({ status: 'rejected', reason: reason || null, decidedBy: ctx.userId, decidedAt: new Date() })
+        .where(and(eq(t.guestOrder.id, id), eq(t.guestOrder.status, 'pending')))
+        .returning(),
+    );
+    if (!row) throw new ConflictException('This order was already decided');
+    this.guestDecided(ctx, g.outletId, id, 'rejected', row.reason);
+    return { id, status: 'rejected' };
+  }
+
+  // Tells the other counters to drop it from their list, and the guest's phone how it went.
+  private guestDecided(ctx: Ctx, outletId: string, id: string, status: string, reason: string | null = null) {
+    publish(ctx.customerId, outletId, 'guestOrder', { id, status });
+    publishGuest(id, { status, reason });
   }
 
   // Locks the stock rows the order needs, then checks what is left after other open bills.
@@ -337,7 +410,7 @@ export class PosController {
       // Stock deducts now. A shortfall (sold offline after it ran out) is recorded, never refused.
       await post(await saleMoves(tx, paid, 1), { allowNegative: true });
       await rollupBill(tx, paid, 1);
-      ctx.afterCommit(() => publish(ctx.customerId, bill.outletId, 'bill', { id: bill.id }));
+      ctx.afterCommit(() => publishBill(ctx, bill.outletId, bill.id));
       return bill.id;
     });
     return billView(ctx.db, billId);

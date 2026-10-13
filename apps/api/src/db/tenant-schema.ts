@@ -727,6 +727,26 @@ export const orderLine = pgTable(
   (t) => [index().on(t.billId), index().on(t.menuItemId, t.createdAt)],
 );
 
+// An order a guest sent from the QR menu at their table. Nothing reaches a bill or the stock
+// until a cashier accepts it; it then becomes an ordinary order on that table's bill.
+export const guestOrder = pgTable(
+  'guest_order',
+  {
+    id: id(),
+    outletId: uuid().notNull().references(() => outlet.id),
+    tableId: uuid().notNull().references(() => diningTable.id),
+    clientId: uuid().notNull().unique(), // from the guest's phone, so a resend is stored once
+    lines: jsonb().$type<{ menuItemId: string; qty: number }[]>().notNull(),
+    status: text().$type<'pending' | 'accepted' | 'rejected'>().notNull().default('pending'),
+    reason: text(), // why it was turned down, shown to the guest
+    billId: uuid().references(() => bill.id),
+    decidedBy: uuid().references(() => appUser.id),
+    decidedAt: ts(),
+    createdAt: ts().notNull().defaultNow(),
+  },
+  (t) => [index().on(t.outletId, t.status), index().on(t.tableId, t.status)],
+);
+
 export const payment = pgTable('payment', {
   id: id(),
   billId: uuid().notNull().references(() => bill.id),

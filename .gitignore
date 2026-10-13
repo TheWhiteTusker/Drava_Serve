@@ -5,3 +5,6 @@ coverage
 *.log
 .DS_Store
 backups/
+
+# Vercel CLI (local link and build output)
+.vercel

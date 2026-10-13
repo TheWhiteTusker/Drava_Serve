@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { businessDate } from '@fnb/shared';
 import { api, can, useApi, useCurrentOutlet, useSession } from '../api';
-import { useLive } from '../live';
+import { useLiveReload } from '../live';
 import { AskDialog, Badge, ErrorNote, Modal, Page, rupee, toast } from '../ui';
 
 // Base units read better as kg / L once they are large.
@@ -22,7 +22,7 @@ export function StockPage() {
   const [filter, setFilter] = useState('');
   const stock = useApi<any>(outletId ? `/inventory/stock?outletId=${outletId}&department=${dept}` : null);
   const [dialog, setDialog] = useState<null | 'wastage' | 'transfer' | { ledger: any }>(null);
-  useLive(['stock'], () => stock.reload());
+  useLiveReload(['stock'], stock.reload);
   if (!outletId) return null;
   const items = (stock.data?.items ?? []).filter((i: any) => i.name.toLowerCase().includes(filter.toLowerCase()));
   const stores = stock.data?.stores ?? [];
@@ -501,7 +501,7 @@ export function ApprovalsPage() {
   const [status, setStatus] = useState('pending');
   const list = useApi<any[]>(`/approvals?status=${status}${outletId ? `&outletId=${outletId}` : ''}`);
   const [error, setError] = useState<string | null>(null);
-  useLive(['approval'], () => list.reload());
+  useLiveReload(['approval'], list.reload);
   async function decide(id: string, approve: boolean) {
     try {
       setError(null);

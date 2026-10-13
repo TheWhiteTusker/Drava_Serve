@@ -1,7 +1,7 @@
 import { BadRequestException, Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { and, asc, eq, inArray } from 'drizzle-orm';
 import {
-  dec, withVersion, zBrand, zCategory, zMenuItem, zStockItem, zTaxClass, type Permission, type StockItemInput,
+  dec, withVersion, zBrand, zCategory, zDiningTable, zMenuItem, zStockItem, zTaxClass, type Permission, type StockItemInput,
 } from '@fnb/shared';
 import type { ZodType } from 'zod';
 import { getSettings } from './access.controller.js';
@@ -9,6 +9,7 @@ import { proposeOrApply } from './approvals.js';
 import { C, Ctx, findOr404, parse, Permit, updateVersioned } from './common.js';
 import { afterMenuChange } from './pricing.controller.js';
 import { tenantSchema as t, type Tx } from './db/index.js';
+import { publish } from './events.js';
 
 interface CrudOpts {
   path: string;
@@ -286,3 +287,15 @@ export class LiquorTreeController {
       }));
   }
 }
+
+// Tables at an outlet. Each has its own QR code; a guest ordering from it orders for that table.
+export const DiningTablesController = crud({
+  path: 'tables',
+  table: t.diningTable,
+  schema: zDiningTable,
+  view: 'pos.bill',
+  manage: 'outlets.manage',
+  outletScoped: true,
+  orderBy: (d) => [asc(d.sortOrder), asc(d.name)],
+  after: (ctx, row) => ctx.afterCommit(() => publish(ctx.customerId, row.outletId, 'menu', {})), // POS reloads its table list
+});

@@ -8,7 +8,7 @@ import { ActivityController } from './activity.js';
 import { ApprovalsController } from './approvals.js';
 import { AuthController } from './auth.controller.js';
 import {
-  BrandsController, CategoriesController, LiquorTreeController, MenuItemsController, StockItemsController,
+  BrandsController, CategoriesController, DiningTablesController, LiquorTreeController, MenuItemsController, StockItemsController,
   TaxClassesController,
 } from './catalog.controller.js';
 import { AuthGuard, ErrorFilter, Public } from './common.js';
@@ -41,7 +41,7 @@ export function jwtSecret() {
   controllers: [
     HealthController, AuthController, UsersController, RolesController, OutletsController, SettingsController,
     AuditController, CategoriesController, BrandsController, TaxClassesController, StockItemsController,
-    MenuItemsController, LiquorTreeController, ApprovalsController, InventoryController,
+    MenuItemsController, DiningTablesController, LiquorTreeController, ApprovalsController, InventoryController,
     VendorsController, VendorItemsController, VendorRatesController, IndentsController,
     DeliveriesController, GrnsController, AttachmentsController, PricingController, PublicMenuController,
     PosController, ReportsController, DataController, ActivityController,

@@ -226,6 +226,8 @@ const settingValue: Record<SettingKey, z.ZodType> = {
   'menu.lowThresholdServes': z.number().int().min(0),
   'pricing.flagTolerancePct': z.number().min(0).max(100),
   'business.dayStart': z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use 24-hour time, e.g. 05:00'),
+  'guest.ordering': z.boolean(),
+  'guest.pickTable': z.boolean(),
 };
 
 @Controller('settings')

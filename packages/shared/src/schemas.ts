@@ -140,6 +140,13 @@ export const zMenuItem = z
     path: ['dietType'],
   });
 
+export const zDiningTable = z.object({
+  outletId: id,
+  name: z.string().trim().min(1, 'Required').max(40),
+  sortOrder: z.coerce.number().int().default(0),
+  active: z.boolean().default(true),
+});
+
 export const zSetting = z.object({
   outletId: id.nullable(),
   key: z.string(),

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { margin, portionCost } from '@fnb/shared';
 import { api, can, useApi, useCurrentOutlet, useSession } from '../api';
-import { useLive } from '../live';
+import { useLiveReload } from '../live';
 import { Badge, DietMark, ErrorNote, Modal, Page, rupee, toast } from '../ui';
 
 // ---------- Menu costs, margins and order ----------
@@ -13,7 +13,7 @@ export function CostingPage() {
   const rows = useApi<any[]>(outletId ? `/costing?outletId=${outletId}` : null);
   const [recipe, setRecipe] = useState<any | null>(null);
   const [place, setPlace] = useState<any | null>(null);
-  useLive(['menu', 'availability'], () => rows.reload());
+  useLiveReload(['menu', 'availability'], rows.reload);
   if (!outletId) return null;
   const list = (rows.data ?? []).filter((r) => r.department === dept);
   const groups = [...new Set(list.map((r) => r.category))];
@@ -311,7 +311,7 @@ export function OffersPage() {
   const offers = useApi<any[]>(outletId ? `/offers?outletId=${outletId}&status=${status}` : null);
   const [rule, setRule] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
-  useLive(['menu'], () => offers.reload());
+  useLiveReload(['menu'], offers.reload);
   useEffect(() => {
     if (rules.data?.[0]) setRule({ ...rules.data[0] });
   }, [rules.data]);

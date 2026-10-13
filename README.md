@@ -8,10 +8,14 @@ The agreed design is in [docs/FNB-Management-System-Handoff.md](docs/FNB-Managem
 Requires Docker Desktop. On Windows, one command does everything: starts Docker if needed, builds and starts the system, waits until it is ready, opens the apps and prints the sign-ins.
 
 ```powershell
-.un.ps1            # or double-click run.cmd
-.un.ps1 stop       # stop (data is kept)
-.un.ps1 reset      # wipe all data and start fresh with the sample data
-.un.ps1 logs       # follow the server's messages
+.
+un.ps1            # or double-click run.cmd
+.
+un.ps1 stop       # stop (data is kept)
+.
+un.ps1 reset      # wipe all data and start fresh with the sample data
+.
+un.ps1 logs       # follow the server's messages
 ```
 
 On any system the plain equivalent is `docker compose up --build`.
@@ -21,7 +25,7 @@ On any system the plain equivalent is `docker compose up --build`.
 | Admin and dashboard | http://localhost:5173 | Owner, managers, chef, storekeeper, accounts |
 | Billing POS | http://localhost:5173/pos/ | Cashier (tablet or desktop; installable; works offline) |
 | Receiving | http://localhost:5173/receiving/ | Watchman and storekeeper (phone; installable; works offline) |
-| Guest QR menu | http://localhost:5173/m/demo/BLR1 | Guests (no sign-in) |
+| Guest QR menu | http://localhost:5173/m/demo/BLR1 (menu only); each table's own QR code (admin › Tables) also takes orders | Guests (no sign-in) |
 | API | http://localhost:3000/api | |
 
 On first start the API migrates the control database and every customer database, then creates a **sample** demo customer if there are no customers yet. Sign in as `owner@demo.test` / `Demo@1234`; the other sample sign-ins are in [docs/phase-1-summary.md](docs/phase-1-summary.md).

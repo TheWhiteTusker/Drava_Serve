@@ -1289,3 +1289,14 @@ dialog::backdrop {
     color: #000;
   }
 }
+
+/* All table QR codes on one printable sheet */
+.qr-sheet {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1rem;
+}
+.qr-sheet figure {
+  break-inside: avoid;
+}

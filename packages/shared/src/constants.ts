@@ -71,6 +71,8 @@ export const SETTING_DEFAULTS = {
   'menu.lowThresholdServes': 5,
   'pricing.flagTolerancePct': 2,
   'business.dayStart': '05:00',
+  'guest.ordering': true, // guests can send orders from the table QR menu; staff accept each one
+  'guest.pickTable': false, // for demos: the outlet QR menu lets a guest pick any table to order for
 } as const;
 export type SettingKey = keyof typeof SETTING_DEFAULTS;
 export const SETTING_KEYS = Object.keys(SETTING_DEFAULTS) as SettingKey[];
@@ -80,4 +82,6 @@ export const OUTLET_SETTING_KEYS: SettingKey[] = [
   'offers.liquorEnabled',
   'receiving.rateTolerancePct',
   'menu.lowThresholdServes',
+  'guest.ordering',
+  'guest.pickTable',
 ];
