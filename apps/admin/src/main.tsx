@@ -10,7 +10,7 @@ import {
 import { StrictMode, useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import type { Permission } from '@fnb/shared';
+import { guestMenuPath, type Permission } from '@fnb/shared';
 import { api, can, setCurrentOutlet, setSession, useApi, useCurrentOutlet, useSession, type Session } from './api';
 import { ErrorNote, Modal, Toasts } from './ui';
 import { ActivityPage } from './pages/activity';
@@ -379,7 +379,7 @@ function Shell({ s }: { s: Session }) {
         <a href="/receiving/" target="_blank" rel="noreferrer">
           <Truck className="icon" aria-hidden /> Receiving app
         </a>
-        <a href={`/m/${s.customer.code}/${s.outlets.find((o) => o.id === outletId)?.code ?? ''}`} target="_blank" rel="noreferrer">
+        <a href={guestMenuPath(s.customer.code, s.outlets.find((o) => o.id === outletId)?.code ?? '')} target="_blank" rel="noreferrer">
           <Tags className="icon" aria-hidden /> Guest menu
         </a>
       </nav>

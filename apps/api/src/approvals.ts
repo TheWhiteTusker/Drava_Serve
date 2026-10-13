@@ -5,7 +5,7 @@ import { alias } from 'drizzle-orm/pg-core';
 import { C, Ctx, findOr404, parse } from './common.js';
 import { tenantSchema as t, type Tx } from './db/index.js';
 import { publish } from './events.js';
-import { stockTx, type Post as PostStock } from './stock.js';
+import { stockTx, type Post as PostStock } from './stock/ledger.js';
 
 // Two-person approval. A request carries what is proposed; when someone with approvals.decide
 // at that outlet (and who is not the proposer) approves it, the handler for its type applies it.

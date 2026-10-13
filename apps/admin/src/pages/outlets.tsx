@@ -1,4 +1,5 @@
 import QRCode from 'qrcode';
+import { guestMenuPath } from '@fnb/shared';
 import { useEffect, useState } from 'react';
 import { api, can, useApi, useCurrentOutlet, useSession } from '../api';
 import { CrudPage, ErrorNote, Modal, Page, toast, yesNo } from '../ui';
@@ -43,7 +44,7 @@ export function OutletsPage() {
       ]}
     />
     <Modal open={!!qr} title={`Guest menu: ${qr?.name ?? ''}`} onClose={() => setQr(null)}>
-      {qr && <MenuQr url={`${location.origin}/m/${s?.customer.code}/${qr.code}`} />}
+      {qr && <MenuQr url={`${location.origin}${guestMenuPath(s!.customer.code, qr.code)}`} />}
     </Modal>
     </>
   );
@@ -59,7 +60,7 @@ export function TablesPage() {
   const [qr, setQr] = useState<any | null>(null);
   const [sheet, setSheet] = useState(false);
   if (!outletId || !outlet) return <p className="muted">You are not assigned to an outlet yet.</p>;
-  const url = (tb: any) => `${location.origin}/m/${s?.customer.code}/${outlet.code}/${tb.id}`;
+  const url = (tb: any) => `${location.origin}${guestMenuPath(s!.customer.code, outlet.code, tb)}`;
   return (
     <>
       <CrudPage

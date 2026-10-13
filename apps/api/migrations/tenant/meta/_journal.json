@@ -64,6 +64,13 @@
       "when": 1791893809880,
       "tag": "0008_guest_orders",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791898990643,
+      "tag": "0009_table_codes",
+      "breakpoints": true
     }
   ]
 }

@@ -3,8 +3,9 @@ import { and, eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { Ctx } from '../src/common.js';
 import { closeAll, tenantSchema as t } from '../src/db/index.js';
-import { endOffersForDay, recostAfterReceipt } from '../src/pricing.js';
-import { stockTx } from '../src/stock.js';
+import { endOffersForDay } from '../src/pricing/offers.js';
+import { recostAfterReceipt } from '../src/pricing/costing.js';
+import { stockTx } from '../src/stock/ledger.js';
 import { setupFixture, type Fixture } from './fixture.js';
 import { client, startApp } from './helpers.js';
 
