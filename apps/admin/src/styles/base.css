@@ -1,0 +1,226 @@
+/* Admin layout and components. Colours, fonts, radii and shadows come only from @fnb/theme. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  background: var(--brand-bg);
+  color: var(--brand-text);
+  font: 15px/1.55 var(--brand-font);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+h1,
+h2,
+h3 {
+  margin: 0 0 0.25rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+h1 {
+  font: 600 1.85rem/1.15 var(--brand-font-heading);
+}
+h2 {
+  font: 600 1.2rem/1.25 var(--brand-font-heading);
+}
+h3 {
+  font-size: 0.98rem;
+  font-weight: 650;
+}
+code {
+  font-family: var(--brand-font-mono);
+  font-size: 0.88em;
+  background: var(--brand-surface-2);
+  padding: 0.05rem 0.35rem;
+  border-radius: 6px;
+}
+a {
+  color: var(--brand-accent-strong);
+}
+.muted {
+  color: var(--brand-text-muted);
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+svg.icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.75;
+}
+
+/* ---------- Controls: 44px touch targets, calm focus ---------- */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  min-height: 44px;
+  border-radius: var(--brand-radius-small);
+}
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--brand-border-strong);
+  background: var(--brand-surface);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: var(--brand-accent);
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--brand-accent);
+  box-shadow: 0 0 0 3px var(--brand-accent-soft);
+}
+input[type='checkbox'] {
+  width: 20px;
+  height: 20px;
+  min-height: 0;
+  accent-color: var(--brand-accent);
+}
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.05rem;
+  border: 1px solid var(--brand-primary);
+  background: var(--brand-primary);
+  color: var(--brand-primary-contrast);
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, transform 0.05s, box-shadow 0.15s;
+}
+button:hover:not(:disabled) {
+  background: var(--brand-primary-hover);
+  border-color: var(--brand-primary-hover);
+}
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+button.secondary {
+  background: var(--brand-surface);
+  color: var(--brand-text);
+  border-color: var(--brand-border-strong);
+}
+button.secondary:hover:not(:disabled) {
+  background: var(--brand-surface-2);
+  border-color: var(--brand-accent);
+}
+button.ghost {
+  background: transparent;
+  color: var(--brand-text);
+  border-color: transparent;
+}
+button.ghost:hover:not(:disabled) {
+  background: var(--brand-surface-2);
+  border-color: transparent;
+}
+button.link {
+  background: none;
+  border: 0;
+  color: var(--brand-accent-strong);
+  padding: 0;
+  min-height: 0;
+  font-weight: 600;
+}
+button.link:hover:not(:disabled) {
+  background: none;
+  text-decoration: underline;
+}
+button.danger {
+  background: var(--brand-danger);
+  border-color: var(--brand-danger);
+  color: #fff;
+}
+button.icon-only {
+  padding: 0;
+  width: 44px;
+}
+button.big {
+  min-height: 56px;
+  font-size: 1.1rem;
+}
+:focus-visible {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: 2px;
+}
+kbd {
+  font: 600 0.72rem var(--brand-font);
+  padding: 0.05rem 0.35rem;
+  border: 1px solid var(--brand-border-strong);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--brand-surface);
+  color: var(--brand-text-muted);
+}
+
+/* ---------- Password visibility toggle ---------- */
+.password-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.password-wrap input {
+  padding-right: 2.75rem;
+}
+button.password-toggle {
+  position: absolute;
+  right: 0.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--brand-text-muted);
+  padding: 0;
+  width: 36px;
+  min-height: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--brand-radius-small);
+  cursor: pointer;
+  box-shadow: none;
+  transition: color 0.15s, background-color 0.15s;
+}
+button.password-toggle:hover:not(:disabled) {
+  background: var(--brand-surface-2);
+  border-color: transparent;
+  color: var(--brand-text);
+}
+button.password-toggle:active:not(:disabled) {
+  transform: translateY(-50%) scale(0.96);
+}
+button.password-toggle:focus-visible {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: 1px;
+}
+

@@ -1,0 +1,113 @@
+/* ---------- Dialogs and toasts ---------- */
+dialog {
+  border: 1px solid var(--brand-border);
+  border-radius: var(--brand-radius-large);
+  background: var(--brand-surface);
+  color: var(--brand-text);
+  padding: 0;
+  width: min(540px, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  box-shadow: var(--brand-shadow-lg);
+}
+dialog.wide {
+  width: min(940px, calc(100vw - 2rem));
+}
+dialog[open] {
+  animation: rise 0.18s ease-out;
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+  }
+}
+dialog::backdrop {
+  background: rgb(20 14 8 / 0.45);
+  backdrop-filter: blur(2px);
+}
+.dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.4rem;
+  border-bottom: 1px solid var(--brand-border);
+  position: sticky;
+  top: 0;
+  background: var(--brand-surface);
+  z-index: 2;
+}
+.dialog-body {
+  padding: 1.25rem 1.4rem 1.4rem;
+}
+.dialog-body footer.row.end {
+  position: sticky;
+  bottom: -1.4rem;
+  background: var(--brand-surface);
+  padding: 0.9rem 0;
+  margin-bottom: -0.4rem;
+  border-top: 1px solid var(--brand-border);
+}
+.toasts {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 100;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--brand-primary);
+  color: var(--brand-primary-contrast);
+  padding: 0.75rem 1rem;
+  border-radius: var(--brand-radius);
+  box-shadow: var(--brand-shadow-lg);
+  animation: rise 0.2s ease-out;
+  max-width: 420px;
+}
+.toast.danger {
+  background: var(--brand-danger);
+  color: #fff;
+}
+
+/* ---------- Command palette ---------- */
+.palette input {
+  border: 0;
+  border-bottom: 1px solid var(--brand-border);
+  border-radius: 0;
+  min-height: 58px;
+  font-size: 1.05rem;
+  padding: 0 1.25rem;
+  box-shadow: none;
+}
+.palette input:focus {
+  box-shadow: none;
+}
+.palette ul {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.palette li button {
+  width: 100%;
+  justify-content: flex-start;
+  background: transparent;
+  border-color: transparent;
+  color: var(--brand-text);
+  font-weight: 500;
+}
+.palette li button .muted {
+  margin-left: auto;
+  font-size: 0.82rem;
+}
+.palette li button[aria-selected='true'],
+.palette li button:hover:not(:disabled) {
+  background: var(--brand-accent-soft);
+  border-color: transparent;
+}

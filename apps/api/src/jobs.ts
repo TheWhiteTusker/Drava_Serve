@@ -3,11 +3,11 @@ import { Queue, Worker } from 'bullmq';
 import { Redis as IORedis } from 'ioredis';
 import { and, eq, sql } from 'drizzle-orm';
 import { istDate, istTime } from '@fnb/shared';
-import { getSettings } from './access.controller.js';
+import { getSettings } from './access/settings.js';
 import { Ctx } from './common.js';
 import { controlDb, controlSchema, tenantDb, tenantSchema as t } from './db/index.js';
-import { endOffersForDay } from './pricing.js';
-import { buildIndents, createDelivery, deliveryDateFor } from './purchasing.controller.js';
+import { endOffersForDay } from './pricing/offers.js';
+import { buildIndents, createDelivery, deliveryDateFor } from './purchasing/indents.js';
 
 // Scheduled work. A one-minute tick checks every customer and outlet; job_run rows make each
 // job happen once per outlet and day, and let it catch up if the server was down at the time.

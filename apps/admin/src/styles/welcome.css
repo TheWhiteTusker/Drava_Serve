@@ -1,0 +1,113 @@
+/* ---------- Liquor tree ---------- */
+.tree details {
+  background: var(--brand-surface);
+  border: 1px solid var(--brand-border);
+  border-radius: var(--brand-radius);
+  padding: 0.5rem 1.1rem;
+  margin-bottom: 0.6rem;
+  box-shadow: var(--brand-shadow);
+}
+.tree summary {
+  cursor: pointer;
+  font: 600 1.05rem var(--brand-font-heading);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.tree ul {
+  margin: 0.25rem 0;
+}
+
+/* ---------- Getting started ---------- */
+.welcome {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+  align-items: start;
+}
+.welcome .card {
+  margin: 0;
+}
+@media (max-width: 1000px) {
+  .welcome {
+    grid-template-columns: 1fr;
+  }
+}
+.checklist {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+}
+.checklist li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--brand-border);
+}
+.checklist li:last-child {
+  border-bottom: 0;
+}
+.checklist .tick {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--brand-border-strong);
+  flex: none;
+}
+.checklist li.done .tick {
+  background: var(--brand-success);
+  border-color: var(--brand-success);
+  color: #fff;
+}
+.checklist li.done .label {
+  color: var(--brand-text-muted);
+  text-decoration: line-through;
+}
+.checklist a {
+  margin-left: auto;
+  font-weight: 600;
+}
+.progress {
+  height: 6px;
+  background: var(--brand-surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+.progress > span {
+  display: block;
+  height: 100%;
+  background: var(--brand-accent);
+  border-radius: 3px;
+}
+.quick {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+.quick a {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--brand-border);
+  border-radius: var(--brand-radius);
+  background: var(--brand-surface);
+  color: var(--brand-text);
+  text-decoration: none;
+  font-weight: 600;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.quick a:hover {
+  border-color: var(--brand-accent);
+  box-shadow: var(--brand-shadow);
+}
+.quick a svg {
+  color: var(--brand-accent-strong);
+}

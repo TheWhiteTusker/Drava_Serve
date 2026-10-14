@@ -42,10 +42,10 @@ const ui = { tab: 'food' as 'food' | 'beverage', vegOnly: false, q: '' };
 let data: {
   outlet: { name: string; address: string | null; fssaiNumber: string | null };
   items: Item[];
-  table: { id: string; name: string } | null;
+  table: { id: string; name: string; slug: string } | null;
   ordering: boolean;
   pickTable: boolean; // demo switch: the outlet menu lists tables to pick from
-  tables?: { id: string; name: string }[];
+  tables?: { id: string; name: string; slug: string }[];
 } | null = null;
 let loadedAt = 0;
 const cart = new Map<string, number>(); // menu item id → quantity, only in this page's memory
@@ -58,8 +58,8 @@ const price = (v: string | number) => `₹${Number(v).toLocaleString('en-IN', { 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 const itemById = (id: string) => data?.items.find((i) => i.id === id);
 // The same menu for one table (or for none), in whichever address form this page was opened with.
-const tableHref = (id: string | null) =>
-  customer ? `/m/${base}${id ? `/${id}` : ''}` : `?c=${encodeURIComponent(code.customer!)}&o=${encodeURIComponent(code.outlet!)}${id ? `&t=${id}` : ''}`;
+const tableHref = (slug: string | null) =>
+  customer ? `/m/${base}${slug ? `/${slug}` : ''}` : `?c=${encodeURIComponent(code.customer!)}&o=${encodeURIComponent(code.outlet!)}${slug ? `&t=${slug}` : ''}`;
 // randomUUID needs HTTPS; the fallback covers a menu opened over plain http on the restaurant's network.
 const uuid = () =>
   crypto.randomUUID?.() ?? '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, (c) => (+c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (+c / 4)))).toString(16));
@@ -263,7 +263,7 @@ function render() {
       <h1>${esc(data.outlet.name)}</h1>
       ${data.outlet.address ? `<p>${esc(data.outlet.address)}</p>` : ''}
       ${data.ordering && data.table ? `<p class="table-tag">Table ${esc(data.table.name)} · add dishes and send your order to staff${data.pickTable ? ` · <a href="${tableHref(null)}">change table</a>` : ''}</p>` : ''}
-      ${data.tables?.length ? `<nav class="pick-table" aria-label="Pick your table"><p>Ordering? Pick your table</p>${data.tables.map((tb) => `<a href="${tableHref(tb.id)}">${esc(tb.name)}</a>`).join('')}</nav>` : ''}
+      ${data.tables?.length ? `<nav class="pick-table" aria-label="Pick your table"><p>Ordering? Pick your table</p>${data.tables.map((tb) => `<a href="${tableHref(tb.slug)}">${esc(tb.name)}</a>`).join('')}</nav>` : ''}
       <div class="ornament" aria-hidden="true"><span></span>◆<span></span></div>
     </header>
     <div class="sticky">

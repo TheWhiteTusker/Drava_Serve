@@ -1,10 +1,11 @@
 import { useState, useSyncExternalStore } from 'react';
-import { AlertCircle, CheckCircle2, CloudOff, RefreshCw } from 'lucide-react';
+import { AlertCircle, CheckCircle2, CloudOff, Eye, EyeOff, RefreshCw } from 'lucide-react';
 import type { Session, SessionStore } from './session';
 
 export function Login({ session, title, subtitle }: { session: SessionStore; title: string; subtitle?: string }) {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   async function submit(e: React.FormEvent) {
@@ -25,14 +26,33 @@ export function Login({ session, title, subtitle }: { session: SessionStore; tit
         <div className="eyebrow">{title}</div>
         <h1 style={{ marginTop: 0 }}>Sign in</h1>
         {subtitle && <p className="muted" style={{ marginTop: 0 }}>{subtitle}</p>}
-        <label className="field">
+        <label className="field" htmlFor="field-login">
           Email or phone
-          <input autoComplete="username" value={login} onChange={(e) => setLogin(e.target.value)} required autoFocus />
+          <input id="field-login" autoComplete="username" value={login} onChange={(e) => setLogin(e.target.value)} required autoFocus />
         </label>
-        <label className="field">
-          Password
-          <input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        </label>
+        <div className="field">
+          <label htmlFor="field-password">Password</label>
+          <div className="password-wrap">
+            <input
+              id="field-password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowPassword((prev) => !prev)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              title={showPassword ? 'Hide password' : 'Show password'}
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff className="icon" aria-hidden /> : <Eye className="icon" aria-hidden />}
+            </button>
+          </div>
+        </div>
         {error && (
           <p className="note danger" role="alert">
             <AlertCircle className="icon" aria-hidden /> {error}

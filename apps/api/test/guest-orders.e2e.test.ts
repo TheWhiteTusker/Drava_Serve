@@ -1,8 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import type { INestApplication } from '@nestjs/common';
+import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { closeAll, tenantSchema as t } from '../src/db/index.js';
-import { publicCache } from '../src/pricing.controller.js';
+import { publicCache } from '../src/public/menu.js';
 import { setupFixture, type Fixture } from './fixture.js';
 import { client, startApp } from './helpers.js';
 
@@ -40,6 +41,15 @@ describe('guest ordering from the table QR menu', () => {
     expect((await guest.get(`/public/menu/${base}`)).body).toMatchObject({ table: null, ordering: false });
     expect((await guest.get(`/public/menu/${base}?table=${randomUUID()}`)).body.ordering).toBe(false);
     expect((await send(randomUUID(), [{ menuItemId: f.m.tomatoSoup, qty: 1 }])).status).toBe(404);
+  });
+
+  it('a table link is its name plus a short code, and only the code is read', async () => {
+    const [{ code }] = await f.db.select({ code: t.diningTable.code }).from(t.diningTable).where(eq(t.diningTable.id, t1));
+    expect(code).toMatch(/^[a-hj-km-z2-9]{4}$/);
+    const menu = (await guest.get(`/public/menu/${f.cust.code}/tst?table=t1-${code}`)).body; // outlet code in any case
+    expect(menu).toMatchObject({ ordering: true, table: { id: t1, name: 'T1', slug: `t1-${code}` } });
+    expect((await guest.get(`/public/menu/${base}?table=renamed-${code}`)).body.table.id).toBe(t1);
+    expect((await guest.get(`/public/menu/${base}?table=t1-zzzz`)).body.table).toBeNull();
   });
 
   let first: string;

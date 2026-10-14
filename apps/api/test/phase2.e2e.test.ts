@@ -5,7 +5,7 @@ import { io as connect } from 'socket.io-client';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { Ctx } from '../src/common.js';
 import { closeAll, tenantSchema as t } from '../src/db/index.js';
-import { stockTx } from '../src/stock.js';
+import { stockTx } from '../src/stock/ledger.js';
 import { setupFixture, type Fixture } from './fixture.js';
 import { startApp } from './helpers.js';
 

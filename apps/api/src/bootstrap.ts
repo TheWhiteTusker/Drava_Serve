@@ -1,6 +1,6 @@
 import { eq, sql } from 'drizzle-orm';
 import { SEED_ROLES, STORE_KINDS, type OutletInput } from '@fnb/shared';
-import { hashSecret } from './common.js';
+import { hashSecret } from './secrets.js';
 import { controlDb, controlSchema, createCustomer, tenantSchema as t, type TenantDb, type Tx } from './db/index.js';
 
 // Starting catalog every new customer gets. All of it is editable afterwards.

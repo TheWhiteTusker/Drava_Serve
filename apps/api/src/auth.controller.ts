@@ -2,7 +2,8 @@ import { Body, Controller, ForbiddenException, Get, Post, Query, UnauthorizedExc
 import { JwtService } from '@nestjs/jwt';
 import { and, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm';
 import { zLogin, zPinSwitch } from '@fnb/shared';
-import { C, Ctx, loadGrants, parse, Public, verifySecret, type TokenClaims } from './common.js';
+import { C, Ctx, loadGrants, parse, Public, type TokenClaims } from './common.js';
+import { verifySecret } from './secrets.js';
 import { controlDb, controlSchema, resolveCustomer, tenantSchema as t, type TenantDb } from './db/index.js';
 
 const MAX_ATTEMPTS = 5;

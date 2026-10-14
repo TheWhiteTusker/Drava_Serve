@@ -1,0 +1,117 @@
+/* ---------- Shell ---------- */
+.shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+}
+.topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 1.25rem;
+  background: color-mix(in srgb, var(--brand-surface) 88%, transparent);
+  backdrop-filter: saturate(1.2) blur(10px);
+  border-bottom: 1px solid var(--brand-border);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.topbar .spacer {
+  flex: 1;
+}
+.topbar .customer {
+  color: var(--brand-text-muted);
+  font-size: 0.9rem;
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--brand-border);
+}
+.logo {
+  display: block;
+  height: 32px;
+  width: 170px;
+  background: var(--brand-logo) left center / contain no-repeat;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--brand-border-strong);
+  border-radius: 999px;
+  padding: 0 0.35rem 0 0.8rem;
+  background: var(--brand-surface);
+}
+.pill select {
+  border: 0;
+  background: transparent;
+  min-height: 38px;
+  padding: 0 1.6rem 0 0;
+  box-shadow: none;
+  font-weight: 600;
+  width: auto;
+  max-width: 22rem;
+}
+.search-trigger {
+  color: var(--brand-text-muted);
+  font-weight: 500;
+  min-width: 15rem;
+  justify-content: flex-start;
+}
+.search-trigger kbd {
+  margin-left: auto;
+}
+.menu-toggle {
+  display: none;
+}
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--brand-accent-soft);
+  color: var(--brand-accent-strong);
+  font: 700 0.8rem var(--brand-font);
+  border: 1px solid var(--brand-accent);
+}
+.usermenu {
+  position: relative;
+}
+.usermenu > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  border-radius: 999px;
+  min-height: 44px;
+}
+.usermenu > summary::-webkit-details-marker {
+  display: none;
+}
+.usermenu > summary:hover {
+  background: var(--brand-surface-2);
+}
+.usermenu .menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 230px;
+  background: var(--brand-surface);
+  border: 1px solid var(--brand-border);
+  border-radius: var(--brand-radius);
+  box-shadow: var(--brand-shadow-lg);
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+}
+.usermenu .menu button {
+  justify-content: flex-start;
+}
+.usermenu .menu .who {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--brand-border);
+  margin-bottom: 0.25rem;
+}

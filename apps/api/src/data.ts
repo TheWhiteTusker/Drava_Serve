@@ -5,7 +5,7 @@ import { zipSync, strToU8 } from 'fflate';
 import { istDate } from '@fnb/shared';
 import { C, Ctx } from './common.js';
 import { controlDb, controlSchema, dbUrl, dropCustomer, tenantDb, type Customer, type TenantDb } from './db/index.js';
-import { toCsv } from './receiving.controller.js';
+import { toCsv } from './csv.js';
 import { deleteRaw, getRaw, listRaw, putRaw } from './storage.js';
 
 // Backups, restore, per-customer export and deletion (handoff 6.14 safeguards).

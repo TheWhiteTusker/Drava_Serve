@@ -1,0 +1,146 @@
+/* ---------- Empty, loading, notes ---------- */
+.empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--brand-text-muted);
+}
+.empty .empty-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--brand-accent-soft);
+  color: var(--brand-accent-strong);
+  margin-bottom: 0.75rem;
+}
+.empty strong {
+  display: block;
+  color: var(--brand-text);
+  font-size: 1.05rem;
+  margin-bottom: 0.25rem;
+}
+.skeleton {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--brand-surface-2), var(--brand-surface-3), var(--brand-surface-2));
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite linear;
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+.note {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  padding: 0.75rem 1rem;
+  border-radius: var(--brand-radius-small);
+  background: var(--brand-accent-soft);
+  color: var(--brand-text);
+  margin: 0.75rem 0;
+}
+.note.danger {
+  background: var(--brand-danger-soft);
+  color: var(--brand-danger);
+}
+.note.success {
+  background: var(--brand-success-soft);
+  color: var(--brand-success);
+}
+
+/* ---------- Forms ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.9rem 1.1rem;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0 0 0.9rem;
+}
+fieldset.field {
+  border: 1px solid var(--brand-border);
+  border-radius: var(--brand-radius);
+  padding: 0.9rem 1.1rem;
+  gap: 0.55rem;
+}
+.field label,
+legend {
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+legend {
+  padding: 0 0.35rem;
+}
+.field small {
+  font-size: 0.82rem;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 44px;
+  font-weight: 400;
+  cursor: pointer;
+}
+.checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0 1rem;
+}
+
+/* ---------- Badges and marks ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.12rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--brand-surface-2);
+  color: var(--brand-text-muted);
+  margin-left: 0.25rem;
+  white-space: nowrap;
+}
+.badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.85;
+}
+.badge.success {
+  color: var(--brand-success);
+  background: var(--brand-success-soft);
+}
+.badge.warning {
+  color: var(--brand-warning);
+  background: var(--brand-warning-soft);
+}
+.badge.danger {
+  color: var(--brand-danger);
+  background: var(--brand-danger-soft);
+}
+.badge.gold {
+  color: var(--brand-accent-strong);
+  background: var(--brand-accent-soft);
+}
+.diet-mark {
+  flex: none;
+}
+
+
+/* A form shown read-only to someone without permission to edit it. */
+fieldset.bare {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}

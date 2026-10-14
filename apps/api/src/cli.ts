@@ -5,7 +5,7 @@ import { writeFileSync } from 'node:fs';
 import { eq } from 'drizzle-orm';
 import { backupCustomer, deleteCustomer, exportCustomer, listBackups, restoreCustomer } from './data.js';
 import { closeAll, controlDb, controlSchema, migrateAll, tenantDb } from './db/index.js';
-import { rebuildRollups } from './reports.js';
+import { rebuildRollups } from './reports/rollup.js';
 import { seedDemo } from './seed.js';
 
 // pnpm db:migrate                       control database, then every customer database

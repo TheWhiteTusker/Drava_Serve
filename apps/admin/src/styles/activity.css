@@ -1,0 +1,104 @@
+/* ---------- Activity feed ---------- */
+.feed {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.feed li {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 0.75rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--brand-border);
+}
+.feed li:last-child {
+  border-bottom: 0;
+}
+.feed p {
+  margin: 0.15rem 0 0;
+  color: var(--brand-text);
+  line-height: 1.45;
+}
+.feed-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: baseline;
+}
+.feed-head time {
+  color: var(--brand-text-muted);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+.feed-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--brand-surface-2);
+  color: var(--brand-text-muted);
+}
+.feed-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.feed-icon.gold {
+  background: var(--brand-accent-soft);
+  color: var(--brand-accent-strong);
+}
+.feed-icon.success {
+  background: var(--brand-success-soft);
+  color: var(--brand-success);
+}
+.feed-icon.warning {
+  background: var(--brand-warning-soft);
+  color: var(--brand-warning);
+}
+.feed-icon.danger {
+  background: var(--brand-danger-soft);
+  color: var(--brand-danger);
+}
+
+/* ---------- Printing: only the page content ---------- */
+.print-only {
+  display: none;
+}
+@media print {
+  .topbar,
+  #sidenav,
+  .page-head .row,
+  .tabs,
+  button {
+    display: none !important;
+  }
+  .print-only {
+    display: block;
+  }
+  .shell {
+    display: block;
+  }
+  .content {
+    padding: 0;
+  }
+  .table-wrap {
+    border: 0;
+    overflow: visible;
+    box-shadow: none;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+}
+
+/* All table QR codes on one printable sheet */
+.qr-sheet {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1rem;
+}
+.qr-sheet figure {
+  break-inside: avoid;
+}
