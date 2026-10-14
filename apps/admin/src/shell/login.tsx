@@ -1,5 +1,5 @@
 import logoDark from '@fnb/theme/logo-dark.svg';
-import { ShieldCheck, Sparkles, Truck } from 'lucide-react';
+import { Eye, EyeOff, ShieldCheck, Sparkles, Truck } from 'lucide-react';
 import { useState } from 'react';
 import { api, setSession, type Session } from '../api';
 import { ErrorNote } from '../ui';
@@ -9,6 +9,7 @@ import { ErrorNote } from '../ui';
 export function Login() {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   async function submit(e: React.FormEvent) {
@@ -56,7 +57,26 @@ export function Login() {
           </div>
           <div className="field">
             <label htmlFor="password">Password</label>
-            <input id="password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <div className="password-wrap">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                title={showPassword ? 'Hide password' : 'Show password'}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="icon" aria-hidden /> : <Eye className="icon" aria-hidden />}
+              </button>
+            </div>
           </div>
           <ErrorNote error={error} />
           <button className="big" disabled={busy}>

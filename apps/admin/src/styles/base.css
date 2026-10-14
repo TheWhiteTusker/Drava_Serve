@@ -180,3 +180,47 @@ kbd {
   background: var(--brand-surface);
   color: var(--brand-text-muted);
 }
+
+/* ---------- Password visibility toggle ---------- */
+.password-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.password-wrap input {
+  padding-right: 2.75rem;
+}
+button.password-toggle {
+  position: absolute;
+  right: 0.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--brand-text-muted);
+  padding: 0;
+  width: 36px;
+  min-height: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--brand-radius-small);
+  cursor: pointer;
+  box-shadow: none;
+  transition: color 0.15s, background-color 0.15s;
+}
+button.password-toggle:hover:not(:disabled) {
+  background: var(--brand-surface-2);
+  border-color: transparent;
+  color: var(--brand-text);
+}
+button.password-toggle:active:not(:disabled) {
+  transform: translateY(-50%) scale(0.96);
+}
+button.password-toggle:focus-visible {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: 1px;
+}
+

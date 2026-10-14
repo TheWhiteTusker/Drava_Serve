@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import { Search } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
+import { Eye, EyeOff, Search } from 'lucide-react';
 
 // ---------- Forms ----------
 
@@ -15,6 +15,7 @@ export interface FieldSpec {
 }
 
 export function Field({ spec, value, onChange }: { spec: FieldSpec; value: any; onChange: (v: any) => void }) {
+  const [showPassword, setShowPassword] = useState(false);
   const id = `f-${spec.name}`;
   const help = spec.help && <small className="muted">{spec.help}</small>;
   if (spec.type === 'checkbox') {
@@ -72,16 +73,40 @@ export function Field({ spec, value, onChange }: { spec: FieldSpec; value: any; 
         onChange={(e) => onChange(e.target.value.split(',').map((s) => s.trim()).filter(Boolean))}
       />
     );
+  } else if (spec.type === 'password') {
+    input = (
+      <div className="password-wrap">
+        <input
+          id={id}
+          type={showPassword ? 'text' : 'password'}
+          value={value ?? ''}
+          required={spec.required}
+          placeholder={spec.placeholder}
+          autoComplete="new-password"
+          onChange={(e) => onChange(e.target.value === '' ? null : e.target.value)}
+        />
+        <button
+          type="button"
+          className="password-toggle"
+          onClick={() => setShowPassword((prev) => !prev)}
+          aria-label={showPassword ? 'Hide password' : 'Show password'}
+          title={showPassword ? 'Hide password' : 'Show password'}
+          tabIndex={-1}
+        >
+          {showPassword ? <EyeOff className="icon" aria-hidden /> : <Eye className="icon" aria-hidden />}
+        </button>
+      </div>
+    );
   } else {
     input = (
       <input
         id={id}
-        type={spec.type === 'password' ? 'password' : spec.type === 'time' ? 'time' : 'text'}
+        type={spec.type === 'time' ? 'time' : 'text'}
         inputMode={spec.type === 'decimal' ? 'decimal' : spec.type === 'number' ? 'numeric' : undefined}
         value={value ?? ''}
         required={spec.required}
         placeholder={spec.placeholder}
-        autoComplete={spec.type === 'password' ? 'new-password' : 'off'}
+        autoComplete="off"
         onChange={(e) => onChange(e.target.value === '' ? null : e.target.value)}
       />
     );
