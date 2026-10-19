@@ -12,7 +12,7 @@ Browser apps (Vercel services admin and field; see vercel.json)
   /m/<c>/<o>[/<table>]   guest QR menu, no sign-in (apps/field/menu); a table's code also takes orders
         │  REST /api/*      WebSocket /api/socket (socket.io)
         ▼
-API (NestJS, apps/api; Vercel service api)  ── Redis (optional): socket.io adapter + BullMQ jobs
+API (NestJS, apps/api; Vercel service api)  ── Redis (optional): socket.io adapter
         │
         ├─ control DB (fnb_control): customer, login_route
         ├─ one PostgreSQL DB per customer (fnb_c_<code>): everything else
@@ -23,7 +23,7 @@ API (NestJS, apps/api; Vercel service api)  ── Redis (optional): socket.io a
 - **Stock.** All stock changes go through `postMoves` / `stockTx` in `src/stock.ts`: balance rows locked in a fixed order, ledger rows appended, weighted average updated, earliest-expiry-first lots. After commit, `afterStock` recomputes portions available, pushes live events, re-ranks when something sells out or comes back, and runs the offer engine on beverage movements.
 - **Rules with numbers** are pure functions in `packages/shared/src/rules.ts` (indent quantity, portion cost, margin, suggested price, ranking, offer selection, availability, status, menu engineering, business day) and `money.ts` (bill totals and taxes), each with tests. The API and the POS use the same functions.
 - **Approvals.** `src/approvals.ts`: `proposeOrApply` applies directly when the proposer may approve, otherwise queues; handlers are registered per type (`registerApproval`) in the controller files. Nobody approves their own request.
-- **Jobs.** `src/jobs.ts`: a BullMQ job every minute runs `tick()`: nightly indent at each outlet's cut-off, delivery list by 04:30, day-end offer release. `job_run` rows make each run happen once and catch up after downtime. Backup runs at 02:00 (`src/data.ts`).
+- **Jobs.** `src/jobs.ts`: `tick()` runs the nightly indent at each outlet's cut-off, the delivery list by 04:30 and the day-end offer release. `job_run` rows make each run happen once and catch up after downtime, so extra or overlapping ticks do nothing. A long-running server ticks every minute itself (`main.ts`); on Vercel, cron-job.org calls `GET /api/jobs/tick` every 5 minutes with `Authorization: Bearer <CRON_SECRET>`. Backups are not scheduled: production relies on Supabase's backups, and `cli backup` makes an off-site copy by hand.
 - **Dashboard.** Paying a bill calls `rollupBill` (`src/reports.ts`) in the same transaction, which adds to `sales_hourly`, `sales_daily` and `bill_hourly`; cancelling a paid bill subtracts. Dashboard queries read only these.
 - **Tests.** `packages/shared/src/*.test.ts` (rules) and `apps/api/test/phase*.e2e.test.ts` (one end-to-end flow per phase, each on its own throwaway customer database). `test/fixture.ts` builds an outlet that mirrors the handoff's worked examples.
 
@@ -35,7 +35,7 @@ API (NestJS, apps/api; Vercel service api)  ── Redis (optional): socket.io a
   - Use managed PostgreSQL 17 and S3-compatible storage in an India region, with encryption at rest.
   - Give each customer database its own PostgreSQL role. Today all customer databases share the server role in `POSTGRES_URL`; per-customer credentials are an open item.
   - Serve over HTTPS. The installable apps (service workers, camera, share sheet) need it.
-  - Run more than one API instance if needed: live updates and jobs already go through Redis. Put PgBouncer in front once there are many customers (see the `ponytail:` note in `src/db/index.ts`).
+  - Run more than one API instance if needed: set `REDIS_URL` so live updates reach every instance; jobs are safe on any number of instances. Put PgBouncer in front once there are many customers (see the `ponytail:` note in `src/db/index.ts`).
   - Every production deploy on Vercel migrates the control database and every customer database before the new code goes live (the `api` service's build command). To migrate on purpose: `pnpm db:migrate` with `POSTGRES_URL` set.
   - The sample demo customer is created only by `pnpm seed`. Don't run it against a production database that holds real customers.
 

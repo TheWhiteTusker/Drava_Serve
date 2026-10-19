@@ -34,14 +34,16 @@ Sign in as `owner@demo.test` / `Demo@1234`; the other sample sign-ins are in [do
 Optional settings in `.env` (see `.env.example`):
 - `S3_*` (Supabase › Storage › S3 Connection): photo, vendor-bill and order-PDF uploads. The purchasing and dashboard tests need them too.
 - `RESEND_API_KEY` and `MAIL_FROM`: emails for "Forgot your password?". Without them, the email and its link are printed in the API's log (in production nothing is sent).
-- `REDIS_URL`: live updates across several API servers and the scheduled jobs (nightly orders, delivery list, offer release, backups). Without it the app runs, live updates reach only devices on the same server, and those jobs do not run.
+- `REDIS_URL`: live updates across several API servers. Without it, live updates reach only devices connected to the same server.
+- Scheduled jobs (nightly vendor orders, delivery list, offer release) run by themselves while `pnpm dev:api` runs; `JOBS=off` stops them.
 
 ## Production
 
 Vercel (team `twt13`, project `pos`) and the production Supabase project.
 
 - Push to `main`: Vercel builds the admin, field and API services. The API build first migrates the production database (`pnpm cli migrate`), so schema changes go live with the code.
-- Vercel environment variables: `POSTGRES_URL` (production project, Session pooler). Optional: `JWT_SECRET`, `S3_*`, `RESEND_API_KEY` and `MAIL_FROM` (password-reset emails), `CORS_ORIGIN`.
+- Vercel environment variables: `POSTGRES_URL` (production project, Session pooler) and `CRON_SECRET`. Optional: `JWT_SECRET`, `S3_*`, `RESEND_API_KEY` and `MAIL_FROM` (password-reset emails), `REDIS_URL`, `CORS_ORIGIN`.
+- Scheduled jobs: cron-job.org calls `GET https://pos-neon-two.vercel.app/api/jobs/tick` every 5 minutes with the header `Authorization: Bearer <CRON_SECRET>` (Vercel's own cron runs only once a day on the free plan). A call without the right secret gets 403.
 - To run a command against production, set the URL for that terminal only: `$env:POSTGRES_URL="<production URL>"; pnpm customer:create …`, then `Remove-Item Env:POSTGRES_URL`.
 
 ## Commands

@@ -16,6 +16,7 @@ import { AuthGuard, ErrorFilter, Public } from './common.js';
 import { LiveGateway } from './events.js';
 import { DataController } from './data.js';
 import { InventoryCountsController } from './inventory/counts.controller.js';
+import { JobsController } from './jobs.js';
 import { InventoryController } from './inventory/stock.controller.js';
 import { PosController } from './pos/controller.js';
 import { DayCloseController } from './pos/day-close.js';
@@ -48,7 +49,7 @@ class HealthController {
     MenuItemsController, DiningTablesController, LiquorTreeController, ApprovalsController, InventoryController, InventoryCountsController,
     VendorsController, VendorItemsController, VendorRatesController, IndentsController,
     DeliveriesController, GrnsController, AttachmentsController, PricingController, PricingRulesController, PublicMenuController,
-    PosController, GuestOrdersController, DayCloseController, ReportsController, DataController, ActivityController,
+    PosController, GuestOrdersController, DayCloseController, ReportsController, DataController, ActivityController, JobsController,
   ],
   providers: [
     LiveGateway,

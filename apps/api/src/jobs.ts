@@ -1,16 +1,17 @@
-import { Logger } from '@nestjs/common';
-import { Queue, Worker } from 'bullmq';
-import { Redis as IORedis } from 'ioredis';
+import { timingSafeEqual } from 'node:crypto';
+import { Controller, ForbiddenException, Get, Headers, Logger } from '@nestjs/common';
 import { and, eq, sql } from 'drizzle-orm';
 import { istDate, istTime } from '@fnb/shared';
 import { getSettings } from './access/settings.js';
-import { Ctx } from './common.js';
+import { Ctx, Public } from './common.js';
 import { controlDb, controlSchema, tenantDb, tenantSchema as t } from './db/index.js';
 import { endOffersForDay } from './pricing/offers.js';
 import { buildIndents, createDelivery, deliveryDateFor } from './purchasing/indents.js';
 
-// Scheduled work. A one-minute tick checks every customer and outlet; job_run rows make each
-// job happen once per outlet and day, and let it catch up if the server was down at the time.
+// Scheduled work. A tick checks every customer and outlet; job_run rows make each job happen once
+// per outlet and day, and let it catch up if no tick came at the time. A long-running server ticks
+// every minute itself (main.ts); on Vercel, where nothing runs between requests, an external
+// scheduler calls GET /api/jobs/tick every few minutes.
 
 const log = new Logger('Jobs');
 const minus = (date: string, days: number) => istDate(new Date(new Date(`${date}T12:00:00+05:30`).getTime() - days * 86_400_000));
@@ -67,24 +68,16 @@ export async function tick(now = new Date()) {
   }
 }
 
-// Started by main.ts when Redis is configured. BullMQ makes sure only one API instance runs
-// each tick, and the nightly backup (phase 6) runs from the same queue.
-export async function startJobs(redisUrl: string, extra: Record<string, () => Promise<unknown>> = {}) {
-  // Workers block on Redis, so they need their own connection with no retry limit.
-  const connection = () => new IORedis(redisUrl, { maxRetriesPerRequest: null });
-  const queue = new Queue('fnb', { connection: connection() });
-  await queue.upsertJobScheduler('tick', { every: 60_000 }, { name: 'tick' });
-  for (const [name, cron] of Object.entries({ backup: '0 2 * * *' })) {
-    if (extra[name]) await queue.upsertJobScheduler(name, { pattern: cron, tz: 'Asia/Kolkata' }, { name });
+// The external scheduler's door. Extra or overlapping calls do nothing, thanks to the job_run claims.
+@Controller('jobs')
+export class JobsController {
+  @Public()
+  @Get('tick')
+  async run(@Headers('authorization') auth?: string) {
+    const secret = process.env.CRON_SECRET;
+    const [given, want] = [Buffer.from(auth ?? ''), Buffer.from(`Bearer ${secret}`)];
+    if (!secret || given.length !== want.length || !timingSafeEqual(given, want)) throw new ForbiddenException('Not allowed');
+    await tick();
+    return { ok: true };
   }
-  const worker = new Worker(
-    'fnb',
-    async (job) => {
-      if (job.name === 'tick') return tick();
-      return extra[job.name]?.();
-    },
-    { connection: connection(), concurrency: 1 },
-  );
-  worker.on('failed', (job, err) => log.error(`${job?.name} failed: ${err.message}`));
-  return { queue, worker };
 }

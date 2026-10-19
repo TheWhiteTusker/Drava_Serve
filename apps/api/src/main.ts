@@ -5,8 +5,7 @@ import { createAdapter } from '@socket.io/redis-adapter';
 import { createClient } from 'redis';
 import type { ServerOptions } from 'socket.io';
 import { AppModule } from './app.module.js';
-import { backupAll } from './data.js';
-import { startJobs } from './jobs.js';
+import { tick } from './jobs.js';
 
 // Live updates fan out through Redis so every API instance reaches every device.
 class RedisIoAdapter extends IoAdapter {
@@ -35,8 +34,9 @@ async function bootstrap() {
     const adapter = new RedisIoAdapter(app);
     await adapter.connect(process.env.REDIS_URL);
     app.useWebSocketAdapter(adapter);
-    if (process.env.JOBS !== 'off') await startJobs(process.env.REDIS_URL, { backup: backupAll });
   }
+  // A long-running server runs the scheduled jobs itself; on Vercel the scheduler calls /api/jobs/tick.
+  if (!process.env.VERCEL && process.env.JOBS !== 'off') setInterval(() => tick().catch((e) => console.error('jobs tick failed', e)), 60_000);
   await app.listen(Number(process.env.PORT ?? 3000));
   console.log(`API listening on ${await app.getUrl()}`);
 }

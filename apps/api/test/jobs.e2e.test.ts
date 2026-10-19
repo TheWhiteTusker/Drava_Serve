@@ -5,7 +5,7 @@ import { Ctx } from '../src/common.js';
 import { closeAll, tenantSchema as t } from '../src/db/index.js';
 import { indentDueAt, tickCustomer } from '../src/jobs.js';
 import { setupFixture, type Fixture } from './fixture.js';
-import { startApp } from './helpers.js';
+import { client, startApp } from './helpers.js';
 
 // The scheduler: the nightly indent is due at the cut-off the evening before delivery and runs once.
 
@@ -24,6 +24,15 @@ afterAll(async () => {
 });
 
 describe('scheduled jobs', () => {
+  it('the scheduler endpoint refuses anyone without the secret', async () => {
+    delete process.env.CRON_SECRET;
+    expect((await client(app).get('/jobs/tick')).status).toBe(403); // no secret set: always refused
+    process.env.CRON_SECRET = 'test-secret';
+    expect((await client(app).get('/jobs/tick')).status).toBe(403);
+    expect((await client(app, 'wrong-secret').get('/jobs/tick')).status).toBe(403);
+    delete process.env.CRON_SECRET;
+  });
+
   it('the indent is due at the cut-off the evening before delivery', () => {
     expect(indentDueAt('2026-10-11', '23:00').toISOString()).toBe(new Date('2026-10-10T23:00:00+05:30').toISOString());
     expect(indentDueAt('2026-10-11', '01:00').toISOString()).toBe(new Date('2026-10-11T01:00:00+05:30').toISOString());

@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { Controller, Get, Logger, Res } from '@nestjs/common';
+import { Controller, Get, Res } from '@nestjs/common';
 import { eq, sql } from 'drizzle-orm';
 import { zipSync, strToU8 } from 'fflate';
 import { istDate } from '@fnb/shared';
@@ -10,7 +10,6 @@ import { deleteRaw, getRaw, listRaw, putRaw } from './storage.js';
 
 // Backups, restore, per-customer export and deletion (handoff 6.14 safeguards).
 
-const log = new Logger('Data');
 export const BACKUP_BUCKET = process.env.BACKUP_BUCKET ?? 'fnb-backups';
 const KEEP_DAYS = Number(process.env.BACKUP_KEEP_DAYS ?? 30);
 
@@ -38,18 +37,6 @@ export async function backupCustomer(c: Customer, now = new Date()) {
   const old = (await listRaw(BACKUP_BUCKET, `${c.code}/`)).filter((o) => o.key.slice(c.code.length + 1, -5) < cutoff);
   await deleteRaw(BACKUP_BUCKET, old.map((o) => o.key));
   return { key, bytes: dump.length };
-}
-
-export async function backupAll() {
-  const customers = await controlDb().select().from(controlSchema.customer);
-  for (const c of customers) {
-    try {
-      const r = await backupCustomer(c);
-      log.log(`backup ${c.code}: ${r.key} (${Math.round(r.bytes / 1024)} KB)`);
-    } catch (e) {
-      log.error(`backup ${c.code} failed: ${(e as Error).message}`);
-    }
-  }
 }
 
 export async function listBackups(code: string) {
