@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "nest build -b swc",
-    "dev": "nest start -b swc --watch",
+    "dev": "nest start -b swc --watch --exec \"node --env-file-if-exists=../../.env\"",
     "start": "node dist/main.js",
     "cli": "node --env-file-if-exists=../../.env --import @swc-node/register/esm-register src/cli.ts",
     "db:generate": "drizzle-kit generate --config drizzle.tenant.ts && drizzle-kit generate --config drizzle.control.ts",

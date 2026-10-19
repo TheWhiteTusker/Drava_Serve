@@ -24,7 +24,7 @@
 
 ## Try it yourself
 
-1. `docker compose up --build`, then open http://localhost:5173/pos/ (on a tablet or a wide browser window). Sign in as `cashier@demo.test` / `Demo@1234`.
+1. Start the apps ([README › Run](../README.md#run)), then open http://localhost:5174/pos/ (on a tablet or a wide browser window). Sign in as `cashier@demo.test` / `Demo@1234`.
 2. Press **F2** (or tap New bill), pick a table, tap a few dishes and drinks, then press **Send order (F9)**. Blenders Pride 60 ml shows ₹306: it's on offer because Royal Stag is low, but nothing says so.
 3. Press **Pay (F8)**, choose Cash, type the amount received to see the change, and confirm. The receipt appears. Try **Print**.
 4. **Offline test:** turn off Wi-Fi (or, in the browser's developer tools, set the network to Offline). Start another bill, send it and pay it. The OFFLINE badge and "1 unsent bill" appear. Turn the connection back on: within a few seconds the badge clears, and the bill appears in the admin app.

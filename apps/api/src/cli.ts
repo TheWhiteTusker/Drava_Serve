@@ -11,7 +11,6 @@ import { seedDemo } from './seed.js';
 // pnpm db:migrate                       control database, then every customer database
 // pnpm customer:create <code> "<name>" --owner-login x --owner-name y --owner-password z
 // pnpm seed [--reset]                   demo customer with SAMPLE data
-// seed-if-empty                         used by Docker on start: migrates, and seeds the demo when SEED_DEMO=true and there are no customers
 // backup [code]                         back up one customer (or all) to object storage now
 // backups <code>                        list a customer's backups
 // restore <code> [YYYY-MM-DD]           restore a customer's database from a backup (latest by default)
@@ -50,13 +49,6 @@ try {
       await migrateAll(() => {});
       await seedDemo({ reset: values.reset });
       break;
-    case 'seed-if-empty': {
-      await migrateAll(() => {});
-      // Only where SEED_DEMO=true (the local Docker setup); never on a real server by accident.
-      const any = await controlDb().select().from(controlSchema.customer).limit(1);
-      if (!any.length && process.env.SEED_DEMO === 'true') await seedDemo();
-      break;
-    }
     case 'backup': {
       const all = await controlDb().select().from(controlSchema.customer);
       for (const c of all.filter((c) => !args[0] || c.code === args[0])) console.log(`${c.code}: ${(await backupCustomer(c)).key}`);
@@ -88,7 +80,7 @@ try {
       break;
     }
     default:
-      throw new Error('Commands: migrate | customer:create | seed [--reset] | seed-if-empty | backup | backups | restore | customer:export | customer:delete | rollups:rebuild');
+      throw new Error('Commands: migrate | customer:create | seed [--reset] | backup | backups | restore | customer:export | customer:delete | rollups:rebuild');
   }
 } catch (e) {
   console.error((e as Error).message);

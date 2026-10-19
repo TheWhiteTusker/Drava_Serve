@@ -24,7 +24,7 @@
 
 ## Try it yourself
 
-1. `docker compose up --build`, then open http://localhost:5173 and sign in as `owner@demo.test` / `Demo@1234`.
+1. Start the apps ([README › Run](../README.md#run)), then open http://localhost:5173 and sign in as `owner@demo.test` / `Demo@1234`.
 2. **Inventory → Stock.** Switch between Food and Beverage. Some sample items show Reorder or Critical. Click an item name to see its movements: the sample week's sales are there.
 3. **Record wastage** (button at the top right). Record 100 g of Tomato wasted from the Kitchen with a reason. As the owner it applies straight away, and the screen updates.
 4. **Try the approval queue:** sign out, sign in as `store@demo.test` and record wastage. It says it has gone for approval. Sign in as `manager@demo.test`, open **Business → Approvals** and approve it.

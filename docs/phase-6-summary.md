@@ -31,12 +31,12 @@ Every block follows the same filters: date range (Today, Last 7 days, Last 30 da
 
 ## Try it yourself
 
-1. `docker compose up --build`, then open http://localhost:5173 and sign in as `owner@demo.test` / `Demo@1234`. The dashboard opens first.
+1. Start the apps ([README › Run](../README.md#run)), then open http://localhost:5173 and sign in as `owner@demo.test` / `Demo@1234`. The dashboard opens first.
 2. Change the date range, switch between outlets, and choose Food or Beverage. Every block follows.
 3. In **Demand by weekday and hour**, pick "Tomato Soup" to see when it sells. Hover over a square (or tab to it) for the exact number.
 4. Ring up a bill on the POS in another window and watch Sales and Bills change.
 5. **Reports:** look at menu engineering for this month, close a day on the POS, then export the day-close CSV.
-6. **Backups** (for White Tusker's team, in a terminal): `docker compose exec api node dist/cli.js backup demo`, then `docker compose exec api node dist/cli.js backups demo` to list them. `docker compose exec api node dist/cli.js restore demo` restores the latest.
+6. **Backups** (for White Tusker's team, in a terminal): `pnpm --filter @fnb/api cli backup demo`, then `pnpm --filter @fnb/api cli backups demo` to list them. `pnpm --filter @fnb/api cli restore demo` restores the latest. Needs the PostgreSQL client tools and the `S3_*` settings.
 
 ## What I assumed
 

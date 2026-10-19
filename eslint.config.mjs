@@ -4,7 +4,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/node_modules/**', 'apps/api/migrations/**'] },
+  { ignores: ['**/dist/**', '**/node_modules/**', 'apps/api/migrations/**', '.vercel/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

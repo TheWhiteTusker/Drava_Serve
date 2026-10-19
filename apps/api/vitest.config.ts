@@ -4,7 +4,7 @@ import { defineConfig } from 'vitest/config';
 try {
   process.loadEnvFile('../../.env');
 } catch {
-  // no .env: rely on the environment (Docker, CI)
+  // no .env: rely on the environment (CI)
 }
 
 export default defineConfig({

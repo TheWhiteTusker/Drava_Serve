@@ -26,10 +26,9 @@
 
 ## Try it yourself
 
-1. Install and open Docker Desktop.
-2. In a terminal, in the project folder, run: `docker compose up --build`. The first time takes a few minutes.
-3. Open http://localhost:5173 in your browser.
-4. Sign in with one of the sample accounts below. The password for all of them is `Demo@1234`.
+1. Set up once and start the apps: [README › Set up](../README.md#set-up) and [Run](../README.md#run).
+2. Open http://localhost:5173 in your browser.
+3. Sign in with one of the sample accounts below. The password for all of them is `Demo@1234`.
 
 | Sign in as | Role | Where | PIN |
 | --- | --- | --- | --- |
@@ -49,7 +48,7 @@ Things to try:
 - **Per-outlet cut-off:** in Settings, set the business cut-off to 22:30, then switch the outlet at the top and give Mysuru 23:15.
 - **Dark mode:** click "Theme" at the top to cycle between following the device, light and dark.
 
-To start over with fresh sample data: `docker compose down -v`, then `docker compose up --build` again.
+To start over with fresh sample data: `pnpm seed --reset`.
 
 ## What I assumed
 
@@ -61,7 +60,7 @@ The full list, with reasons, is in [DECISIONS.md](DECISIONS.md). The ones you ma
 - **Ingredients are shared across a business's outlets; menus and prices are per outlet.** A tomato is the same tomato everywhere, but Indiranagar and Mysuru can have different dishes, prices and stock levels.
 - **Mocktails and soft drinks** sit under the food course "Soft beverages" with food tax. **Cocktails** are a beverage type with liquor tax.
 - **Beverage offers are switched off for every new outlet.** The owner turns them on per outlet. In the sample data they are on at Indiranagar only.
-- **Local file storage:** MinIO (the usual local S3 store) no longer publishes its Docker image, so SeaweedFS is used locally. Production can use any S3-compatible storage in an India region.
+- **File storage:** any S3-compatible storage in an India region; development and production use Supabase Storage.
 
 ## What I need from you
 

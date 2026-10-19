@@ -5,14 +5,14 @@ For White Tusker's developers taking over the F&B management system. Read [READM
 ## 1. How it fits together
 
 ```
-Browser apps (one nginx container, apps/admin/Dockerfile)
+Browser apps (Vercel services admin and field; see vercel.json)
   /            admin + dashboard (apps/admin)
   /pos/        billing POS, installable, offline queue (apps/field/pos)
   /receiving/  receiving app, installable, offline queue (apps/field/receiving)
   /m/<c>/<o>[/<table>]   guest QR menu, no sign-in (apps/field/menu); a table's code also takes orders
         │  REST /api/*      WebSocket /api/socket (socket.io)
         ▼
-API (NestJS, apps/api)  ── Redis: socket.io adapter + BullMQ jobs
+API (NestJS, apps/api; Vercel service api)  ── Redis (optional): socket.io adapter + BullMQ jobs
         │
         ├─ control DB (fnb_control): customer, login_route
         ├─ one PostgreSQL DB per customer (fnb_c_<code>): everything else
@@ -29,21 +29,22 @@ API (NestJS, apps/api)  ── Redis: socket.io adapter + BullMQ jobs
 
 ## 2. Running it
 
-- Local: `docker compose up --build` (everything, with sample data) or the development commands in the README.
+- Local: the Set up and Run steps in the README, against a development Supabase project.
 - **Production checklist:**
   - Set `JWT_SECRET` (optional for now: without it, production derives the session key from `POSTGRES_URL`), `POSTGRES_URL`, `CONTROL_DB_NAME`, `REDIS_URL`, `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `CORS_ORIGIN`, and optionally `BACKUP_BUCKET`, `BACKUP_KEEP_DAYS`, `TENANT_POOL_MAX`.
   - Use managed PostgreSQL 17 and S3-compatible storage in an India region, with encryption at rest.
   - Give each customer database its own PostgreSQL role. Today all customer databases share the server role in `POSTGRES_URL`; per-customer credentials are an open item.
   - Serve over HTTPS. The installable apps (service workers, camera, share sheet) need it.
   - Run more than one API instance if needed: live updates and jobs already go through Redis. Put PgBouncer in front once there are many customers (see the `ponytail:` note in `src/db/index.ts`).
-  - Each API start runs `seed-if-empty`, which migrates the control database and every customer database before serving. To migrate on purpose: `node dist/cli.js migrate`.
-  - The sample demo customer is created only when `SEED_DEMO=true` (set in `docker-compose.yml` for local use) and there are no customers. Leave it unset in production.
+  - Every production deploy on Vercel migrates the control database and every customer database before the new code goes live (the `api` service's build command). To migrate on purpose: `pnpm db:migrate` with `POSTGRES_URL` set.
+  - The sample demo customer is created only by `pnpm seed`. Don't run it against a production database that holds real customers.
 
 ## 3. Adding a customer
 
-```sh
-docker compose exec api node dist/cli.js customer:create sharma "Sharma Hospitality Pvt Ltd" \
-  --owner-login owner@sharma.example --owner-password '<temporary>' --owner-name "Owner"
+```powershell
+$env:POSTGRES_URL="<production URL>"
+pnpm customer:create sharma "Sharma Hospitality Pvt Ltd" --owner-login owner@sharma.example --owner-password '<temporary>' --owner-name "Owner"
+Remove-Item Env:POSTGRES_URL
 ```
 
 This adds the control row, creates `fnb_c_sharma`, runs every migration, loads the starting catalog (seed roles, courses, the liquor tree from handoff 6.6, starter brands and two tax classes) and creates the owner sign-in. The owner then signs in, adds outlets (each gets main, kitchen and bar stores, plus an offer rule switched off), users, stock items and menu items. Opening stock goes in as a first stock count.

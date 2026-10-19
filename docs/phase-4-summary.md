@@ -18,7 +18,7 @@
 
 **Silent price change.** Guests and the POS see only the new lower price. There is no "offer" tag and no crossed-out price, and the bill will show only the price charged. Behind the scenes, everything is recorded for your reports: menu price, price charged and which offer caused it.
 
-**Guest QR menu.** At `/m/<business>/<outlet>`, for example http://localhost:5173/m/demo/BLR1. Food is grouped by course in ranked order, drinks by type and brand. It shows veg and non-veg marks (by shape, not just colour), allergens, sold-out items greyed and current prices only. There's no sign-in, no cookies and nothing collected about guests. **Outlets → QR code** gives a printable QR for each outlet.
+**Guest QR menu.** At `/m/<business>/<outlet>`, for example https://pos-neon-two.vercel.app/m/demo/BLR1 (locally: http://localhost:5174/menu/?c=demo&o=BLR1). Food is grouped by course in ranked order, drinks by type and brand. It shows veg and non-veg marks (by shape, not just colour), allergens, sold-out items greyed and current prices only. There's no sign-in, no cookies and nothing collected about guests. **Outlets → QR code** gives a printable QR for each outlet.
 
 **Margins never leave the admin screens.** The POS and the guest menu receive no cost or margin figures at all, and a test checks this.
 
@@ -28,7 +28,7 @@
 2. Click **Recipe** on Tomato Soup and change the tomato quantity to 600 g. The cost and margin update as you type. Close without saving.
 3. Make tomato expensive: receive tomato at ₹50 a kg through the receiving app (Phase 3 summary, steps 2–4). Then come back: Sweet Corn Soup is now first.
 4. **Pricing → Margin targets:** set Soups and salads to 75%. Tomato Soup is flagged "under target" with a suggested price. Approve it in **Business → Approvals** as `manager@demo.test`.
-5. **Pricing → Beverage offers:** Royal Stag is down to 4 pegs at Indiranagar, so Blenders Pride 60 ml is on offer at ₹306 instead of ₹340. Open http://localhost:5173/m/demo/BLR1 on your phone, tap Drinks, and Blenders Pride shows ₹306 with no offer label.
+5. **Pricing → Beverage offers:** Royal Stag is down to 4 pegs at Indiranagar, so Blenders Pride 60 ml is on offer at ₹306 instead of ₹340. Open https://pos-neon-two.vercel.app/m/demo/BLR1 on your phone, tap Drinks, and Blenders Pride shows ₹306 with no offer label.
 6. Switch to the Mysuru outlet: offers are off there (**Settings → Beverage offers**), so no offer is running.
 
 ## What I assumed

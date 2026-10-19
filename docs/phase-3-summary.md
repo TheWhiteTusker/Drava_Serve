@@ -24,8 +24,8 @@
 
 ## Try it yourself
 
-1. `docker compose up --build`, then open http://localhost:5173.
-2. **On a phone or a narrow browser window,** open http://localhost:5173/receiving/ and sign in as `watchman@demo.test` / `Demo@1234`. Today's vegetable delivery for Indiranagar is waiting. Accept some lines, mark one Short and reject one with a reason. Take a photo if you're on a phone. Press **Finish gate check**.
+1. Start the apps ([README › Run](../README.md#run)), then open http://localhost:5173.
+2. **On a phone or a narrow browser window,** open http://localhost:5174/receiving/ and sign in as `watchman@demo.test` / `Demo@1234`. Today's vegetable delivery for Indiranagar is waiting. Accept some lines, mark one Short and reject one with a reason. Take a photo if you're on a phone. Press **Finish gate check**.
 3. Sign out and sign in as `store@demo.test`. Open the same delivery, enter a usable quantity and the bill rate for each line (try rejecting a little as Spoiled), add a bill number, and press **Finish re-check**. Then press **Sign as staff**.
 4. Sign in again as the watchman and press **Sign as watchman**. The stock goes in.
 5. On a computer, as `owner@demo.test`: **Purchasing → Deliveries** shows the note, **Accounts** lets you record a payment and export CSV, and **Vendors and rates → Rate history** shows the new rate.
