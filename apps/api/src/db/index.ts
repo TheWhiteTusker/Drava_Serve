@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { attachDatabasePool } from '@vercel/functions';
 import { eq } from 'drizzle-orm';
 import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
@@ -30,6 +31,7 @@ let control: { pool: pg.Pool; db: ControlDb } | undefined;
 export function controlDb(): ControlDb {
   if (!control) {
     const pool = new pg.Pool({ connectionString: dbUrl(controlDbName()), max: 5 });
+    attachDatabasePool(pool); // on Vercel: idle connections close before the function is paused
     control = { pool, db: drizzle(pool, { schema: controlSchema, casing: 'snake_case' }) };
   }
   return control.db;
@@ -42,6 +44,7 @@ export function tenantDb(dbName: string): TenantDb {
   let t = tenantPools.get(dbName);
   if (!t) {
     const pool = new pg.Pool({ connectionString: dbUrl(dbName), max: Number(process.env.TENANT_POOL_MAX ?? 5) });
+    attachDatabasePool(pool);
     t = { pool, db: drizzle(pool, { schema: tenantSchema, casing: 'snake_case' }) };
     tenantPools.set(dbName, t);
   }

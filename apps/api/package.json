@@ -19,6 +19,7 @@
     "@nestjs/platform-socket.io": "12.1.2",
     "@nestjs/websockets": "12.1.2",
     "@socket.io/redis-adapter": "^8.3.0",
+    "@vercel/functions": "3.9.11",
     "bullmq": "^6.3.12",
     "drizzle-orm": "0.45.4",
     "fflate": "^0.8.3",
