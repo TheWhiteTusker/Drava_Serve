@@ -34,6 +34,9 @@ export function Shell({ s }: { s: Session }) {
 
   return (
     <div className="shell">
+      <a className="skip-link" href="#content">
+        Skip to content
+      </a>
       <header className="topbar">
         <button className="ghost icon-only menu-toggle" aria-expanded={menuOpen} aria-controls="sidenav" onClick={() => setMenuOpen((o) => !o)}>
           <Menu className="icon" />
@@ -109,7 +112,7 @@ export function Shell({ s }: { s: Session }) {
         </a>
       </nav>
       {/* Keyed by user: after a PIN switch every page reloads with the new person's access. */}
-      <main className="content" key={s.user.id}>
+      <main id="content" tabIndex={-1} className="content" key={s.user.id}>
         <Routes>
           {nav.map((n) => (
             <Route key={n.to} path={`${n.to}/*`} element={<n.page />} />

@@ -16,21 +16,21 @@
  * (green circle in a green square, brown triangle in a brown square).
  */
 
-@import '@fontsource-variable/inter';
-@import '@fontsource/playfair-display/500.css';
-@import '@fontsource/playfair-display/600.css';
-@import '@fontsource/playfair-display/700.css';
+@import "@fontsource-variable/inter";
+@import "@fontsource/playfair-display/500.css";
+@import "@fontsource/playfair-display/600.css";
+@import "@fontsource/playfair-display/700.css";
 
 :root {
   color-scheme: light;
 
   /* Brand */
-  --brand-logo: url('./logo.svg');
+  --brand-logo: url("./logo.svg");
   --brand-primary: #2b241d; /* espresso: main buttons */
   --brand-primary-hover: #3d342a;
   --brand-primary-contrast: #fbf6ec;
   --brand-accent: #a77a2c; /* brass gold: highlights, active states */
-  --brand-accent-strong: #855f1c; /* gold dark enough for text and links */
+  --brand-accent-strong: #7f5a1a; /* gold dark enough for text and links (4.5:1 on every surface) */
   --brand-accent-soft: rgb(167 122 44 / 0.12);
 
   /* Surfaces and text */
@@ -46,21 +46,24 @@
   /* Status (text colour, and a soft background for badges) */
   --brand-success: #2e7550;
   --brand-success-soft: #e3f0e6;
-  --brand-warning: #9a6312;
+  --brand-warning: #8a5810; /* 4.5:1 on --brand-warning-soft, as on badges */
   --brand-warning-soft: #f7ead2;
   --brand-danger: #b0402b;
   --brand-danger-soft: #f8e1dc;
-  --brand-info: #855f1c;
+  --brand-info: #7f5a1a;
 
   /* Shape, type and depth */
   --brand-radius: 12px;
   --brand-radius-small: 8px;
   --brand-radius-large: 18px;
-  --brand-font: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --brand-font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
-  --brand-font-mono: ui-monospace, 'Cascadia Mono', Consolas, monospace;
-  --brand-shadow: 0 1px 2px rgb(60 40 20 / 0.05), 0 2px 8px -2px rgb(60 40 20 / 0.08);
-  --brand-shadow-lg: 0 2px 6px rgb(60 40 20 / 0.06), 0 18px 40px -12px rgb(60 40 20 / 0.22);
+  --brand-font:
+    "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --brand-font-heading: "Playfair Display", Georgia, "Times New Roman", serif;
+  --brand-font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --brand-shadow:
+    0 1px 2px rgb(60 40 20 / 0.05), 0 2px 8px -2px rgb(60 40 20 / 0.08);
+  --brand-shadow-lg:
+    0 2px 6px rgb(60 40 20 / 0.06), 0 18px 40px -12px rgb(60 40 20 / 0.22);
 
   /* Charts (validated for colour-blind safety and contrast on these surfaces) */
   --chart-series: #a77a2c;
@@ -75,9 +78,9 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
+  :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --brand-logo: url('./logo-dark.svg');
+    --brand-logo: url("./logo-dark.svg");
     --brand-primary: #d3ad62;
     --brand-primary-hover: #e0bf7c;
     --brand-primary-contrast: #1a150f;
@@ -111,9 +114,9 @@
   }
 }
 
-:root[data-theme='dark'] {
+:root[data-theme="dark"] {
   color-scheme: dark;
-  --brand-logo: url('./logo-dark.svg');
+  --brand-logo: url("./logo-dark.svg");
   --brand-primary: #d3ad62;
   --brand-primary-hover: #e0bf7c;
   --brand-primary-contrast: #1a150f;
@@ -144,4 +147,27 @@
   --chart-axis: #4a3f33;
   --mark-veg: #3dbb5f;
   --mark-nonveg: #c47a3d;
+}
+
+/* Respect the device's "reduce motion" setting in every app. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Headings without a lonely last word; short text without orphans. */
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+p,
+li {
+  text-wrap: pretty;
 }

@@ -47,6 +47,24 @@ a {
 .num {
   font-variant-numeric: tabular-nums;
 }
+/* Keyboard users jump past the navigation; it shows only when focused. */
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -100px;
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  border-radius: var(--brand-radius-small);
+  background: var(--brand-primary);
+  color: var(--brand-primary-contrast);
+  font-weight: 600;
+}
+.skip-link:focus {
+  top: 0.75rem;
+}
+main:focus {
+  outline: none; /* focused only by the skip link, never by clicking */
+}
 .sr-only {
   position: absolute;
   width: 1px;
