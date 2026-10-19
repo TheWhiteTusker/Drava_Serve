@@ -26,6 +26,11 @@ export const zLogin = z.object({
   password: z.string().min(1),
 });
 
+const newPassword = z.string().min(8, 'At least 8 characters');
+export const zChangePassword = z.object({ currentPassword: z.string().min(1), newPassword });
+export const zForgotPassword = zLogin.pick({ login: true });
+export const zResetPassword = z.object({ token: z.string().min(1), password: newPassword });
+
 export const zPinSwitch = z.object({
   userId: id,
   pin: z.string().regex(/^\d{4,6}$/, 'PIN is 4 to 6 digits'),

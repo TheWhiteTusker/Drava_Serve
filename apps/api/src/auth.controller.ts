@@ -1,14 +1,16 @@
-import { Body, Controller, ForbiddenException, Get, Post, Query, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Body, Controller, ForbiddenException, Get, Post, Query, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { and, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm';
-import { zLogin, zPinSwitch } from '@fnb/shared';
+import { zChangePassword, zForgotPassword, zLogin, zPinSwitch, zResetPassword } from '@fnb/shared';
 import { C, Ctx, loadGrants, parse, Public, type TokenClaims } from './common.js';
-import { verifySecret } from './secrets.js';
+import { appUrl, sendMail } from './mail.js';
+import { hashSecret, passwordStamp, resetSecret, verifySecret } from './secrets.js';
 import { controlDb, controlSchema, resolveCustomer, tenantSchema as t, type TenantDb } from './db/index.js';
 
 const MAX_ATTEMPTS = 5;
 const LOCK_MINUTES = 15;
 const WRONG = 'Sign-in details are not right';
+const EXPIRED = 'This link has expired or was already used. Ask for a new one.';
 
 // Counts a failed attempt; five in a row locks the user for 15 minutes.
 async function checkSecret(db: TenantDb, user: typeof t.appUser.$inferSelect, secret: string, stored: string | null) {
@@ -80,6 +82,57 @@ export class AuthController {
       .innerJoin(t.userRole, eq(t.userRole.userId, t.appUser.id))
       .where(and(eq(t.appUser.active, true), isNotNull(t.appUser.pinHash), atOutlet))
       .orderBy(t.appUser.name);
+  }
+
+  // Signed-in users change their own password; the current one is checked like a sign-in.
+  @Post('password')
+  async changePassword(@C() ctx: Ctx, @Body() body: unknown) {
+    const { currentPassword, newPassword } = parse(zChangePassword, body);
+    const [user] = await ctx.db.select().from(t.appUser).where(eq(t.appUser.id, ctx.userId!));
+    await checkSecret(ctx.db, user, currentPassword, user.passwordHash);
+    const passwordHash = await hashSecret(newPassword);
+    await ctx.tx((tx) => tx.update(t.appUser).set({ passwordHash }).where(eq(t.appUser.id, user.id)));
+    return { ok: true };
+  }
+
+  // Forgot password: emails a link that sets a new one. The answer is the same whether or not the
+  // sign-in exists, so it cannot be used to find out who has an account. Phone sign-ins get no email.
+  @Public()
+  @Post('forgot')
+  async forgot(@Body() body: unknown) {
+    const { login } = parse(zForgotPassword, body);
+    const answer = { message: 'If that sign-in has an email address, a link to set a new password is on its way.' };
+    if (!login.includes('@')) return answer;
+    const [route] = await controlDb().select().from(controlSchema.loginRoute).where(eq(controlSchema.loginRoute.login, login));
+    const tenant = route && (await resolveCustomer(route.customerId));
+    const [user] = tenant ? await tenant.db.select().from(t.appUser).where(eq(t.appUser.login, login)) : [];
+    if (!tenant || !user?.active) return answer;
+    const claims = { sub: user.id, cid: tenant.customer.id, pw: passwordStamp(user.passwordHash) };
+    const token = await this.jwt.signAsync(claims, { secret: resetSecret(), expiresIn: '30m' });
+    await sendMail({
+      to: login,
+      subject: 'Set a new password',
+      text:
+        `Hello ${user.name},\n\nSomeone asked to set a new password for ${login}. To do it, open this link within 30 minutes:\n\n` +
+        `${appUrl()}/reset-password?token=${token}\n\nIf it wasn't you, ignore this email: your password stays as it is.`,
+    });
+    return answer;
+  }
+
+  // The link from that email: works once, for 30 minutes, and stops working if the password changes.
+  @Public()
+  @Post('reset')
+  async reset(@Body() body: unknown) {
+    const { token, password } = parse(zResetPassword, body);
+    const claims = await this.jwt.verifyAsync<TokenClaims & { pw: string }>(token, { secret: resetSecret() }).catch(() => null);
+    const tenant = claims && (await resolveCustomer(claims.cid));
+    const [user] = claims && tenant ? await tenant.db.select().from(t.appUser).where(eq(t.appUser.id, claims.sub)) : [];
+    if (!claims || !tenant || !user?.active || passwordStamp(user.passwordHash) !== claims.pw) throw new BadRequestException(EXPIRED);
+    const passwordHash = await hashSecret(password);
+    await new Ctx(claims.cid, tenant.db, user.id, null, []).tx((tx) =>
+      tx.update(t.appUser).set({ passwordHash, failedAttempts: 0, lockedUntil: null }).where(eq(t.appUser.id, user.id)),
+    );
+    return { ok: true };
   }
 
   @Get('me')

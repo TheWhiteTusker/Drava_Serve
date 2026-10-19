@@ -1,16 +1,18 @@
 import 'reflect-metadata';
 import { parseArgs } from 'node:util';
-import { provisionCustomer } from './bootstrap.js';
+import { asSystem, provisionCustomer } from './bootstrap.js';
 import { writeFileSync } from 'node:fs';
 import { eq } from 'drizzle-orm';
 import { backupCustomer, deleteCustomer, exportCustomer, listBackups, restoreCustomer } from './data.js';
-import { closeAll, controlDb, controlSchema, migrateAll, tenantDb } from './db/index.js';
+import { closeAll, controlDb, controlSchema, migrateAll, resolveCustomer, tenantDb, tenantSchema } from './db/index.js';
 import { rebuildRollups } from './reports/rollup.js';
+import { hashSecret } from './secrets.js';
 import { seedDemo } from './seed.js';
 
 // pnpm db:migrate                       control database, then every customer database
 // pnpm customer:create <code> "<name>" --owner-login x --owner-name y --owner-password z
 // pnpm seed [--reset]                   demo customer with SAMPLE data
+// pnpm user:password <login> <password>  set anyone's password (an owner who forgot theirs, say) and unlock them
 // backup [code]                         back up one customer (or all) to object storage now
 // backups <code>                        list a customer's backups
 // restore <code> [YYYY-MM-DD]           restore a customer's database from a backup (latest by default)
@@ -43,6 +45,18 @@ try {
       }
       const c = await provisionCustomer({ code, name, owner: { login, password, name: values['owner-name'] ?? 'Owner' } });
       console.log(`Created customer ${c.code} with database ${c.dbName}. Owner signs in as ${login}`);
+      break;
+    }
+    case 'user:password': {
+      const [login, password] = [args[0]?.trim().toLowerCase(), args[1]];
+      if (!login || !password || password.length < 8) throw new Error('Usage: user:password <login> <new password, at least 8 characters>');
+      const [route] = await controlDb().select().from(controlSchema.loginRoute).where(eq(controlSchema.loginRoute.login, login));
+      const tenant = route && (await resolveCustomer(route.customerId));
+      if (!tenant) throw new Error(`No sign-in "${login}" at an active customer`);
+      const passwordHash = await hashSecret(password);
+      const u = tenantSchema.appUser;
+      await asSystem(tenant.db, 'system:cli', (tx) => tx.update(u).set({ passwordHash, failedAttempts: 0, lockedUntil: null }).where(eq(u.login, login)));
+      console.log(`New password set for ${login} (${tenant.customer.code}). Ask them to change it after signing in.`);
       break;
     }
     case 'seed':
@@ -80,7 +94,7 @@ try {
       break;
     }
     default:
-      throw new Error('Commands: migrate | customer:create | seed [--reset] | backup | backups | restore | customer:export | customer:delete | rollups:rebuild');
+      throw new Error('Commands: migrate | customer:create | seed [--reset] | user:password | backup | backups | restore | customer:export | customer:delete | rollups:rebuild');
   }
 } catch (e) {
   console.error((e as Error).message);

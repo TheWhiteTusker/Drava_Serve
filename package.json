@@ -11,7 +11,8 @@
     "typecheck": "pnpm -r typecheck",
     "db:migrate": "pnpm --filter @fnb/api cli migrate",
     "customer:create": "pnpm --filter @fnb/api cli customer:create",
-    "seed": "pnpm --filter @fnb/api cli seed"
+    "seed": "pnpm --filter @fnb/api cli seed",
+    "user:password": "pnpm --filter @fnb/api cli user:password"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

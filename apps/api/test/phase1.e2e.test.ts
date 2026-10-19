@@ -2,6 +2,7 @@ import type { INestApplication } from '@nestjs/common';
 import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { closeAll, migrateAll, resolveCustomer } from '../src/db/index.js';
+import { outbox } from '../src/mail.js';
 import { client, signIn, startApp, tempCustomer } from './helpers.js';
 
 // Phase 1 main flow: a customer sets up outlets, people, roles and the catalog, and every
@@ -175,6 +176,36 @@ describe('phase 1: foundation', () => {
     const r = await client(app).post('/auth/login', { login: `lock@${A.code}.test`, password: 'Passw0rd!' });
     expect(r.status).toBe(401);
     expect(r.body.message).toMatch(/Too many attempts/);
+  });
+
+  describe('passwords', () => {
+    const login = () => `pw@${A.code}.test`;
+    beforeAll(async () => {
+      const roles = (await ownerA.get('/roles')).body;
+      const cashier = roles.find((r: any) => r.name === 'Cashier');
+      expect((await ownerA.post('/users', { name: 'Pat Word', login: login(), password: 'First-pass1', roles: [{ roleId: cashier.id, outletId }] })).status).toBe(201);
+    });
+
+    it('a user changes their own password after giving the current one', async () => {
+      const me = client(app, await signIn(app, login(), 'First-pass1'));
+      expect((await me.post('/auth/password', { currentPassword: 'wrong', newPassword: 'Second-pass2' })).status).toBe(401);
+      expect((await me.post('/auth/password', { currentPassword: 'First-pass1', newPassword: 'short' })).status).toBe(400);
+      expect((await me.post('/auth/password', { currentPassword: 'First-pass1', newPassword: 'Second-pass2' })).status).toBe(201);
+      expect((await client(app).post('/auth/login', { login: login(), password: 'First-pass1' })).status).toBe(401);
+      await signIn(app, login(), 'Second-pass2');
+    });
+
+    it('forgot password emails a one-time link that is never a session', async () => {
+      outbox.length = 0;
+      const answer = (await client(app).post('/auth/forgot', { login: login().toUpperCase() })).body;
+      expect((await client(app).post('/auth/forgot', { login: 'nobody@nowhere.test' })).body).toEqual(answer); // no hint who exists
+      expect(outbox.map((m) => m.to)).toEqual([login()]);
+      const token = /token=([\w.-]+)/.exec(outbox[0].text)![1];
+      expect((await client(app, token).get('/auth/me')).status).toBe(401);
+      expect((await client(app).post('/auth/reset', { token, password: 'Third-pass3' })).status).toBe(201);
+      expect((await client(app).post('/auth/reset', { token, password: 'Fourth-pass4' })).status).toBe(400); // used once
+      await signIn(app, login(), 'Third-pass3');
+    });
   });
 
   describe('customers never see each other', () => {

@@ -1,8 +1,10 @@
 import logoDark from '@fnb/theme/logo-dark.svg';
 import { Eye, EyeOff, ShieldCheck, Sparkles, Truck } from 'lucide-react';
 import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { api, setSession, type Session } from '../api';
 import { ErrorNote } from '../ui';
+import { ForgotPassword, ResetPassword } from './password';
 
 // ---------- Sign in ----------
 
@@ -12,6 +14,11 @@ export function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // The emailed reset link opens /reset-password?token=…
+  const location = useLocation();
+  const navigate = useNavigate();
+  const token = location.pathname === '/reset-password' ? new URLSearchParams(location.search).get('token') : null;
+  const [forgot, setForgot] = useState(false);
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -45,6 +52,11 @@ export function Login() {
         <small style={{ color: '#9f927d' }}>White Tusker Private Limited</small>
       </section>
       <section className="login-form">
+        {token ? (
+          <ResetPassword token={token} onDone={() => navigate('/', { replace: true })} />
+        ) : forgot ? (
+          <ForgotPassword onBack={() => setForgot(false)} />
+        ) : (
         <form onSubmit={submit}>
           <div className="eyebrow">Welcome back</div>
           <h2>Sign in</h2>
@@ -83,9 +95,13 @@ export function Login() {
             {busy ? 'Signing in…' : 'Sign in'}
           </button>
           <p className="muted" style={{ fontSize: '0.85rem' }}>
-            Forgot your password? Ask your owner or manager to set a new one under Users.
+            <button type="button" className="link" onClick={() => setForgot(true)}>
+              Forgot your password?
+            </button>{' '}
+            If you sign in with a phone number, ask your owner to set a new one under Users.
           </p>
         </form>
+        )}
       </section>
     </main>
   );

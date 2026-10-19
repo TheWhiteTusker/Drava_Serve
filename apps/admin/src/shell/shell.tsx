@@ -1,9 +1,10 @@
-import { LogOut, Menu, Receipt, Search, Store, Tags, Truck, Users } from 'lucide-react';
+import { KeyRound, LogOut, Menu, Receipt, Search, Store, Tags, Truck, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import { guestMenuPath } from '@fnb/shared';
 import { can, setCurrentOutlet, setSession, useCurrentOutlet, type Session } from '../api';
 import { THEME_ICON, THEME_LABEL, useTheme } from './theme';
+import { ChangePassword } from './password';
 import { PinSwitch, initials } from './pin-switch';
 import { NAV } from './nav';
 import { CommandPalette } from './palette';
@@ -11,6 +12,7 @@ import { CommandPalette } from './palette';
 export function Shell({ s }: { s: Session }) {
   const [theme, cycleTheme] = useTheme();
   const [pinOpen, setPinOpen] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const outletId = useCurrentOutlet();
@@ -73,6 +75,9 @@ export function Shell({ s }: { s: Session }) {
             <button className="ghost" onClick={() => setPinOpen(true)}>
               <Users className="icon" aria-hidden /> Switch user (PIN)
             </button>
+            <button className="ghost" onClick={() => setPasswordOpen(true)}>
+              <KeyRound className="icon" aria-hidden /> Change password
+            </button>
             <button className="ghost" onClick={() => setSession(null)}>
               <LogOut className="icon" aria-hidden /> Sign out
             </button>
@@ -113,6 +118,7 @@ export function Shell({ s }: { s: Session }) {
         </Routes>
       </main>
       <PinSwitch open={pinOpen} onClose={() => setPinOpen(false)} />
+      <ChangePassword open={passwordOpen} onClose={() => setPasswordOpen(false)} />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} nav={nav} />
     </div>
   );

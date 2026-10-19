@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { Controller, Get, Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
@@ -30,6 +29,7 @@ import { VendorItemsController, VendorRatesController, VendorsController } from 
 import { AttachmentsController } from './receiving/attachments.js';
 import { DeliveriesController } from './receiving/deliveries.js';
 import { GrnsController } from './receiving/grns.js';
+import { jwtSecret } from './secrets.js';
 
 @Controller('health')
 class HealthController {
@@ -38,19 +38,6 @@ class HealthController {
   ok() {
     return { ok: true };
   }
-}
-
-// ponytail: JWT_SECRET is optional for now. Without it, production signs sessions with a key derived
-// from POSTGRES_URL (it holds the database password, so it is secret and the same on every instance);
-// changing that password signs everyone out. Set JWT_SECRET to manage the key on its own.
-export function jwtSecret() {
-  const s = process.env.JWT_SECRET;
-  if (s) return s;
-  if (process.env.NODE_ENV === 'production' && process.env.POSTGRES_URL) {
-    console.warn('JWT_SECRET is not set; signing sessions with a key derived from POSTGRES_URL');
-    return createHash('sha256').update(`fnb-jwt:${process.env.POSTGRES_URL}`).digest('base64url');
-  }
-  return 'dev-only-secret-change-me';
 }
 
 @Module({

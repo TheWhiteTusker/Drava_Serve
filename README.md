@@ -33,6 +33,7 @@ Sign in as `owner@demo.test` / `Demo@1234`; the other sample sign-ins are in [do
 
 Optional settings in `.env` (see `.env.example`):
 - `S3_*` (Supabase › Storage › S3 Connection): photo, vendor-bill and order-PDF uploads. The purchasing and dashboard tests need them too.
+- `RESEND_API_KEY` and `MAIL_FROM`: emails for "Forgot your password?". Without them, the email and its link are printed in the API's log (in production nothing is sent).
 - `REDIS_URL`: live updates across several API servers and the scheduled jobs (nightly orders, delivery list, offer release, backups). Without it the app runs, live updates reach only devices on the same server, and those jobs do not run.
 
 ## Production
@@ -40,7 +41,7 @@ Optional settings in `.env` (see `.env.example`):
 Vercel (team `twt13`, project `pos`) and the production Supabase project.
 
 - Push to `main`: Vercel builds the admin, field and API services. The API build first migrates the production database (`pnpm cli migrate`), so schema changes go live with the code.
-- Vercel environment variables: `POSTGRES_URL` (production project, Session pooler). Optional: `JWT_SECRET`, `S3_*`, `CORS_ORIGIN`.
+- Vercel environment variables: `POSTGRES_URL` (production project, Session pooler). Optional: `JWT_SECRET`, `S3_*`, `RESEND_API_KEY` and `MAIL_FROM` (password-reset emails), `CORS_ORIGIN`.
 - To run a command against production, set the URL for that terminal only: `$env:POSTGRES_URL="<production URL>"; pnpm customer:create …`, then `Remove-Item Env:POSTGRES_URL`.
 
 ## Commands
@@ -52,6 +53,7 @@ Vercel (team `twt13`, project `pos`) and the production Supabase project.
 | `pnpm db:migrate` | Migrate the control database, then every customer database |
 | `pnpm customer:create <code> "<name>" --owner-login <login> --owner-password <pw> [--owner-name <name>]` | Add a customer: creates its database, migrates it, loads the starting catalog and its owner sign-in |
 | `pnpm seed [--reset]` | Create (or rebuild) the sample demo customer |
+| `pnpm user:password <login> <new password>` | Set anyone's password and unlock them, for example an owner who forgot theirs (nobody above them can do it in the app) |
 | `pnpm --filter @fnb/api cli backup [code]` / `backups <code>` / `restore <code> [date]` | Back up now, list backups, restore (needs the PostgreSQL client tools `pg_dump` / `pg_restore`) |
 | `pnpm --filter @fnb/api cli customer:export <code> <file.zip>` | Every table of one customer as CSV |
 | `pnpm --filter @fnb/api cli customer:delete <code> --confirm` | Final backup, then remove the customer's database, files and sign-ins |
