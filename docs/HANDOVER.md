@@ -29,7 +29,7 @@ API (NestJS, apps/api; Vercel service api)  ── Redis (optional): socket.io a
 
 ## 2. Running it
 
-- Local: the Set up and Run steps in the README, against a development Supabase project.
+- Local: the Set up and Run steps in the README, against the development Neon project.
 - **Production checklist:**
   - Set `JWT_SECRET` (optional for now: without it, production derives the session key from `POSTGRES_URL`), `POSTGRES_URL`, `CONTROL_DB_NAME`, `REDIS_URL`, `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `CORS_ORIGIN`, and optionally `BACKUP_BUCKET`, `BACKUP_KEEP_DAYS`, `TENANT_POOL_MAX`.
   - Use managed PostgreSQL 17 and S3-compatible storage in an India region, with encryption at rest.

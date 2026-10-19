@@ -5,10 +5,10 @@ The agreed design is in [docs/FNB-Management-System-Handoff.md](docs/FNB-Managem
 
 ## Set up
 
-Needs **Node 24+**, **pnpm 11** (`corepack enable`) and **two Supabase projects** in Mumbai (`ap-south-1`): one for development, one for production. Nothing else runs on your machine.
+Needs **Node 24+**, **pnpm 11** (`corepack enable`) and two cloud databases: a **Neon** project for development and tests, and the **Supabase** project in Mumbai (`ap-south-1`) for production. Nothing else runs on your machine.
 
 1. `pnpm install`
-2. `cp .env.example .env`, then set `POSTGRES_URL` to the **development** project's connection string (Supabase › Connect › Session pooler). Never the production one: the tests create and drop databases.
+2. `cp .env.example .env`, then set `POSTGRES_URL` to the **Neon** connection string (Neon › Connect, connection pooling on). Never the production one: the tests create and drop databases.
 3. `pnpm --filter @fnb/shared build`
 4. `pnpm seed`: creates the control database and a **sample** demo customer (`pnpm seed --reset` rebuilds it).
 
