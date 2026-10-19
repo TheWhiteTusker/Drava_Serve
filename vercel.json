@@ -22,7 +22,7 @@
     "api": {
       "root": "apps/api",
       "framework": "nestjs",
-      "buildCommand": "pnpm --filter @fnb/shared build"
+      "buildCommand": "pnpm --filter @fnb/shared build && if [ \"$VERCEL_ENV\" = production ]; then pnpm cli migrate; fi"
     }
   },
   "rewrites": [
