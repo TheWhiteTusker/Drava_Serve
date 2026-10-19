@@ -10,7 +10,6 @@ export const DIET_TYPES = ['veg', 'non_veg', 'egg'] as const;
 export type DietType = (typeof DIET_TYPES)[number];
 
 export const ALLERGENS = ['milk', 'nuts', 'gluten', 'egg', 'soy', 'shellfish'] as const;
-export type Allergen = (typeof ALLERGENS)[number];
 
 // Suggested tag prefixes; tags are free text so customers can add their own.
 export const TAG_SUGGESTIONS = [
@@ -60,8 +59,6 @@ export type MovementType = (typeof MOVEMENT_TYPES)[number];
 export const PAYMENT_MODES = ['cash', 'upi', 'card'] as const;
 export type PaymentMode = (typeof PAYMENT_MODES)[number];
 
-export const APPROVAL_STATUSES = ['pending', 'approved', 'rejected', 'cancelled'] as const;
-
 // Settings with their defaults. Outlet values override customer values.
 export const SETTING_DEFAULTS = {
   'indent.cutoff': '23:00',
@@ -76,7 +73,6 @@ export const SETTING_DEFAULTS = {
   'guest.pickTable': false, // for demos: the outlet QR menu lets a guest pick any table to order for
 } as const;
 export type SettingKey = keyof typeof SETTING_DEFAULTS;
-export const SETTING_KEYS = Object.keys(SETTING_DEFAULTS) as SettingKey[];
 // Settings that make sense per outlet (the rest are customer-wide only).
 export const OUTLET_SETTING_KEYS: SettingKey[] = [
   'indent.cutoff',

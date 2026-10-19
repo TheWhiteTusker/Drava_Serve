@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import {
-  ALLERGENS, BASE_UNITS, CATEGORY_KINDS, DEPARTMENTS, DIET_TYPES, ORIGINS, PRICE_TIERS, STORE_KINDS,
+  ALLERGENS, BASE_UNITS, CATEGORY_KINDS, DEPARTMENTS, DIET_TYPES, ORIGINS, PRICE_TIERS,
 } from './constants';
 import { PERMISSION_CODES } from './permissions';
 
@@ -88,8 +88,6 @@ export const zTaxClass = z.object({
   active: z.boolean().default(true),
 });
 
-export const zStore = z.object({ outletId: id, name, kind: z.enum(STORE_KINDS) });
-
 export const zStockItem = z
   .object({
     name,
@@ -152,19 +150,8 @@ export const zDiningTable = z.object({
   active: z.boolean().default(true),
 });
 
-export const zSetting = z.object({
-  outletId: id.nullable(),
-  key: z.string(),
-  value: z.unknown(),
-});
-
 // Every update carries the version the editor started from.
 export const withVersion = <T extends z.ZodTypeAny>(s: T) => z.intersection(s, z.object({ version: z.coerce.number().int() }));
 
 export type OutletInput = z.infer<typeof zOutlet>;
-export type UserInput = z.infer<typeof zUser>;
-export type RoleInput = z.infer<typeof zRole>;
-export type CategoryInput = z.infer<typeof zCategory>;
 export type StockItemInput = z.infer<typeof zStockItem>;
-export type MenuItemInput = z.infer<typeof zMenuItem>;
-export type TaxClassInput = z.infer<typeof zTaxClass>;
