@@ -22,7 +22,7 @@
     "api": {
       "root": "apps/api",
       "framework": "nestjs",
-      "buildCommand": "pnpm --filter @fnb/shared build && pnpm run build"
+      "buildCommand": "pnpm --filter @fnb/shared build"
     }
   },
   "rewrites": [
