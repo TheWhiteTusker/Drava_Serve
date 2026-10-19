@@ -31,7 +31,7 @@ API (NestJS, apps/api)  ── Redis: socket.io adapter + BullMQ jobs
 
 - Local: `docker compose up --build` (everything, with sample data) or the development commands in the README.
 - **Production checklist:**
-  - Set `JWT_SECRET` (required when `NODE_ENV=production`), `POSTGRES_URL`, `CONTROL_DB_NAME`, `REDIS_URL`, `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `CORS_ORIGIN`, and optionally `BACKUP_BUCKET`, `BACKUP_KEEP_DAYS`, `TENANT_POOL_MAX`.
+  - Set `JWT_SECRET` (optional for now: without it, production derives the session key from `POSTGRES_URL`), `POSTGRES_URL`, `CONTROL_DB_NAME`, `REDIS_URL`, `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `CORS_ORIGIN`, and optionally `BACKUP_BUCKET`, `BACKUP_KEEP_DAYS`, `TENANT_POOL_MAX`.
   - Use managed PostgreSQL 17 and S3-compatible storage in an India region, with encryption at rest.
   - Give each customer database its own PostgreSQL role. Today all customer databases share the server role in `POSTGRES_URL`; per-customer credentials are an open item.
   - Serve over HTTPS. The installable apps (service workers, camera, share sheet) need it.
