@@ -99,7 +99,7 @@ export function ActivityList({ outletId, kind = '', limit = 50, compact = false 
                   </time>
                 </div>
                 <p>{e.message}</p>
-                {!compact && e.kind === 'price_flag' && e.data?.suggested && <PriceSuggestion current={e.data.current} suggested={e.data.suggested} />}
+                {!compact && e.kind === 'price_flag' && e.data?.suggested && <PriceSuggestion previous={e.data.previous} current={e.data.current} suggested={e.data.suggested} />}
               </div>
             </li>
           );

@@ -1,4 +1,4 @@
-import { desc, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, inArray, ne, or } from 'drizzle-orm';
 import { dec, margin, portionCost, resolveTarget, suggestedPrice } from '@fnb/shared';
 import { getSettings } from '../access/settings.js';
 import { logActivity, money } from '../activity.js';
@@ -63,14 +63,21 @@ export async function recost(ctx: Ctx, tx: Tx, menuItemIds: string[], reason: st
     if (!tolerances.has(item.outletId)) tolerances.set(item.outletId, Number((await getSettings(tx, item.outletId)).effective['pricing.flagTolerancePct']));
     if (target && dec(m.pct).lt(dec(target).minus(tolerances.get(item.outletId)!)) && dec(cost).gt(0)) {
       flagged.push(item.id);
-      // Current vs suggested, each as cost price, selling price and margin.
+      // Previous (the last costing before cost or price moved), current and suggested, each as
+      // cost price, selling price and margin.
+      const [before] = await tx
+        .select({ portionCost: t.menuItemCost.portionCost, sellingPrice: t.menuItemCost.sellingPrice, marginPct: t.menuItemCost.marginPct })
+        .from(t.menuItemCost)
+        .where(and(eq(t.menuItemCost.menuItemId, item.id), or(ne(t.menuItemCost.portionCost, cost), ne(t.menuItemCost.sellingPrice, item.sellingPrice))))
+        .orderBy(desc(t.menuItemCost.calculatedAt))
+        .limit(1);
       const price = suggestedPrice(cost, target);
       const current = { portionCost: cost, sellingPrice: item.sellingPrice, marginPct: m.pct };
       const suggested = { portionCost: cost, sellingPrice: price, marginPct: margin(price, cost).pct };
-      const fell = prev && dec(m.pct).lt(prev.marginPct) ? ` from ${Number(prev.marginPct)}%` : '';
+      const fell = before && dec(m.pct).lt(before.marginPct) ? ` from ${Number(before.marginPct)}%` : '';
       const created = await queueSystemRequest(tx, {
         outletId: item.outletId, type: 'price_change', entity: 'menu_item', entityId: item.id, proposedBy: ctx.userId,
-        current,
+        current: { ...current, previous: before ?? null },
         proposed: { menuItemId: item.id, ...suggested, summary: `${item.name}: margins are reducing, so raise the price to keep the ${Number(target)}% target` },
         reason: `Margin fell${fell} to ${m.pct}% after ${reason}`,
       });
@@ -78,7 +85,7 @@ export async function recost(ctx: Ctx, tx: Tx, menuItemIds: string[], reason: st
         await logActivity(ctx, tx, {
           outletId: item.outletId, kind: 'price_flag', title: 'Price suggestion',
           message: `${item.name}'s margin fell to ${m.pct}% (target ${Number(target)}%) after ${reason}. Margins are reducing, so a new price of ${money(price)} (now ${money(item.sellingPrice)}) to keep the target is waiting for a manager's approval.`,
-          data: { menuItemId: item.id, targetPct: target, current, suggested },
+          data: { menuItemId: item.id, targetPct: target, previous: before ?? null, current, suggested },
         });
       }
     }

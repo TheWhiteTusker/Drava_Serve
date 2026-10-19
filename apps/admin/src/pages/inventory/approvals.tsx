@@ -62,9 +62,11 @@ export function ApprovalsPage() {
   );
 }
 
-// A price suggestion: cost price, selling price and margin now, and at the suggested price.
+// A price suggestion: cost price, selling price and margin before the change, now, and at the
+// suggested price. Previous is missing when nothing changed since the first costing.
 type PriceRow = { portionCost: string; sellingPrice: string; marginPct: string };
-export function PriceSuggestion({ current, suggested }: { current: PriceRow; suggested: PriceRow }) {
+export function PriceSuggestion({ previous, current, suggested }: { previous?: PriceRow | null; current: PriceRow; suggested: PriceRow }) {
+  const rows: [string, PriceRow | null | undefined][] = [['Previous', previous], ['Current', current], ['Suggested', suggested]];
   return (
     <div className="table-wrap">
       <table>
@@ -77,7 +79,7 @@ export function PriceSuggestion({ current, suggested }: { current: PriceRow; sug
           </tr>
         </thead>
         <tbody>
-          {([['Current', current], ['Suggested', suggested]] as const).map(([label, x]) => (
+          {rows.map(([label, x]) => x && (
             <tr key={label}>
               <th scope="row">{label}</th>
               <td>{rupee(x.portionCost)}</td>
@@ -107,7 +109,7 @@ function Proposed({ r }: { r: any }) {
   if (p.summary) out.push(p.summary);
   return (
     <>
-      {suggestion && <PriceSuggestion current={r.current} suggested={p} />}
+      {suggestion && <PriceSuggestion previous={r.current.previous} current={r.current} suggested={p} />}
       <ul className="plain">
         {out.map((l) => (
           <li key={l}>{l}</li>

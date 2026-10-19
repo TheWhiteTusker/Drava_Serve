@@ -63,8 +63,9 @@ describe('phase 4: costing, ranking and beverage offers', () => {
     await f.owner.put('/margin-targets', { outletId: f.outlet.id, categoryId: f.cat('Soups and salads'), targetPct: '75' });
     const [req] = await f.db.select().from(t.approvalRequest).where(and(eq(t.approvalRequest.type, 'price_change'), eq(t.approvalRequest.entityId, f.m.tomatoSoup)));
     expect(req.proposed).toMatchObject({ sellingPrice: '182.00' }); // 45.50 ÷ (1 − 75%)
-    // Shown as current vs suggested: cost price, selling price, margin.
+    // Shown as previous, current and suggested: cost price, selling price, margin.
     expect(req.current).toMatchObject({ portionCost: '45.500000', sellingPrice: '160.00', marginPct: '71.56' });
+    expect((req.current as any).previous).toMatchObject({ portionCost: '38.000000', sellingPrice: '160.00', marginPct: '76.25' }); // before tomato rose
     expect(req.proposed).toMatchObject({ portionCost: '45.500000', marginPct: '75.00' });
     expect((await item(f.m.tomatoSoup)).price).toBe('160.00');
     await f.people.manager.post(`/approvals/${req.id}/decide`, { approve: true });
