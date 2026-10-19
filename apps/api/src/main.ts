@@ -24,15 +24,20 @@ class RedisIoAdapter extends IoAdapter {
   }
 }
 
-const app = await NestFactory.create(AppModule);
-app.setGlobalPrefix('api');
-app.enableCors({ origin: process.env.CORS_ORIGIN?.split(',') ?? true });
-app.enableShutdownHooks();
-if (process.env.REDIS_URL) {
-  const adapter = new RedisIoAdapter(app);
-  await adapter.connect(process.env.REDIS_URL);
-  app.useWebSocketAdapter(adapter);
-  if (process.env.JOBS !== 'off') await startJobs(process.env.REDIS_URL, { backup: backupAll });
+// Not awaited at the top level: on Vercel, listen() is captured and never reports "listening",
+// so a top-level await would keep this module from ever finishing loading.
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api');
+  app.enableCors({ origin: process.env.CORS_ORIGIN?.split(',') ?? true });
+  app.enableShutdownHooks();
+  if (process.env.REDIS_URL) {
+    const adapter = new RedisIoAdapter(app);
+    await adapter.connect(process.env.REDIS_URL);
+    app.useWebSocketAdapter(adapter);
+    if (process.env.JOBS !== 'off') await startJobs(process.env.REDIS_URL, { backup: backupAll });
+  }
+  await app.listen(Number(process.env.PORT ?? 3000));
+  console.log(`API listening on ${await app.getUrl()}`);
 }
-await app.listen(Number(process.env.PORT ?? 3000));
-console.log(`API listening on ${await app.getUrl()}`);
+void bootstrap();
