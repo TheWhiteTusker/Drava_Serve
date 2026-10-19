@@ -95,7 +95,7 @@ To add WhatsApp Business:
 - **Schema change:** edit `apps/api/src/db/tenant-schema.ts`, run `pnpm --filter @fnb/api db:generate`, review the SQL, and add `SELECT attach_audit('<table>')` for any new table people edit. The next API start (or `pnpm db:migrate`) applies it to every customer.
 - **New approval type:** `registerApproval('type', 'Label', handler)` in a controller file, then call `proposeOrApply` where the change is requested.
 - **New live event:** `publish(customerId, outletId, event, data)` in `src/events.ts`; listen with `useLive` (admin) or the socket in the POS.
-- **Restore a customer:** `node dist/cli.js backups <code>`, then `node dist/cli.js restore <code> [YYYY-MM-DD]`. Restore replaces the whole database, so tell the customer first.
+- **Restore a customer:** `pnpm --filter @fnb/api cli backups <code>`, then `pnpm --filter @fnb/api cli restore <code> [YYYY-MM-DD]` (with `POSTGRES_URL` set to that database). Restore replaces the whole database, so tell the customer first.
 
 ## 8. Open items
 

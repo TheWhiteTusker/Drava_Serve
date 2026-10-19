@@ -3,9 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "nest build -b swc",
-    "dev": "nest start -b swc --watch --exec \"node --env-file-if-exists=../../.env\"",
-    "start": "node dist/main.js",
+    "dev": "node --watch --env-file-if-exists=../../.env --import @swc-node/register/esm-register src/main.ts",
     "cli": "node --env-file-if-exists=../../.env --import @swc-node/register/esm-register src/cli.ts",
     "db:generate": "drizzle-kit generate --config drizzle.tenant.ts && drizzle-kit generate --config drizzle.control.ts",
     "test": "vitest run",
@@ -34,9 +32,7 @@
     "zod": "4.6.5"
   },
   "devDependencies": {
-    "@nestjs/cli": "12.0.8",
     "@swc-node/register": "^1.12.1",
-    "@swc/cli": "^0.8.1",
     "@swc/core": "1.16.13",
     "@types/express": "^5.0.6",
     "@types/multer": "^2.3.0",
