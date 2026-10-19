@@ -63,17 +63,22 @@ export async function recost(ctx: Ctx, tx: Tx, menuItemIds: string[], reason: st
     if (!tolerances.has(item.outletId)) tolerances.set(item.outletId, Number((await getSettings(tx, item.outletId)).effective['pricing.flagTolerancePct']));
     if (target && dec(m.pct).lt(dec(target).minus(tolerances.get(item.outletId)!)) && dec(cost).gt(0)) {
       flagged.push(item.id);
+      // Current vs suggested, each as cost price, selling price and margin.
+      const price = suggestedPrice(cost, target);
+      const current = { portionCost: cost, sellingPrice: item.sellingPrice, marginPct: m.pct };
+      const suggested = { portionCost: cost, sellingPrice: price, marginPct: margin(price, cost).pct };
+      const fell = prev && dec(m.pct).lt(prev.marginPct) ? ` from ${Number(prev.marginPct)}%` : '';
       const created = await queueSystemRequest(tx, {
         outletId: item.outletId, type: 'price_change', entity: 'menu_item', entityId: item.id, proposedBy: ctx.userId,
-        current: { sellingPrice: item.sellingPrice, marginPct: m.pct, portionCost: cost },
-        proposed: { menuItemId: item.id, sellingPrice: suggestedPrice(cost, target), summary: `${item.name}: margin ${m.pct}% is under the ${target}% target` },
-        reason: `Margin fell to ${m.pct}% after ${reason}`,
+        current,
+        proposed: { menuItemId: item.id, ...suggested, summary: `${item.name}: margins are reducing, so raise the price to keep the ${Number(target)}% target` },
+        reason: `Margin fell${fell} to ${m.pct}% after ${reason}`,
       });
       if (created.created) {
         await logActivity(ctx, tx, {
           outletId: item.outletId, kind: 'price_flag', title: 'Price suggestion',
-          message: `${item.name}'s margin fell to ${m.pct}% (target ${Number(target)}%) after ${reason}, so a new price of ${money(suggestedPrice(cost, target))} (now ${money(item.sellingPrice)}) is waiting for a manager's approval.`,
-          data: { menuItemId: item.id, marginPct: m.pct, targetPct: target, suggestedPrice: suggestedPrice(cost, target) },
+          message: `${item.name}'s margin fell to ${m.pct}% (target ${Number(target)}%) after ${reason}. Margins are reducing, so a new price of ${money(price)} (now ${money(item.sellingPrice)}) to keep the target is waiting for a manager's approval.`,
+          data: { menuItemId: item.id, targetPct: target, current, suggested },
         });
       }
     }

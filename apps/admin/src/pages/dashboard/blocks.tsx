@@ -95,7 +95,7 @@ export function DemandBlock({ x, cats, demandFor, setDemandFor }: { x: any; cats
           <option value="">Everything</option>
           <optgroup label="Courses and types">
             {(cats ?? [])
-              .filter((c) => c.kind === 'course' || c.kind === 'liquor_type')
+              .filter((c) => c.kind === 'course' || c.kind === 'liquor_type' || c.kind === 'drink_type')
               .map((c) => (
                 <option key={c.id} value={`c:${c.id}`}>
                   {c.name}

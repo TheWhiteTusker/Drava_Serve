@@ -67,8 +67,12 @@ export const FOOD_MENU: FoodMenu[] = [
   ['Jeera Rice', 'Breads and rice', 'veg', '180', [['Basmati rice', 150], ['Butter', 10], ['Mixed spices', 3]], ['milk'], []],
   ['Brownie with Ice Cream', 'Desserts', 'egg', '220', [['Dark chocolate', 60], ['Maida', 30], ['Butter', 30], ['Sugar', 40], ['Eggs', 1], ['Vanilla ice cream', 60]], ['egg', 'gluten', 'milk'], []],
   ['Vanilla Ice Cream', 'Desserts', 'veg', '120', [['Vanilla ice cream', 120]], ['milk'], []],
-  ['Fresh Lime Soda', 'Soft beverages', 'veg', '110', [['Lemon', 1], ['Soda water', 250], ['Sugar', 20]], [], []],
-  ['Virgin Mojito', 'Soft beverages', 'veg', '180', [['Lemon', 1], ['Mint leaves', 10], ['Sugar', 25], ['Soda water', 200]], [], []],
+];
+
+// [menu item, drink type, serve ml, price, recipe]: non-alcoholic beverages, taxed like food.
+export const SOFT_MENU: [string, string, number, string, [string, number][]][] = [
+  ['Fresh Lime Soda', 'Soft drinks', 300, '110', [['Lemon', 1], ['Soda water', 250], ['Sugar', 20]]],
+  ['Virgin Mojito', 'Mocktails', 300, '180', [['Lemon', 1], ['Mint leaves', 10], ['Sugar', 25], ['Soda water', 200]]],
 ];
 
 // [menu item, product, serve ml, price]; one bottle sells as several items.

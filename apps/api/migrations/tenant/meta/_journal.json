@@ -71,6 +71,13 @@
       "when": 1791898990643,
       "tag": "0009_table_codes",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792402833092,
+      "tag": "0010_beverage_types",
+      "breakpoints": true
     }
   ]
 }

@@ -6,6 +6,7 @@ import {
 import { api, useCurrentOutlet } from '../api';
 import { useLive } from '../live';
 import { Empty, ErrorNote, Page } from '../ui';
+import { PriceSuggestion } from './inventory/approvals';
 
 // The activity feed: what the system did by itself and why, newest first, updating live.
 
@@ -16,6 +17,7 @@ interface Entry {
   kind: string;
   title: string;
   message: string;
+  data?: any;
 }
 
 const KIND: Record<string, { icon: LucideIcon; tone: string }> = {
@@ -97,6 +99,7 @@ export function ActivityList({ outletId, kind = '', limit = 50, compact = false 
                   </time>
                 </div>
                 <p>{e.message}</p>
+                {!compact && e.kind === 'price_flag' && e.data?.suggested && <PriceSuggestion current={e.data.current} suggested={e.data.suggested} />}
               </div>
             </li>
           );

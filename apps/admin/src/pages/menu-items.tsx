@@ -13,10 +13,13 @@ export function MenuItemsPage() {
   const s = useSession();
   const outletId = useCurrentOutlet();
   const [dept, setDept] = useState<'food' | 'beverage'>('food');
+  const [alcoholic, setAlcoholic] = useState(true); // beverages: liquor tree, or non-alcoholic drink types
   const cats = useApi<any[]>('/categories');
   const brands = useApi<any[]>('/brands');
   const taxes = useApi<any[]>('/tax-classes');
   const catName = (id: string) => cats.data?.find((c) => c.id === id)?.name ?? '';
+  const isAlcoholic = (r: any) => cats.data?.find((c) => c.id === r.categoryId)?.kind !== 'drink_type';
+  const drinkOpts = (cats.data ?? []).filter((c) => c.kind === 'drink_type').map((c) => ({ value: c.id, label: c.name }));
   const courseOpts = (cats.data ?? []).filter((c) => c.kind === 'course').map((c) => ({ value: c.id, label: c.name }));
   const liquorOpts = (cats.data ?? [])
     .filter((c) => c.kind === 'liquor_type' || c.kind === 'liquor_subtype')
@@ -34,19 +37,27 @@ export function MenuItemsPage() {
             <button role="tab" aria-selected={dept === 'beverage'} className={dept === 'beverage' ? '' : 'ghost'} onClick={() => setDept('beverage')}>
               Beverage
             </button>
+            {dept === 'beverage' &&
+              ([true, false] as const).map((a) => (
+                <button key={String(a)} role="tab" aria-selected={alcoholic === a} className={alcoholic === a ? 'secondary' : 'ghost'} onClick={() => setAlcoholic(a)}>
+                  {a ? 'Alcoholic' : 'Non-alcoholic'}
+                </button>
+              ))}
           </div>
         }
         singular="menu item"
-        key={`${outletId}-${dept}`}
-        title={dept === 'food' ? 'Food menu' : 'Beverage menu'}
+        key={`${outletId}-${dept}-${alcoholic}`}
+        title={dept === 'food' ? 'Food menu' : alcoholic ? 'Alcoholic beverages' : 'Non-alcoholic beverages'}
         intro={
           dept === 'food'
             ? 'Prices are before tax. Diet type prints as the veg / non-veg mark on the menu and the bill.'
-            : 'One bottle can sell as several items (30 ml, 60 ml, bottle), each with its own price. Recipes link each to the bottle.'
+            : alcoholic
+              ? 'One bottle can sell as several items (30 ml, 60 ml, bottle), each with its own price. Recipes link each to the bottle.'
+              : 'Soft drinks, juices, mocktails, tea and coffee. Taxed like food (GST), not liquor.'
         }
         path="/menu-items"
         query={`?outletId=${outletId}`}
-        filter={(r: any) => r.department === dept}
+        filter={(r: any) => r.department === dept && (dept === 'food' || isAlcoholic(r) === alcoholic)}
         canManage={can(s, 'catalog.manage', outletId)}
         columns={[
           {
@@ -70,11 +81,14 @@ export function MenuItemsPage() {
           active: true,
           tags: [],
           allergens: [],
-          taxClassId: taxes.data?.find((t) => t.kind === (dept === 'food' ? 'food' : 'liquor'))?.id ?? null,
+          taxClassId: taxes.data?.find((t) => t.kind === (dept === 'beverage' && alcoholic ? 'liquor' : 'food'))?.id ?? null,
         }}
         fields={[
           { name: 'name', label: 'Name', required: true },
-          { name: 'categoryId', label: dept === 'food' ? 'Course' : 'Liquor type or sub-type', type: 'select', required: true, options: dept === 'food' ? courseOpts : liquorOpts },
+          {
+            name: 'categoryId', label: dept === 'food' ? 'Course' : alcoholic ? 'Liquor type or sub-type' : 'Drink type', type: 'select', required: true,
+            options: dept === 'food' ? courseOpts : alcoholic ? liquorOpts : drinkOpts,
+          },
           ...(dept === 'food'
             ? [{ name: 'dietType', label: 'Diet type', type: 'select' as const, required: true, options: DIETS }]
             : [

@@ -9,7 +9,8 @@ import { costOf } from './costing.js';
 // ---------- Ranking ----------
 
 // Food: inside each course, available first, margin % high to low, ties by units sold in the
-// last 30 days, manager pins first. Beverages keep type and brand order. Positions are global
+// last 30 days, manager pins first. Beverages keep type and brand order, alcoholic before
+// non-alcoholic. Positions are global
 // per outlet so one sort gives the whole menu.
 export async function rerankOutlet(ctx: Ctx, outletId: string, avail?: Map<string, Availability>) {
   const db = ctx.db;
@@ -50,6 +51,7 @@ export async function rerankOutlet(ctx: Ctx, outletId: string, avail?: Map<strin
     .filter((i) => i.m.department === 'beverage')
     .sort(
       (a, b) =>
+        Number(a.cat.kind === 'drink_type') - Number(b.cat.kind === 'drink_type') || // alcoholic first, then non-alcoholic
         Number(a.parent ?? a.cat.sortOrder) - Number(b.parent ?? b.cat.sortOrder) ||
         (a.parent != null ? a.cat.sortOrder : -1) - (b.parent != null ? b.cat.sortOrder : -1) ||
         (brands.get(a.m.brandId ?? '') ?? '').localeCompare(brands.get(b.m.brandId ?? '') ?? '') ||

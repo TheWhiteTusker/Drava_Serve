@@ -6,6 +6,7 @@ const KIND_LABEL: Record<string, string> = {
   course: 'Food course',
   liquor_type: 'Liquor type',
   liquor_subtype: 'Liquor sub-type',
+  drink_type: 'Non-alcoholic drink type',
   stock: 'Stock group',
 };
 

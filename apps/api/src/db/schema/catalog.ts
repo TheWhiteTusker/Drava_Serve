@@ -29,7 +29,7 @@ export const category = pgTable(
   },
   (t) => [
     unique().on(t.kind, t.parentId, t.name).nullsNotDistinct(),
-    check('category_kind', sql`${t.kind} in ('course','liquor_type','liquor_subtype','stock')`),
+    check('category_kind', sql`${t.kind} in ('course','liquor_type','liquor_subtype','drink_type','stock')`),
   ],
 );
 

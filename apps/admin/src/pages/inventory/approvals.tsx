@@ -62,24 +62,57 @@ export function ApprovalsPage() {
   );
 }
 
+// A price suggestion: cost price, selling price and margin now, and at the suggested price.
+type PriceRow = { portionCost: string; sellingPrice: string; marginPct: string };
+export function PriceSuggestion({ current, suggested }: { current: PriceRow; suggested: PriceRow }) {
+  return (
+    <div className="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th aria-label="Row" />
+            <th>Cost price</th>
+            <th>Selling price</th>
+            <th>Margin</th>
+          </tr>
+        </thead>
+        <tbody>
+          {([['Current', current], ['Suggested', suggested]] as const).map(([label, x]) => (
+            <tr key={label}>
+              <th scope="row">{label}</th>
+              <td>{rupee(x.portionCost)}</td>
+              <td>{rupee(x.sellingPrice)}</td>
+              <td>{Number(x.marginPct)}%</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 // A readable summary of what a request would change.
 function Proposed({ r }: { r: any }) {
   const p = r.proposed ?? {};
+  const suggestion = r.type === 'price_change' && r.current?.portionCost && p.marginPct;
   const items = useApi<any[]>(p.stockItemId ? '/stock-items' : null);
   const name = items.data?.find((i) => i.id === p.stockItemId)?.name;
   const out: string[] = [];
   if (p.movement) out.push(`${MOVE_LABEL[p.movement] ?? p.movement}: ${name ?? 'item'} ${p.qty}`);
-  if (p.sellingPrice) out.push(`New price ${rupee(p.sellingPrice)}${r.current?.sellingPrice ? ` (now ${rupee(r.current.sellingPrice)})` : ''}`);
+  if (p.sellingPrice && !suggestion) out.push(`New price ${rupee(p.sellingPrice)}${r.current?.sellingPrice ? ` (now ${rupee(r.current.sellingPrice)})` : ''}`);
   if (p.amount) out.push(`Amount ${rupee(p.amount)}`);
   if (p.discountPct) out.push(`Discount ${p.discountPct}%`);
   if (p.ledgerId) out.push(`Reverse stock entry #${p.ledgerId}`);
   if (p.countId) out.push('Post the counted variance');
   if (p.summary) out.push(p.summary);
   return (
-    <ul className="plain">
-      {out.map((l) => (
-        <li key={l}>{l}</li>
-      ))}
-    </ul>
+    <>
+      {suggestion && <PriceSuggestion current={r.current} suggested={p} />}
+      <ul className="plain">
+        {out.map((l) => (
+          <li key={l}>{l}</li>
+        ))}
+      </ul>
+    </>
   );
 }

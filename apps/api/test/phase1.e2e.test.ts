@@ -60,8 +60,11 @@ describe('phase 1: foundation', () => {
     expect(tree.find((x: any) => x.name === 'Whisky').subtypes.map((s: any) => s.name)).toContain('Single malt');
     const cats = (await ownerA.get('/categories')).body.filter((c: any) => c.kind === 'course');
     expect(cats.map((c: any) => c.name)).toEqual([
-      'Starters', 'Appetizers', 'Soups and salads', 'Main course', 'Breads and rice', 'Sides', 'Desserts', 'Soft beverages',
+      'Starters', 'Appetizers', 'Soups and salads', 'Main course', 'Breads and rice', 'Sides', 'Desserts',
     ]);
+    // Beverages: alcoholic on the liquor tree, non-alcoholic under drink types.
+    const drinks = (await ownerA.get('/categories')).body.filter((c: any) => c.kind === 'drink_type');
+    expect(drinks.map((c: any) => c.name)).toEqual(['Soft drinks', 'Juices and shakes', 'Mocktails', 'Tea and coffee', 'Water']);
   });
 
   it('stock items hold base units, purchase-unit conversions and per-outlet levels', async () => {
@@ -87,6 +90,14 @@ describe('phase 1: foundation', () => {
     expect(r.status).toBe(201);
     expect(r.body).toMatchObject({ sellingPrice: '160.00', version: 1, allergens: ['milk'] });
     menuItemId = r.body.id;
+  });
+
+  it('beverages are alcoholic (liquor tree) or non-alcoholic (drink type), never under a food course', async () => {
+    const cats = (await ownerA.get('/categories')).body;
+    const tax = (await ownerA.get('/tax-classes')).body.find((x: any) => x.code === 'FOOD_GST5');
+    const base = { outletId, name: 'Fresh Lime Soda', department: 'beverage', sellingPrice: '110', taxClassId: tax.id };
+    expect((await ownerA.post('/menu-items', { ...base, categoryId: cats.find((c: any) => c.name === 'Desserts').id })).status).toBe(400);
+    expect((await ownerA.post('/menu-items', { ...base, categoryId: cats.find((c: any) => c.name === 'Soft drinks').id })).status).toBe(201);
   });
 
   it('stops two people overwriting each other (version check)', async () => {

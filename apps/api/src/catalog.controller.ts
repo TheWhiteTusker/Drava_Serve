@@ -57,10 +57,10 @@ export const MenuItemsController = crud({
   orderBy: (m) => [asc(m.department), asc(m.name)],
   async check(ctx, tx, data, before) {
     const [cat] = await tx.select().from(t.category).where(eq(t.category.id, data.categoryId));
-    const ok = data.department === 'food' ? cat?.kind === 'course' : cat?.kind === 'liquor_type' || cat?.kind === 'liquor_subtype';
+    const ok = data.department === 'food' ? cat?.kind === 'course' : ['liquor_type', 'liquor_subtype', 'drink_type'].includes(cat?.kind ?? '');
     if (!ok) {
       throw new BadRequestException(
-        data.department === 'food' ? 'Food items go under a course' : 'Beverage items go under a liquor type or sub-type',
+        data.department === 'food' ? 'Food items go under a course' : 'Beverages go under a liquor type (alcoholic) or a drink type (non-alcoholic)',
       );
     }
     if (!before || dec(before.sellingPrice).eq(data.sellingPrice)) return;

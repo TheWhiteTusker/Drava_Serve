@@ -28,8 +28,9 @@ export const TAG_SUGGESTIONS = [
 export const BASE_UNITS = ['g', 'ml', 'pc'] as const;
 export type BaseUnit = (typeof BASE_UNITS)[number];
 
-// course = food course; liquor_type / liquor_subtype = the liquor tree; stock = ingredient grouping.
-export const CATEGORY_KINDS = ['course', 'liquor_type', 'liquor_subtype', 'stock'] as const;
+// course = food course; liquor_type / liquor_subtype = the liquor tree (alcoholic beverages);
+// drink_type = non-alcoholic beverages (soft drinks, mocktails…); stock = ingredient grouping.
+export const CATEGORY_KINDS = ['course', 'liquor_type', 'liquor_subtype', 'drink_type', 'stock'] as const;
 export type CategoryKind = (typeof CATEGORY_KINDS)[number];
 
 export const ORIGINS = ['indian', 'imported'] as const;

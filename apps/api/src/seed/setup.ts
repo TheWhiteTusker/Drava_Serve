@@ -3,7 +3,7 @@ import { dec, rupees } from '@fnb/shared';
 import { createOutlet } from '../bootstrap.js';
 import { hashSecret } from '../secrets.js';
 import { controlDb, controlSchema, tenantSchema as t } from '../db/index.js';
-import { BAR_MENU, DEMO, FOOD, FOOD_MENU, LIQUOR, STAFF, VENDORS, istDate } from './data.js';
+import { BAR_MENU, DEMO, FOOD, FOOD_MENU, LIQUOR, SOFT_MENU, STAFF, VENDORS, istDate } from './data.js';
 import type { Tx } from '../db/index.js';
 
 
@@ -123,6 +123,9 @@ export async function seedMenus(tx: Tx, outlets: Outlet[], { items, cat, food, l
     };
     for (const [name, course, dietType, price, recipe, allergens, tags] of FOOD_MENU) {
       await add({ outletId: o.id, name, department: 'food', categoryId: cat(course).id, dietType, sellingPrice: price, taxClassId: food.id, allergens: allergens ?? [], tags: tags ?? [] }, recipe);
+    }
+    for (const [name, type, ml, price, recipe] of SOFT_MENU) {
+      await add({ outletId: o.id, name, department: 'beverage', categoryId: cat(type).id, serveSizeMl: String(ml), sellingPrice: price, taxClassId: food.id }, recipe);
     }
     for (const [name, product, ml, price] of BAR_MENU) {
       const s = items.get(product)!;

@@ -5,8 +5,11 @@ import { controlDb, controlSchema, createCustomer, tenantSchema as t, type Tenan
 
 // Starting catalog every new customer gets. All of it is editable afterwards.
 export const COURSES = [
-  'Starters', 'Appetizers', 'Soups and salads', 'Main course', 'Breads and rice', 'Sides', 'Desserts', 'Soft beverages',
+  'Starters', 'Appetizers', 'Soups and salads', 'Main course', 'Breads and rice', 'Sides', 'Desserts',
 ];
+
+// Non-alcoholic beverages. Alcoholic ones sit on the liquor tree below.
+export const DRINK_TYPES = ['Soft drinks', 'Juices and shakes', 'Mocktails', 'Tea and coffee', 'Water'];
 
 // Liquor tree from handoff 6.6 (a seed list from general knowledge, to be edited per customer).
 // "Cocktails" is added as a type so cocktails sit on the beverage side with liquor tax.
@@ -71,6 +74,7 @@ export async function bootstrapCustomer(db: TenantDb) {
       await tx.insert(t.rolePermission).values(r.permissions.map((permission) => ({ roleId: role.id, permission })));
     }
     await tx.insert(t.category).values(COURSES.map((name, i) => ({ name, kind: 'course' as const, sortOrder: i })));
+    await tx.insert(t.category).values(DRINK_TYPES.map((name, i) => ({ name, kind: 'drink_type' as const, sortOrder: i })));
     for (const [i, [type, subs]] of LIQUOR_TREE.entries()) {
       const [c] = await tx.insert(t.category).values({ name: type, kind: 'liquor_type', sortOrder: i }).returning();
       if (subs.length) {

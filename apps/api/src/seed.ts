@@ -6,7 +6,7 @@ import { runOffers } from './pricing/offers.js';
 import { rebuildRollups } from './reports/rollup.js';
 import { approveIndent, buildIndents } from './purchasing/indents.js';
 import { controlDb, controlSchema, createCustomer, dropCustomer, tenantSchema as t } from './db/index.js';
-import { BAR_MENU, DEMO, FOOD_MENU, istDate } from './seed/data.js';
+import { BAR_MENU, DEMO, FOOD_MENU, SOFT_MENU, istDate } from './seed/data.js';
 import { seedMenus, seedPeople, seedStock, seedVendors } from './seed/setup.js';
 import { seedSales } from './seed/sales.js';
 
@@ -35,7 +35,7 @@ export async function seedDemo(opts: { reset?: boolean; log?: (s: string) => voi
     await tx.insert(t.setting).values({ outletId: outlets[0].id, key: 'guest.pickTable', value: true }); // demo: pick a table on the guest menu
 
     const billCount = await seedSales(tx, outlets, stock, menus, days, firstDay);
-    log(`Sample data: 2 outlets, ${stock.items.size} stock items, ${FOOD_MENU.length + BAR_MENU.length + 1} menu items per outlet, ${billCount} bills over ${days} days`);
+    log(`Sample data: 2 outlets, ${stock.items.size} stock items, ${FOOD_MENU.length + SOFT_MENU.length + BAR_MENU.length + 1} menu items per outlet, ${billCount} bills over ${days} days`);
   });
   // Menu order and offers as they would be after a normal day, and this morning's vegetable
   // delivery waiting at the Indiranagar gate for the receiving app.
