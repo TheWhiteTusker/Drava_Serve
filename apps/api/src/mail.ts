@@ -20,7 +20,7 @@ export async function sendMail(mail: Mail) {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
-    body: JSON.stringify({ from: process.env.MAIL_FROM ?? 'F&B Manager <onboarding@resend.dev>', to: mail.to, subject: mail.subject, text: mail.text }),
+    body: JSON.stringify({ from: process.env.MAIL_FROM ?? 'Drava Serve <onboarding@resend.dev>', to: mail.to, subject: mail.subject, text: mail.text }),
   });
   if (!res.ok) throw new Error(`Email to ${mail.to} could not be sent (${res.status}): ${await res.text()}`);
 }

@@ -1,11 +1,11 @@
 {
-  "name": "F&B Billing",
+  "name": "Drava Serve Billing",
   "short_name": "Billing",
   "start_url": "/pos/",
   "scope": "/pos/",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#f6f1e8",
-  "theme_color": "#2b241d",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
 }

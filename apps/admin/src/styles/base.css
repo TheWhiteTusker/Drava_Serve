@@ -8,28 +8,33 @@
 html,
 body {
   margin: 0;
-  background: var(--brand-bg);
+  background: var(--brand-backdrop) center / cover fixed, var(--brand-bg);
   color: var(--brand-text);
   font: 15px/1.55 var(--brand-font);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
+/* Type scale: serif for page (h1) and card (h2) titles only; everything below is the sans. */
 h1,
 h2,
-h3 {
+h3,
+h4 {
   margin: 0 0 0.25rem;
-  line-height: 1.2;
   letter-spacing: -0.01em;
 }
 h1 {
-  font: 600 1.85rem/1.15 var(--brand-font-heading);
+  font: 600 2rem/1.15 var(--brand-font-heading);
 }
 h2 {
-  font: 600 1.2rem/1.25 var(--brand-font-heading);
+  font: 600 1.3rem/1.25 var(--brand-font-heading);
 }
 h3 {
-  font-size: 0.98rem;
-  font-weight: 650;
+  font: 600 1rem/1.35 var(--brand-font);
+  letter-spacing: 0;
+}
+h4 {
+  font: 600 0.92rem/1.35 var(--brand-font);
+  letter-spacing: 0;
 }
 code {
   font-family: var(--brand-font-mono);
@@ -133,27 +138,35 @@ button {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.6rem 1.15rem;
-  border: 1px solid var(--brand-primary);
-  background: linear-gradient(180deg, var(--brand-primary) 0%, color-mix(in srgb, var(--brand-primary) 88%, #000) 100%);
+  border: 1px solid color-mix(in srgb, var(--brand-primary) 70%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--brand-primary) 72%, transparent) 0%,
+    color-mix(in srgb, var(--brand-primary) 86%, transparent) 100%
+  );
   color: var(--brand-primary-contrast);
   cursor: pointer;
   font-weight: 600;
   letter-spacing: 0.01em;
   white-space: nowrap;
-  box-shadow: 0 1px 3px rgb(31 25 19 / 0.15), 0 1px 2px rgb(31 25 19 / 0.08);
+  box-shadow: var(--glass-rim-tinted), 0 1px 3px rgb(0 0 0 / 0.12), 0 1px 2px rgb(0 0 0 / 0.06);
   transition-property: background-color, border-color, transform, box-shadow;
   transition-duration: 0.15s;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 button:hover:not(:disabled) {
-  background: linear-gradient(180deg, var(--brand-primary-hover) 0%, var(--brand-primary) 100%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--brand-primary-hover) 80%, transparent) 0%,
+    color-mix(in srgb, var(--brand-primary) 92%, transparent) 100%
+  );
   border-color: var(--brand-primary-hover);
-  box-shadow: 0 3px 8px rgb(31 25 19 / 0.2), 0 1px 3px rgb(31 25 19 / 0.1);
+  box-shadow: var(--glass-rim-tinted), 0 3px 8px rgb(0 0 0 / 0.16), 0 1px 3px rgb(0 0 0 / 0.08);
   transform: translateY(-1px);
 }
 button:active:not(:disabled) {
   transform: scale(0.975);
-  box-shadow: 0 1px 2px rgb(31 25 19 / 0.15);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
 }
 button:disabled {
   opacity: 0.45;
@@ -162,15 +175,15 @@ button:disabled {
   box-shadow: none;
 }
 button.secondary {
-  background: var(--brand-surface);
+  background: var(--glass-fill-flat);
   color: var(--brand-text);
-  border: 1px solid var(--brand-border-strong);
-  box-shadow: var(--brand-shadow-xs);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-rim), var(--brand-shadow-xs);
 }
 button.secondary:hover:not(:disabled) {
-  background: var(--brand-surface-2);
+  background: var(--glass-fill-hover);
   border-color: var(--brand-accent);
-  box-shadow: var(--brand-shadow-sm);
+  box-shadow: var(--glass-rim), var(--brand-shadow-sm);
   color: var(--brand-text);
 }
 button.ghost {
@@ -180,7 +193,7 @@ button.ghost {
   box-shadow: none;
 }
 button.ghost:hover:not(:disabled) {
-  background: var(--brand-surface-2);
+  background: var(--glass-fill-flat);
   border-color: transparent;
   color: var(--brand-text);
   transform: none;
@@ -189,16 +202,16 @@ button.ghost:active:not(:disabled) {
   transform: scale(0.975);
 }
 button.gold {
-  background: linear-gradient(180deg, #c7983c 0%, var(--brand-accent) 100%);
+  background: linear-gradient(180deg, #f02d4e 0%, var(--brand-accent) 100%);
   border: 1px solid var(--brand-accent-strong);
-  color: #1a140d;
+  color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 2px 8px rgb(176 130 46 / 0.28);
+  box-shadow: 0 2px 8px rgb(226 29 62 / 0.3);
 }
 button.gold:hover:not(:disabled) {
-  background: linear-gradient(180deg, #d4a74d 0%, #ba8933 100%);
+  background: linear-gradient(180deg, #ff3d5e 0%, #c91433 100%);
   border-color: var(--brand-accent-strong);
-  box-shadow: 0 4px 14px rgb(176 130 46 / 0.4);
+  box-shadow: 0 4px 14px rgb(226 29 62 / 0.45);
 }
 button.link {
   background: none;

@@ -8,7 +8,7 @@
 html,
 body {
   margin: 0;
-  background: var(--brand-bg);
+  background: var(--brand-backdrop) center / cover fixed, var(--brand-bg);
   color: var(--brand-text);
   font: 16px/1.45 var(--brand-font);
   -webkit-tap-highlight-color: transparent;
@@ -75,21 +75,25 @@ button {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.65rem 1.15rem;
-  border: 1px solid var(--brand-primary);
-  background: linear-gradient(180deg, var(--brand-primary) 0%, color-mix(in srgb, var(--brand-primary) 88%, #000) 100%);
+  border: 1px solid color-mix(in srgb, var(--brand-primary) 70%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--brand-primary) 72%, transparent) 0%,
+    color-mix(in srgb, var(--brand-primary) 86%, transparent) 100%
+  );
   color: var(--brand-primary-contrast);
   font-weight: 650;
   cursor: pointer;
   touch-action: manipulation;
   border-radius: var(--brand-radius);
-  box-shadow: 0 1px 3px rgb(31 25 19 / 0.15), 0 1px 2px rgb(31 25 19 / 0.08);
+  box-shadow: var(--glass-rim-tinted), 0 1px 3px rgb(0 0 0 / 0.12), 0 1px 2px rgb(0 0 0 / 0.06);
   transition-property: background-color, transform, box-shadow, border-color;
   transition-duration: 0.15s;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 button:active:not(:disabled) {
   transform: scale(0.975);
-  box-shadow: 0 1px 2px rgb(31 25 19 / 0.15);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
 }
 button:disabled {
   opacity: 0.45;
@@ -98,13 +102,13 @@ button:disabled {
   box-shadow: none;
 }
 button.secondary {
-  background: var(--brand-surface);
-  border: 1px solid var(--brand-border-strong);
+  background: var(--glass-fill-flat);
+  border: 1px solid var(--glass-border);
   color: var(--brand-text);
-  box-shadow: var(--brand-shadow-xs);
+  box-shadow: var(--glass-rim), var(--brand-shadow-xs);
 }
 button.secondary:hover:not(:disabled) {
-  background: var(--brand-surface-2);
+  background: var(--glass-fill-hover);
   border-color: var(--brand-accent);
 }
 button.ghost {
@@ -114,18 +118,18 @@ button.ghost {
   box-shadow: none;
 }
 button.ghost:hover:not(:disabled) {
-  background: var(--brand-surface-2);
+  background: var(--glass-fill-flat);
 }
 button.gold {
-  background: linear-gradient(180deg, #c7983c 0%, var(--brand-accent) 100%);
+  background: linear-gradient(180deg, #f02d4e 0%, var(--brand-accent) 100%);
   border: 1px solid var(--brand-accent-strong);
-  color: #1a140d;
+  color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 2px 8px rgb(176 130 46 / 0.3);
+  box-shadow: 0 2px 8px rgb(226 29 62 / 0.32);
 }
 button.gold:hover:not(:disabled) {
-  background: linear-gradient(180deg, #d4a74d 0%, #ba8933 100%);
-  box-shadow: 0 4px 14px rgb(176 130 46 / 0.42);
+  background: linear-gradient(180deg, #ff3d5e 0%, #c91433 100%);
+  box-shadow: 0 4px 14px rgb(226 29 62 / 0.45);
 }
 button.good {
   background: linear-gradient(180deg, color-mix(in srgb, var(--brand-success) 85%, #fff) 0%, var(--brand-success) 100%);
@@ -174,7 +178,7 @@ button.icon-only {
   background: color-mix(in srgb, var(--brand-surface) 86%, transparent);
   backdrop-filter: blur(14px) saturate(150%);
   border-bottom: 1px solid var(--brand-border);
-  box-shadow: 0 1px 4px rgb(31 25 19 / 0.03);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.04);
   position: sticky;
   top: 0;
   z-index: 5;
@@ -242,12 +246,13 @@ button.icon-only {
   margin: 0 auto;
 }
 .card {
-  background: var(--brand-surface);
-  border: 1px solid var(--brand-border);
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
   border-radius: var(--brand-radius-large);
   padding: 1.25rem 1.4rem;
   margin-bottom: 1rem;
-  box-shadow: var(--brand-shadow);
+  box-shadow: var(--glass-rim), var(--glass-shadow);
 }
 .tap {
   display: flex;
@@ -255,20 +260,20 @@ button.icon-only {
   gap: 1rem;
   width: 100%;
   text-align: left;
-  background: var(--brand-surface);
+  background: var(--glass-fill-flat);
   color: var(--brand-text);
-  border: 1px solid var(--brand-border);
+  border: 1px solid var(--glass-border);
   border-radius: var(--brand-radius-large);
   margin-bottom: 0.75rem;
   padding: 1.1rem 1.25rem;
-  box-shadow: var(--brand-shadow-xs);
+  box-shadow: var(--glass-rim), var(--brand-shadow-xs);
   transition-property: border-color, box-shadow, transform;
   transition-duration: 0.15s;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 .tap:hover {
   border-color: var(--brand-accent);
-  box-shadow: var(--brand-shadow-md);
+  box-shadow: var(--glass-rim), var(--brand-shadow-md);
   transform: translateY(-2px);
 }
 .tap:active {
@@ -438,17 +443,16 @@ label.field > select {
   display: grid;
   place-items: center;
   padding: 1.25rem;
-  background:
-    radial-gradient(700px 400px at 20% 0%, var(--brand-accent-soft), transparent 60%),
-    var(--brand-bg);
+  background: radial-gradient(700px 400px at 20% 0%, var(--brand-accent-soft), transparent 60%);
 }
 .signin form {
   width: min(420px, 100%);
-  background: var(--brand-surface);
-  border: 1px solid var(--brand-border);
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
   border-radius: var(--brand-radius-large);
   padding: 1.75rem;
-  box-shadow: var(--brand-shadow-lg);
+  box-shadow: var(--glass-rim), var(--brand-shadow-lg);
 }
 .signin .eyebrow {
   font: 650 0.72rem var(--brand-font);

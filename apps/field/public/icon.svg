@@ -1,5 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><!-- Placeholder app icon; replace with the brand icon -->
-  <rect width="64" height="64" rx="14" fill="#2b241d"/>
-  <path d="M32 12 52 32 32 52 12 32Z" fill="none" stroke="#d3ad62" stroke-width="3"/>
-  <path d="M32 22 42 32 32 42 22 32Z" fill="#d3ad62"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><!-- App icon: the brand mark on black -->
+  <rect width="64" height="64" rx="14" fill="#09090b"/>
+  <g transform="translate(32 32) scale(.14)">
+    <defs>
+      <path id="body" d="M-24 -140H24L58.2 -118.8L48 -101.1A112 112 0 0 0 -48 -101.1L-58.2 -118.8Z"/>
+      <path id="arms" d="M41.6 -96.1L20.6 -59.7M-41.6 -96.1L-20.6 -59.7"/>
+      <circle id="head" cy="-152" r="15"/>
+      <circle id="headCut" cy="-152" r="26"/>
+      <mask id="cut" maskUnits="userSpaceOnUse" x="-175" y="-175" width="350" height="350">
+        <rect x="-175" y="-175" width="350" height="350" fill="#fff"/>
+        <g stroke="#000" stroke-width="30" stroke-linecap="round">
+          <use href="#arms"/><use href="#arms" transform="rotate(60)"/><use href="#arms" transform="rotate(120)"/>
+          <use href="#arms" transform="rotate(180)"/><use href="#arms" transform="rotate(240)"/><use href="#arms" transform="rotate(300)"/>
+        </g>
+        <g fill="#000">
+          <use href="#headCut"/><use href="#headCut" transform="rotate(60)"/><use href="#headCut" transform="rotate(120)"/>
+          <use href="#headCut" transform="rotate(180)"/><use href="#headCut" transform="rotate(240)"/><use href="#headCut" transform="rotate(300)"/>
+        </g>
+      </mask>
+    </defs>
+    <g fill="#ffffff" stroke="#ffffff" stroke-width="8" stroke-linejoin="round" mask="url(#cut)">
+      <use href="#body"/><use href="#body" transform="rotate(60)"/><use href="#body" transform="rotate(120)"/>
+      <use href="#body" transform="rotate(180)"/><use href="#body" transform="rotate(240)"/><use href="#body" transform="rotate(300)"/>
+    </g>
+    <g fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round">
+      <use href="#arms"/><use href="#arms" transform="rotate(60)"/><use href="#arms" transform="rotate(120)"/>
+      <use href="#arms" transform="rotate(180)"/><use href="#arms" transform="rotate(240)"/><use href="#arms" transform="rotate(300)"/>
+    </g>
+    <g fill="none" stroke="#ffffff" stroke-width="8">
+      <use href="#head"/><use href="#head" transform="rotate(60)"/><use href="#head" transform="rotate(120)"/>
+      <use href="#head" transform="rotate(180)"/><use href="#head" transform="rotate(240)"/><use href="#head" transform="rotate(300)"/>
+    </g>
+  </g>
 </svg>

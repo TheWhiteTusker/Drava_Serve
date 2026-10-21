@@ -51,19 +51,22 @@ export const LIQUOR: LiquorRow[] = [
 // [menu item, course, diet, price, recipe [stock item, qty]]
 type FoodMenu = [string, string, DietType, string, [string, number][], string[]?, string[]?];
 export const FOOD_MENU: FoodMenu[] = [
-  // Tomato and sweet corn soup mirror the worked example in handoff 6.10: same price, tomato soup
-  // costs about ₹38 and sweet corn about ₹41, so tomato soup ranks first until tomato rises.
   ['Tomato Soup', 'Soups and salads', 'veg', '160', [['Tomato', 250], ['Onion', 50], ['Butter', 20], ['Fresh cream', 75], ['Mixed spices', 5], ['Sugar', 10], ['Ginger garlic paste', 10]], ['milk'], ['cuisine:Continental']],
   ['Sweet Corn Soup', 'Soups and salads', 'veg', '160', [['Sweet corn', 200], ['Butter', 15], ['Fresh cream', 50], ['Mixed spices', 5], ['Maida', 20], ['Onion', 30], ['Sugar', 10], ['Ginger garlic paste', 10]], ['milk', 'gluten'], ['cuisine:Chinese']],
   ['Paneer Tikka', 'Starters', 'veg', '280', [['Paneer', 200], ['Capsicum', 50], ['Onion', 50], ['Mixed spices', 10], ['Cooking oil', 20], ['Lemon', 0.5]], ['milk'], ['cuisine:North Indian', 'spice:medium']],
+  ['Crispy Corn Pepper', 'Starters', 'veg', '240', [['Sweet corn', 180], ['Capsicum', 40], ['Onion', 40], ['Cooking oil', 40], ['Mixed spices', 5]], [], ['cuisine:Chinese', 'spice:medium']],
   ['Chicken 65', 'Starters', 'non_veg', '300', [['Chicken boneless', 200], ['Ginger garlic paste', 15], ['Mixed spices', 10], ['Cooking oil', 60], ['Eggs', 0.5]], ['egg'], ['cuisine:South Indian', 'spice:hot', "chef's special"]],
+  ['Murgh Malai Tikka', 'Starters', 'non_veg', '340', [['Chicken boneless', 220], ['Fresh cream', 50], ['Ginger garlic paste', 15], ['Mixed spices', 8], ['Lemon', 0.5]], ['milk'], ['cuisine:North Indian', 'spice:mild']],
   ['Masala Omelette', 'Appetizers', 'egg', '120', [['Eggs', 3], ['Onion', 30], ['Cooking oil', 10], ['Mixed spices', 3]], ['egg'], []],
   ['Potato Wedges', 'Appetizers', 'veg', '180', [['Potato', 250], ['Cooking oil', 80], ['Mixed spices', 5]], [], ['jain']],
   ['Butter Chicken', 'Main course', 'non_veg', '380', [['Chicken boneless', 250], ['Butter', 30], ['Fresh cream', 60], ['Tomato', 150], ['Mixed spices', 10], ['Ginger garlic paste', 15]], ['milk'], ['cuisine:North Indian', "chef's special"]],
+  ['Dal Makhani', 'Main course', 'veg', '290', [['Butter', 40], ['Fresh cream', 50], ['Tomato', 100], ['Mixed spices', 8], ['Ginger garlic paste', 10]], ['milk'], ['cuisine:North Indian']],
   ['Paneer Butter Masala', 'Main course', 'veg', '320', [['Paneer', 200], ['Butter', 30], ['Fresh cream', 50], ['Tomato', 150], ['Mixed spices', 10]], ['milk'], ['cuisine:North Indian']],
   ['Veg Biryani', 'Breads and rice', 'veg', '260', [['Basmati rice', 180], ['Potato', 50], ['Capsicum', 40], ['Onion', 80], ['Cooking oil', 30], ['Mixed spices', 10], ['Mint leaves', 5]], [], ['spice:medium']],
   ['Chicken Biryani', 'Breads and rice', 'non_veg', '340', [['Basmati rice', 180], ['Chicken boneless', 200], ['Onion', 80], ['Cooking oil', 30], ['Mixed spices', 12], ['Mint leaves', 5]], [], ['spice:medium']],
   ['Butter Naan', 'Breads and rice', 'veg', '70', [['Maida', 100], ['Butter', 10], ['Milk', 20]], ['gluten', 'milk'], []],
+  ['Garlic Naan', 'Breads and rice', 'veg', '85', [['Maida', 100], ['Butter', 15], ['Milk', 20], ['Ginger garlic paste', 5]], ['gluten', 'milk'], []],
+  ['Tandoori Roti', 'Breads and rice', 'veg', '50', [['Maida', 80], ['Butter', 5]], ['gluten'], []],
   ['Jeera Rice', 'Breads and rice', 'veg', '180', [['Basmati rice', 150], ['Butter', 10], ['Mixed spices', 3]], ['milk'], []],
   ['Brownie with Ice Cream', 'Desserts', 'egg', '220', [['Dark chocolate', 60], ['Maida', 30], ['Butter', 30], ['Sugar', 40], ['Eggs', 1], ['Vanilla ice cream', 60]], ['egg', 'gluten', 'milk'], []],
   ['Vanilla Ice Cream', 'Desserts', 'veg', '120', [['Vanilla ice cream', 120]], ['milk'], []],
@@ -73,6 +76,7 @@ export const FOOD_MENU: FoodMenu[] = [
 export const SOFT_MENU: [string, string, number, string, [string, number][]][] = [
   ['Fresh Lime Soda', 'Soft drinks', 300, '110', [['Lemon', 1], ['Soda water', 250], ['Sugar', 20]]],
   ['Virgin Mojito', 'Mocktails', 300, '180', [['Lemon', 1], ['Mint leaves', 10], ['Sugar', 25], ['Soda water', 200]]],
+  ['Classic Cold Brew Float', 'Mocktails', 300, '220', [['Sugar', 15], ['Milk', 60], ['Vanilla ice cream', 40]]],
 ];
 
 // [menu item, product, serve ml, price]; one bottle sells as several items.
@@ -80,10 +84,14 @@ export const BAR_MENU: [string, string, number, string][] = [
   ['Royal Stag 30 ml', 'Royal Stag 750 ml', 30, '150'],
   ['Royal Stag 60 ml', 'Royal Stag 750 ml', 60, '280'],
   ['Royal Stag bottle', 'Royal Stag 750 ml', 750, '3200'],
+  ['Blenders Pride 30 ml', 'Blenders Pride 750 ml', 30, '190'],
   ['Blenders Pride 60 ml', 'Blenders Pride 750 ml', 60, '340'],
   ['Johnnie Walker Black Label 60 ml', 'Johnnie Walker Black Label 750 ml', 60, '720'],
+  ['Johnnie Walker Black Label bottle', 'Johnnie Walker Black Label 750 ml', 750, '8200'],
   ['Glenfiddich 12 60 ml', 'Glenfiddich 12 750 ml', 60, '950'],
+  ['Glenfiddich 12 bottle', 'Glenfiddich 12 750 ml', 750, '10500'],
   ['Old Monk 60 ml', 'Old Monk 750 ml', 60, '200'],
+  ['Bacardi Carta Blanca 30 ml', 'Bacardi Carta Blanca 750 ml', 30, '150'],
   ['Bacardi Carta Blanca 60 ml', 'Bacardi Carta Blanca 750 ml', 60, '260'],
   ['Smirnoff 60 ml', 'Smirnoff 750 ml', 60, '260'],
   ['Bombay Sapphire 60 ml', 'Bombay Sapphire 750 ml', 60, '520'],
@@ -93,21 +101,21 @@ export const BAR_MENU: [string, string, number, string][] = [
 ];
 
 export const VENDORS: [string, 'food' | 'beverage', string[]][] = [
-  ['Sample Vegetable Supplier', 'food', ['Tomato', 'Onion', 'Potato', 'Sweet corn', 'Capsicum', 'Lemon', 'Mint leaves', 'Ginger garlic paste']],
-  ['Sample Dairy and Poultry', 'food', ['Paneer', 'Chicken boneless', 'Eggs', 'Milk', 'Fresh cream', 'Butter', 'Vanilla ice cream']],
-  ['Sample Grocery Wholesale', 'food', ['Cooking oil', 'Basmati rice', 'Maida', 'Mixed spices', 'Sugar', 'Dark chocolate']],
-  ['Sample Beverage Distributor', 'beverage', ['Soda water', 'Cola']],
-  ['Sample Liquor Distributor', 'beverage', LIQUOR.map((l) => l[0])],
+  ['Green Valley Agro & Fresh Produce Ltd', 'food', ['Tomato', 'Onion', 'Potato', 'Sweet corn', 'Capsicum', 'Lemon', 'Mint leaves', 'Ginger garlic paste']],
+  ['Heritage Farms & Dairy Co.', 'food', ['Paneer', 'Chicken boneless', 'Eggs', 'Milk', 'Fresh cream', 'Butter', 'Vanilla ice cream']],
+  ['Maharaja Grains & Spices Traders', 'food', ['Cooking oil', 'Basmati rice', 'Maida', 'Mixed spices', 'Sugar', 'Dark chocolate']],
+  ['Southern Craft Beverages Ltd', 'beverage', ['Soda water', 'Cola']],
+  ['United Spirits & Beverages Distributorship', 'beverage', LIQUOR.map((l) => l[0])],
 ];
 
 export const STAFF: [string, string, string, string, 'outlet1' | 'all'][] = [
   // [login, name, role, PIN, scope]
-  ['manager@demo.test', 'Asha (Outlet manager, sample)', 'Outlet manager', '2222', 'outlet1'],
-  ['watchman@demo.test', 'Raju (Watchman, sample)', 'Watchman', '3333', 'outlet1'],
-  ['store@demo.test', 'Kiran (Storekeeper, sample)', 'Storekeeper / kitchen staff', '4444', 'outlet1'],
-  ['chef@demo.test', 'Meera (Chef, sample)', 'Chef / bar manager', '5555', 'outlet1'],
-  ['cashier@demo.test', 'Vinay (Cashier, sample)', 'Cashier', '6666', 'outlet1'],
-  ['accounts@demo.test', 'Farah (Accounts, sample)', 'Accounts', '7777', 'all'],
+  ['manager@demo.test', 'Asha Hegde', 'Outlet manager', '2222', 'outlet1'],
+  ['watchman@demo.test', 'Raju Gowda', 'Watchman', '3333', 'outlet1'],
+  ['store@demo.test', 'Kiran Kumar', 'Storekeeper / kitchen staff', '4444', 'outlet1'],
+  ['chef@demo.test', 'Chef Meera Nambiar', 'Chef / bar manager', '5555', 'outlet1'],
+  ['cashier@demo.test', 'Vinay Prasad', 'Cashier', '6666', 'outlet1'],
+  ['accounts@demo.test', 'Farah Khan', 'Accounts', '7777', 'all'],
 ];
 
 // Stock left today, fixed for the demo: at Indiranagar (offers on) Royal Stag is down to four

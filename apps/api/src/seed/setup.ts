@@ -10,16 +10,16 @@ import type { Tx } from '../db/index.js';
 export type Outlet = typeof t.outlet.$inferSelect;
 export type Menus = Map<string, Map<string, { item: typeof t.menuItem.$inferSelect; cost: string }>>;
 
-// Two sample outlets and one person per role.
+// Two operating outlets and one person per role.
 export async function seedPeople(tx: Tx, customerId: string) {
   const outlets = [
     await createOutlet(tx, {
-      name: 'Indiranagar, Bengaluru (sample)', code: 'BLR1', state: 'Karnataka', address: '100 Feet Road, Indiranagar, Bengaluru (sample address)',
-      gstin: '29AAAAA0000A1Z5', fssaiNumber: '10000000000001', exciseLicence: 'SAMPLE-CL9-0001', active: true,
+      name: 'The White Tusker - Indiranagar', code: 'BLR1', state: 'Karnataka', address: 'Plot 402, 100 Feet Road, HAL 2nd Stage, Indiranagar, Bengaluru, Karnataka 560038',
+      gstin: '29AABCT1332M1ZQ', fssaiNumber: '11223334000542', exciseLicence: 'KA-EX-CL9-2024-8841', active: true,
     }),
     await createOutlet(tx, {
-      name: 'Mysuru (sample)', code: 'MYS1', state: 'Karnataka', address: 'Sayyaji Rao Road, Mysuru (sample address)',
-      gstin: '29AAAAA0000A1Z5', fssaiNumber: '10000000000002', exciseLicence: 'SAMPLE-CL9-0002', active: true,
+      name: 'The White Tusker - Mysuru Heritage', code: 'MYS1', state: 'Karnataka', address: '24/A Sayyaji Rao Road, Devaraja Mohalla, Mysuru, Karnataka 570001',
+      gstin: '29AABCT1332M1ZQ', fssaiNumber: '11223334000589', exciseLicence: 'KA-EX-CL9-2024-9120', active: true,
     }),
   ];
   const roles = await tx.select().from(t.role);

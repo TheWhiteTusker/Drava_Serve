@@ -9,10 +9,10 @@ import { Tile } from './charts';
 // ---------- Reports ----------
 
 const CLASS: Record<string, [string, string]> = {
-  star: ['Star', 'High margin, popular: keep and feature'],
-  plowhorse: ['Plowhorse', 'Popular, low margin: look at cost or price'],
-  puzzle: ['Puzzle', 'High margin, not popular: promote or reposition'],
-  dog: ['Dog', 'Low margin, not popular: consider removing'],
+  star: ['Top Performer', 'High margin, high volume: protect and feature'],
+  plowhorse: ['Volume Driver', 'High volume, lower margin: optimize cost or review pricing'],
+  puzzle: ['High Potential', 'High margin, low volume: promote and reposition'],
+  dog: ['Underperformer', 'Low margin, low volume: review for removal or reformulate'],
 };
 
 export function ReportsPage() {
@@ -34,16 +34,18 @@ export function ReportsPage() {
   const exportOk = can(s, 'reports.export', current);
   const group = (list: any[]) =>
     ['star', 'plowhorse', 'puzzle', 'dog'].map((c) => (
-      <div key={c} className="card">
-        <h3>
-          {CLASS[c][0]} <span className="muted">· {CLASS[c][1]}</span>
-        </h3>
-        <ul className="plain">
+      <div key={c} className="card quadrant">
+        <h4>{CLASS[c][0]}</h4>
+        <p>{CLASS[c][1]}</p>
+        <ul className="clean">
           {list
             .filter((i) => i.class === c)
             .map((i) => (
               <li key={i.id}>
-                {i.name} <span className="muted">· {num(i.units)} sold ({i.share}%) · {rupee(i.marginPerUnit)} per plate</span>
+                <span>{i.name}</span>
+                <span className="muted">
+                  {num(i.units)} sold · {i.share}% · {rupee(i.marginPerUnit)} per plate
+                </span>
               </li>
             ))}
           {!list.some((i) => i.class === c) && <li className="muted">None this month.</li>}
@@ -65,9 +67,9 @@ export function ReportsPage() {
         <ErrorNote error={me.error} />
         {me.data && (
           <>
-            <h3>Food</h3>
+            <h3 className="section-label">Food</h3>
             <div className="cards">{group(me.data.food)}</div>
-            <h3>Beverage</h3>
+            <h3 className="section-label">Beverage</h3>
             <div className="cards">{group(me.data.beverage)}</div>
             <div className="tiles">
               <Tile label="Bar pour cost" value={`${me.data.pourCost.pct}%`} note={`Liquor cost ${rupee(me.data.pourCost.liquorCost)} ÷ liquor sales ${rupee(me.data.pourCost.liquorSales)}. Bars typically aim for about 20%.`} />

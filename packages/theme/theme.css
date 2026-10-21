@@ -26,36 +26,53 @@
 
   /* Brand */
   --brand-logo: url("./logo.svg");
-  --brand-primary: #1f1913; /* deep espresso */
-  --brand-primary-hover: #332b22;
-  --brand-primary-contrast: #fbf7ee;
-  --brand-accent: #b0822e; /* refined brass-gold */
-  --brand-accent-strong: #7d5718; /* gold dark enough for 4.5:1 text/links */
-  --brand-accent-soft: rgb(176 130 46 / 0.12);
-  --brand-accent-glow: rgb(176 130 46 / 0.25);
+  --brand-primary: #09090b; /* true black */
+  --brand-primary-hover: #202026;
+  --brand-primary-contrast: #ffffff;
+  --brand-accent: #e21d3e; /* cherry red */
+  --brand-accent-strong: #960f26; /* dark cherry: 4.5:1 for text and links on see-through glass */
+  --brand-accent-soft: rgb(226 29 62 / 0.1);
+  --brand-accent-glow: rgb(226 29 62 / 0.25);
 
-  /* Surfaces and text */
-  --brand-bg: #f7f4ee;
+  /* Surfaces and text - Full clean white & neutral slates */
+  --brand-bg: #ffffff;
   --brand-surface: #ffffff;
-  --brand-surface-2: #f2eee5;
-  --brand-surface-3: #e8e2d4;
-  --brand-border: #e4dcd0;
-  --brand-border-strong: #cdbfab;
-  --brand-text: #1d1813;
-  --brand-text-muted: #6e6455;
+  --brand-surface-2: #f4f4f7;
+  --brand-surface-3: #eaeaf0;
+  --brand-border: #e2e2e8;
+  --brand-border-strong: #c8c8d4;
+  --brand-text: #09090b;
+  --brand-text-muted: #4a4a56; /* 4.5:1 on see-through glass over the darkest fold of the backdrop */
+
+  /* Page backdrop and glass. Cards are thin see-through panes with no border, lifted by a soft
+   * shadow; buttons are glass without the blur (dozens of blurred POS tiles would be slow).
+   * The pane brightens what is behind it (1.4x) and adds a 20% white fill: together that keeps
+   * muted text and --brand-accent-strong at 4.5:1 over the darkest fold. Lower either and they fail.
+   * Surfaces without the blur need the 70% flat fill. */
+  --brand-backdrop: url("./backdrop-light.webp"); /* 3840px, shadows lifted */
+  --glass-fill: rgb(255 255 255 / 0.2);
+  --glass-fill-flat: rgb(255 255 255 / 0.7);
+  --glass-fill-hover: rgb(255 255 255 / 0.85);
+  --glass-border: transparent;
+  --glass-veil: rgb(255 255 255 / 0.2); /* sidebar and topbar */
+  --glass-blur: blur(10px) saturate(150%) brightness(1.4);
+  --glass-shadow: 0 12px 40px -12px rgb(70 50 30 / 0.22), 0 2px 8px rgb(70 50 30 / 0.06);
+  /* Never set the rims to none: they're used in shadow lists, where none is invalid. */
+  --glass-rim: inset 0 1px 0 rgb(255 255 255 / 0.6); /* light catching the top edge, not an outline */
+  --glass-rim-tinted: inset 1px 1px 0 rgb(255 214 160 / 0.55), inset -1px -1px 0 rgb(255 255 255 / 0.15);
 
   /* Status (text colour, and soft backgrounds / borders for badges) */
   --brand-success: #1e7047;
   --brand-success-soft: #e3f3ea;
   --brand-success-border: #bce5d0;
-  --brand-warning: #8d560c;
-  --brand-warning-soft: #fcf1dc;
-  --brand-warning-border: #f6d89f;
+  --brand-warning: #b56e08;
+  --brand-warning-soft: #fdf5e7;
+  --brand-warning-border: #f8dfb1;
   --brand-danger: #b33924;
   --brand-danger-soft: #fce8e4;
   --brand-danger-border: #f7bbb0;
-  --brand-info: #7d5718;
-  --brand-info-soft: #fbf1de;
+  --brand-info: #b0132e;
+  --brand-info-soft: #fde8ec;
 
   /* Shape, type and depth */
   --brand-radius-xs: 4px;
@@ -69,20 +86,20 @@
   --brand-font-heading: "Playfair Display", Georgia, "Times New Roman", serif;
   --brand-font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
   
-  /* Layered diffused shadows */
-  --brand-shadow-xs: 0 1px 2px rgb(31 25 19 / 0.04);
-  --brand-shadow-sm: 0 2px 4px rgb(31 25 19 / 0.04), 0 1px 2px rgb(31 25 19 / 0.02);
-  --brand-shadow: 0 3px 8px -1px rgb(31 25 19 / 0.06), 0 1px 3px rgb(31 25 19 / 0.03);
-  --brand-shadow-md: 0 6px 16px -2px rgb(31 25 19 / 0.08), 0 2px 6px -1px rgb(31 25 19 / 0.04);
-  --brand-shadow-lg: 0 16px 36px -6px rgb(31 25 19 / 0.12), 0 6px 14px -3px rgb(31 25 19 / 0.05);
+  /* Layered diffused shadows (neutral, no brown) */
+  --brand-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.04);
+  --brand-shadow-sm: 0 2px 4px rgb(0 0 0 / 0.05), 0 1px 2px rgb(0 0 0 / 0.03);
+  --brand-shadow: 0 3px 8px -1px rgb(0 0 0 / 0.08), 0 1px 3px rgb(0 0 0 / 0.04);
+  --brand-shadow-md: 0 6px 16px -2px rgb(0 0 0 / 0.1), 0 2px 6px -1px rgb(0 0 0 / 0.05);
+  --brand-shadow-lg: 0 16px 36px -6px rgb(0 0 0 / 0.14), 0 6px 14px -3px rgb(0 0 0 / 0.06);
   --brand-shadow-glow: 0 0 0 1px var(--brand-accent), 0 4px 16px var(--brand-accent-soft);
 
   /* Charts */
-  --chart-series: #b0822e;
-  --chart-seq-low: #f5ebd2;
-  --chart-seq-high: #563b12;
-  --chart-grid: #ede5d7;
-  --chart-axis: #cfbfab;
+  --chart-series: #e21d3e;
+  --chart-seq-low: #fce8eb;
+  --chart-seq-high: #7a0c1f;
+  --chart-grid: #e8e8ed;
+  --chart-axis: #bcbcc7;
 
   /* Compliance marks (not brand) */
   --mark-veg: #1a8a3a;
@@ -93,41 +110,54 @@
   :root:not([data-theme="light"]) {
     color-scheme: dark;
     --brand-logo: url("./logo-dark.svg");
-    --brand-primary: #d8b46e;
-    --brand-primary-hover: #e5c584;
-    --brand-primary-contrast: #15110d;
-    --brand-accent: #d8b46e;
-    --brand-accent-strong: #e7caa0;
-    --brand-accent-soft: rgb(216 180 110 / 0.15);
-    --brand-accent-glow: rgb(216 180 110 / 0.3);
-    --brand-bg: #12100d;
-    --brand-surface: #1c1813;
-    --brand-surface-2: #262019;
-    --brand-surface-3: #322b22;
-    --brand-border: #383025;
-    --brand-border-strong: #544738;
-    --brand-text: #f5ede1;
-    --brand-text-muted: #b8ab96;
+    --brand-primary: #e21d3e;
+    --brand-primary-hover: #f03352;
+    --brand-primary-contrast: #ffffff;
+    --brand-accent: #e21d3e;
+    --brand-accent-strong: #ff5c77;
+    --brand-accent-soft: rgb(226 29 62 / 0.18);
+    --brand-accent-glow: rgb(226 29 62 / 0.35);
+
+    /* Surfaces and text - Full true black & cool graphite */
+    --brand-bg: #000000;
+    --brand-surface: #0a0a0c;
+    --brand-surface-2: #141417;
+    --brand-surface-3: #1f1f24;
+    --brand-border: #232328;
+    --brand-border-strong: #383842;
+    --brand-text: #ffffff;
+    --brand-text-muted: #9c9ca8;
+    --brand-backdrop: none;
+    --glass-fill: rgb(255 255 255 / 0.05);
+    --glass-fill-hover: rgb(255 255 255 / 0.09);
+    --glass-border: rgb(255 255 255 / 0.12);
+    --glass-veil: rgb(255 255 255 / 0.03);
+    --glass-fill-flat: rgb(255 255 255 / 0.05);
+    --glass-shadow: 0 12px 40px -12px rgb(0 0 0 / 0.7);
+    --glass-blur: blur(24px) saturate(140%);
+    --glass-rim: 0 0 #0000; /* no rim in dark mode; "none" is invalid inside shadow lists */
+    --glass-rim-tinted: 0 0 #0000;
+
     --brand-success: #7fcf9c;
     --brand-success-soft: #193223;
     --brand-success-border: #264a35;
     --brand-warning: #e9ba6c;
-    --brand-warning-soft: #382c16;
-    --brand-warning-border: #524020;
+    --brand-warning-soft: rgb(233 186 108 / 0.15);
+    --brand-warning-border: rgb(233 186 108 / 0.35);
     --brand-danger: #f1907d;
-    --brand-danger-soft: #3d211b;
-    --brand-danger-border: #582f27;
-    --brand-info: #e7caa0;
-    --brand-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.4);
-    --brand-shadow-sm: 0 2px 4px rgb(0 0 0 / 0.4);
-    --brand-shadow: 0 3px 8px -1px rgb(0 0 0 / 0.5), 0 1px 3px rgb(0 0 0 / 0.3);
-    --brand-shadow-md: 0 6px 16px -2px rgb(0 0 0 / 0.6);
-    --brand-shadow-lg: 0 18px 42px -10px rgb(0 0 0 / 0.7);
-    --chart-series: #c69941;
-    --chart-seq-low: #2b2318;
-    --chart-seq-high: #edd8aa;
-    --chart-grid: #2f271e;
-    --chart-axis: #4a3e32;
+    --brand-danger-soft: #331515;
+    --brand-danger-border: #4f1e1e;
+    --brand-info: #ff5c77;
+    --brand-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.6);
+    --brand-shadow-sm: 0 2px 4px rgb(0 0 0 / 0.6);
+    --brand-shadow: 0 3px 8px -1px rgb(0 0 0 / 0.7), 0 1px 3px rgb(0 0 0 / 0.5);
+    --brand-shadow-md: 0 6px 18px -2px rgb(0 0 0 / 0.8);
+    --brand-shadow-lg: 0 18px 46px -8px rgb(0 0 0 / 0.9);
+    --chart-series: #e21d3e;
+    --chart-seq-low: #2a0b12;
+    --chart-seq-high: #ff9ebb;
+    --chart-grid: #1c1c22;
+    --chart-axis: #353540;
     --mark-veg: #3dbb5f;
     --mark-nonveg: #c47a3d;
   }
@@ -136,41 +166,54 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
   --brand-logo: url("./logo-dark.svg");
-  --brand-primary: #d8b46e;
-  --brand-primary-hover: #e5c584;
-  --brand-primary-contrast: #15110d;
-  --brand-accent: #d8b46e;
-  --brand-accent-strong: #e7caa0;
-  --brand-accent-soft: rgb(216 180 110 / 0.15);
-  --brand-accent-glow: rgb(216 180 110 / 0.3);
-  --brand-bg: #12100d;
-  --brand-surface: #1c1813;
-  --brand-surface-2: #262019;
-  --brand-surface-3: #322b22;
-  --brand-border: #383025;
-  --brand-border-strong: #544738;
-  --brand-text: #f5ede1;
-  --brand-text-muted: #b8ab96;
+  --brand-primary: #e21d3e;
+  --brand-primary-hover: #f03352;
+  --brand-primary-contrast: #ffffff;
+  --brand-accent: #e21d3e;
+  --brand-accent-strong: #ff5c77;
+  --brand-accent-soft: rgb(226 29 62 / 0.18);
+  --brand-accent-glow: rgb(226 29 62 / 0.35);
+
+  /* Surfaces and text - Full true black & cool graphite */
+  --brand-bg: #000000;
+  --brand-surface: #0a0a0c;
+  --brand-surface-2: #141417;
+  --brand-surface-3: #1f1f24;
+  --brand-border: #232328;
+  --brand-border-strong: #383842;
+  --brand-text: #ffffff;
+  --brand-text-muted: #9c9ca8;
+  --brand-backdrop: none;
+  --glass-fill: rgb(255 255 255 / 0.05);
+  --glass-fill-hover: rgb(255 255 255 / 0.09);
+  --glass-border: rgb(255 255 255 / 0.12);
+  --glass-veil: rgb(255 255 255 / 0.03);
+  --glass-fill-flat: rgb(255 255 255 / 0.05);
+  --glass-shadow: 0 12px 40px -12px rgb(0 0 0 / 0.7);
+  --glass-blur: blur(24px) saturate(140%);
+  --glass-rim: 0 0 #0000; /* no rim in dark mode; "none" is invalid inside shadow lists */
+  --glass-rim-tinted: 0 0 #0000;
+
   --brand-success: #7fcf9c;
   --brand-success-soft: #193223;
   --brand-success-border: #264a35;
   --brand-warning: #e9ba6c;
-  --brand-warning-soft: #382c16;
-  --brand-warning-border: #524020;
+  --brand-warning-soft: rgb(233 186 108 / 0.15);
+  --brand-warning-border: rgb(233 186 108 / 0.35);
   --brand-danger: #f1907d;
-  --brand-danger-soft: #3d211b;
-  --brand-danger-border: #582f27;
-  --brand-info: #e7caa0;
-  --brand-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.4);
-  --brand-shadow-sm: 0 2px 4px rgb(0 0 0 / 0.4);
-  --brand-shadow: 0 3px 8px -1px rgb(0 0 0 / 0.5), 0 1px 3px rgb(0 0 0 / 0.3);
-  --brand-shadow-md: 0 6px 16px -2px rgb(0 0 0 / 0.6);
-  --brand-shadow-lg: 0 18px 42px -10px rgb(0 0 0 / 0.7);
-  --chart-series: #c69941;
-  --chart-seq-low: #2b2318;
-  --chart-seq-high: #edd8aa;
-  --chart-grid: #2f271e;
-  --chart-axis: #4a3e32;
+  --brand-danger-soft: #331515;
+  --brand-danger-border: #4f1e1e;
+  --brand-info: #ff5c77;
+  --brand-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.6);
+  --brand-shadow-sm: 0 2px 4px rgb(0 0 0 / 0.6);
+  --brand-shadow: 0 3px 8px -1px rgb(0 0 0 / 0.7), 0 1px 3px rgb(0 0 0 / 0.5);
+  --brand-shadow-md: 0 6px 18px -2px rgb(0 0 0 / 0.8);
+  --brand-shadow-lg: 0 18px 46px -8px rgb(0 0 0 / 0.9);
+  --chart-series: #e21d3e;
+  --chart-seq-low: #2a0b12;
+  --chart-seq-high: #ff9ebb;
+  --chart-grid: #1c1c22;
+  --chart-axis: #353540;
   --mark-veg: #3dbb5f;
   --mark-nonveg: #c47a3d;
 }

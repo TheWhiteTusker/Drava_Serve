@@ -15,6 +15,18 @@ export async function seedSales(tx: Tx, outlets: Outlet[], stock: Stock, menus: 
   const ledger: (typeof t.stockLedger.$inferInsert)[] = [];
   const rand = rng(42);
   const pick = <T>(xs: T[]) => xs[Math.floor(rand() * xs.length)];
+
+  // Pre-fetch all recipes into memory to avoid thousands of roundtrips to remote Postgres
+  const allRecipes = await tx.select().from(t.recipeLine);
+  const recipesByItem = new Map<string, (typeof t.recipeLine.$inferSelect)[]>();
+  for (const r of allRecipes) {
+    const list = recipesByItem.get(r.menuItemId) ?? [];
+    list.push(r);
+    recipesByItem.set(r.menuItemId, list);
+  }
+
+  const orderLinesToInsert: (typeof t.orderLine.$inferInsert)[] = [];
+  const paymentsToInsert: (typeof t.payment.$inferInsert)[] = [];
   let billCount = 0;
   for (const o of outlets) {
     const menu = [...menus.get(o.id)!.values()];
@@ -22,7 +34,7 @@ export async function seedSales(tx: Tx, outlets: Outlet[], stock: Stock, menus: 
     for (let d = days - 1; d >= 0; d--) {
       const date = istDate(new Date(Date.now() - d * 86_400_000));
       const weekend = [0, 5, 6].includes(new Date(`${date}T12:00:00+05:30`).getDay());
-      const n = Math.floor((weekend ? 30 : 18) + rand() * 10);
+      const n = Math.floor((weekend ? 22 : 14) + rand() * 8);
       for (let b = 0; b < n; b++) {
         const hour = pick([12, 13, 13, 14, 15, 19, 20, 20, 21, 21, 22]);
         const opened = new Date(`${date}T${String(hour).padStart(2, '0')}:${String(Math.floor(rand() * 60)).padStart(2, '0')}:00+05:30`);
@@ -45,12 +57,12 @@ export async function seedSales(tx: Tx, outlets: Outlet[], stock: Stock, menus: 
           .returning();
         const [order] = await tx.insert(t.billOrder).values({ billId: bill.id, placedAt: opened, placedBy: cashier.id }).returning();
         for (const l of lines) {
-          await tx.insert(t.orderLine).values({
+          orderLinesToInsert.push({
             billId: bill.id, orderId: order.id, menuItemId: l.c.item.id, name: l.c.item.name, department: l.c.item.department,
             taxClassId: l.tax.id, taxKind: l.tax.kind, qty: String(l.qty), menuPrice: l.c.item.sellingPrice, priceCharged: l.c.item.sellingPrice,
             costAtSale: l.c.cost, createdAt: opened,
           });
-          const recipe = await tx.select().from(t.recipeLine).where(eq(t.recipeLine.menuItemId, l.c.item.id));
+          const recipe = recipesByItem.get(l.c.item.id) ?? [];
           for (const r of recipe) {
             const s = [...items.values()].find((x) => x.id === r.stockItemId)!;
             ledger.push({
@@ -59,10 +71,16 @@ export async function seedSales(tx: Tx, outlets: Outlet[], stock: Stock, menus: 
             });
           }
         }
-        await tx.insert(t.payment).values({ billId: bill.id, mode: pick(['cash', 'upi', 'upi', 'card'] as const), amount: totals.grandTotal, receivedAt: paid, receivedBy: cashier.id });
+        paymentsToInsert.push({ billId: bill.id, mode: pick(['cash', 'upi', 'upi', 'card'] as const), amount: totals.grandTotal, receivedAt: paid, receivedBy: cashier.id });
         billCount++;
       }
     }
+  }
+  for (let i = 0; i < orderLinesToInsert.length; i += 400) {
+    await tx.insert(t.orderLine).values(orderLinesToInsert.slice(i, i + 400));
+  }
+  for (let i = 0; i < paymentsToInsert.length; i += 400) {
+    await tx.insert(t.payment).values(paymentsToInsert.slice(i, i + 400));
   }
   const opening: (typeof t.stockLedger.$inferInsert)[] = [];
   for (const o of outlets) {
@@ -70,7 +88,7 @@ export async function seedSales(tx: Tx, outlets: Outlet[], stock: Stock, menus: 
       const storeId = storeOf(o.id, s.department === 'food' ? 'kitchen' : 'bar').id;
       const used = ledger.filter((l) => l.storeId === storeId && l.stockItemId === s.id).reduce((a, l) => a.minus(l.qty), dec(0));
       const left = LEFT_TODAY[o.code]?.[s.name] != null ? dec(LEFT_TODAY[o.code][s.name]) : dec(pars.get(s.name)!).times(0.1 + rand() * 1.2);
-      opening.push({ outletId: o.id, storeId, stockItemId: s.id, qty: used.plus(left).toFixed(0), unitCost: s.currentCost, movement: 'opening', reason: 'Sample opening stock', at: firstDay });
+      opening.push({ outletId: o.id, storeId, stockItemId: s.id, qty: used.plus(left).toFixed(0), unitCost: s.currentCost, movement: 'opening', reason: 'Opening stock count', at: firstDay });
     }
   }
   ledger.unshift(...opening);

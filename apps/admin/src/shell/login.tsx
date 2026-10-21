@@ -33,7 +33,7 @@ export function Login() {
   return (
     <main className="login">
       <section className="login-brand">
-        <img src={logoDark} alt="F&B Manager" />
+        <img src={logoDark} alt="Drava Serve" />
         <div>
           <h1>Run the kitchen, the bar and the books in one place.</h1>
           <p>Live stock, nightly orders, costed recipes, a menu that ranks itself by margin, and billing that keeps working offline.</p>

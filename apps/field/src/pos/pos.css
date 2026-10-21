@@ -105,11 +105,11 @@ kbd {
   text-align: left;
   min-height: 98px;
   padding: 0.85rem 0.95rem;
-  background: var(--brand-surface);
+  background: var(--glass-fill-flat);
   color: var(--brand-text);
-  border: 1.5px solid var(--brand-border);
+  border: 1.5px solid var(--glass-border);
   border-radius: var(--brand-radius);
-  box-shadow: var(--brand-shadow-xs);
+  box-shadow: var(--glass-rim), var(--brand-shadow-xs);
   font-weight: 600;
   transition-property: transform, box-shadow, border-color, background-color;
   transition-duration: 0.12s;
@@ -121,7 +121,7 @@ kbd {
 }
 .item:hover:not(:disabled) {
   border-color: var(--brand-accent);
-  box-shadow: var(--brand-shadow-md);
+  box-shadow: var(--glass-rim), var(--brand-shadow-md);
   transform: translateY(-2px);
 }
 .item:active:not(:disabled) {
@@ -165,8 +165,9 @@ kbd {
   font-variant-numeric: tabular-nums;
 }
 .ticket {
-  background: var(--brand-surface);
-  border: 1px solid var(--brand-border);
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
   border-radius: var(--brand-radius-large);
   padding: 1.25rem 1.35rem;
   display: flex;
@@ -175,7 +176,7 @@ kbd {
   align-self: start;
   position: sticky;
   top: 74px;
-  box-shadow: var(--brand-shadow-lg);
+  box-shadow: var(--glass-rim), var(--brand-shadow-lg);
 }
 .ticket-empty {
   text-align: center;
@@ -305,7 +306,7 @@ dialog.wide {
   width: min(880px, calc(100vw - 1.5rem));
 }
 dialog::backdrop {
-  background: rgb(18 14 10 / 0.55);
+  background: rgb(0 0 0 / 0.65);
   backdrop-filter: blur(6px);
 }
 .grid-buttons {
@@ -325,7 +326,7 @@ dialog::backdrop {
   flex-direction: column;
   gap: 0.2rem;
   min-height: 88px;
-  background: var(--brand-surface);
+  background: var(--glass-fill-flat);
   color: var(--brand-text);
   border: 1.5px dashed var(--brand-border-strong);
   border-radius: var(--brand-radius);
@@ -374,7 +375,7 @@ dialog::backdrop {
   flex-direction: column;
   gap: 0.35rem;
   min-height: 84px;
-  background: var(--brand-surface);
+  background: var(--glass-fill-flat);
   color: var(--brand-text);
   border: 1.5px solid var(--brand-border-strong);
   border-radius: var(--brand-radius);

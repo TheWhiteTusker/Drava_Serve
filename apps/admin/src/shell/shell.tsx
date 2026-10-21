@@ -42,7 +42,7 @@ export function Shell({ s }: { s: Session }) {
           <Menu className="icon" />
           <span className="sr-only">Menu</span>
         </button>
-        <span className="logo" role="img" aria-label="F&B Manager" />
+        <span className="logo" role="img" aria-label="Drava Serve" />
         <span className="customer">{s.customer.name}</span>
         <span className="spacer" />
         <button className="secondary search-trigger" onClick={() => setPaletteOpen(true)}>

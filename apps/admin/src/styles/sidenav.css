@@ -1,6 +1,7 @@
 #sidenav {
-  background: var(--brand-surface);
-  border-right: 1px solid var(--brand-border);
+  background: var(--glass-veil);
+  backdrop-filter: var(--glass-blur);
+  border-right: 1px solid var(--glass-border);
   padding: 1rem 0.85rem 2.5rem;
   position: sticky;
   top: 57px;
@@ -68,7 +69,6 @@
 .content {
   padding: 2.25rem 2.5rem 5rem;
   min-width: 0;
-  max-width: 1440px;
 }
 @media (max-width: 900px) {
   .shell {
@@ -91,6 +91,7 @@
     inset: 57px auto 0 0;
     width: 280px;
     z-index: 15;
+    background: var(--glass-fill-flat); /* a drawer over content needs the denser glass */
     box-shadow: var(--brand-shadow-lg);
   }
   #sidenav.open {

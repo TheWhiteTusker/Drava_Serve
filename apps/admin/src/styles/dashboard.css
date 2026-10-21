@@ -1,10 +1,11 @@
 /* ---------- Dashboard ---------- */
 .filters {
   padding: 0.85rem 1.15rem;
-  background: var(--brand-surface);
-  border: 1px solid var(--brand-border);
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
   border-radius: var(--brand-radius);
-  box-shadow: var(--brand-shadow);
+  box-shadow: var(--glass-rim), var(--glass-shadow);
   margin-bottom: 1.5rem;
 }
 .filters .row {
@@ -27,14 +28,15 @@
   margin-bottom: 1.5rem;
 }
 .tile {
-  background: var(--brand-surface);
-  border: 1px solid var(--brand-border);
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
   border-radius: var(--brand-radius);
   padding: 1.15rem 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  box-shadow: var(--brand-shadow);
+  box-shadow: var(--glass-rim), var(--glass-shadow);
   position: relative;
   overflow: hidden;
   transition-property: transform, box-shadow, border-color;
@@ -53,7 +55,7 @@
 }
 .tile:hover {
   transform: translateY(-2px);
-  box-shadow: var(--brand-shadow-md);
+  box-shadow: var(--glass-rim), var(--brand-shadow-md);
   border-color: var(--brand-border-strong);
 }
 .tile:hover::before {

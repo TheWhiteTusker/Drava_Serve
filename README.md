@@ -1,4 +1,4 @@
-# F&B Management System
+# Drava Serve
 
 Multi-customer food and beverage management for restaurants and bars in India, built for White Tusker Private Limited.
 The agreed design is in [docs/FNB-Management-System-Handoff.md](docs/FNB-Management-System-Handoff.md); choices made while building are in [docs/DECISIONS.md](docs/DECISIONS.md); the developer handover is [docs/HANDOVER.md](docs/HANDOVER.md).

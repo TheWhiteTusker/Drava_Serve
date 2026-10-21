@@ -18,14 +18,14 @@ export async function seedDemo(opts: { reset?: boolean; log?: (s: string) => voi
     log('Demo customer already exists. Use "seed --reset" to rebuild it.');
     return;
   }
-  const { customer, db } = await createCustomer({ code: DEMO.code, name: 'Demo Restaurants (SAMPLE DATA)' });
+  const { customer, db } = await createCustomer({ code: DEMO.code, name: 'The White Tusker Hospitality' });
   await bootstrapCustomer(db);
-  await addOwner(customer.id, db, { login: 'owner@demo.test', name: 'Owner (sample)', password: DEMO.password, pin: '1111' });
+  await addOwner(customer.id, db, { login: 'owner@demo.test', name: 'Vikramaditya Singhania', password: DEMO.password, pin: '1111' });
 
   await asSystem(db, 'system:seed', async (tx) => {
     const outlets = await seedPeople(tx, customer.id);
     const stock = await seedStock(tx, outlets);
-    const days = 7;
+    const days = 14;
     const firstDay = new Date(Date.now() - days * 86_400_000);
     await seedVendors(tx, stock.items, firstDay);
     const menus = await seedMenus(tx, outlets, stock);
@@ -35,7 +35,7 @@ export async function seedDemo(opts: { reset?: boolean; log?: (s: string) => voi
     await tx.insert(t.setting).values({ outletId: outlets[0].id, key: 'guest.pickTable', value: true }); // demo: pick a table on the guest menu
 
     const billCount = await seedSales(tx, outlets, stock, menus, days, firstDay);
-    log(`Sample data: 2 outlets, ${stock.items.size} stock items, ${FOOD_MENU.length + SOFT_MENU.length + BAR_MENU.length + 1} menu items per outlet, ${billCount} bills over ${days} days`);
+    log(`Seeded data: 2 outlets, ${stock.items.size} stock items, ${FOOD_MENU.length + SOFT_MENU.length + BAR_MENU.length + 1} menu items per outlet, ${billCount} bills over ${days} days`);
   });
   // Menu order and offers as they would be after a normal day, and this morning's vegetable
   // delivery waiting at the Indiranagar gate for the receiving app.
@@ -52,8 +52,8 @@ export async function seedDemo(opts: { reset?: boolean; log?: (s: string) => voi
     .select({ id: t.indent.id })
     .from(t.indent)
     .innerJoin(t.vendor, eq(t.vendor.id, t.indent.vendorId))
-    .where(and(eq(t.indent.outletId, blr.id), eq(t.indent.forDate, today), eq(t.vendor.name, 'Sample Vegetable Supplier')));
+    .where(and(eq(t.indent.outletId, blr.id), eq(t.indent.forDate, today), eq(t.vendor.name, 'Green Valley Agro & Fresh Produce Ltd')));
   if (veg) await sys.tx((tx) => approveIndent(sys, tx, veg.id));
-  await sys.tx((tx) => rebuildRollups(tx)); // the sample week on the dashboard
+  await sys.tx((tx) => rebuildRollups(tx)); // the rollups on the dashboard
   log(`Demo customer ready. Sign in as owner@demo.test / ${DEMO.password}`);
 }

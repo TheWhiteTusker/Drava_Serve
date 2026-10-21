@@ -19,6 +19,20 @@
   color: var(--brand-accent-strong);
   margin-bottom: 0.4rem;
 }
+/* A section label inside a card (Food, Beverage): smaller than h3, set apart by case and spacing. */
+.section-label {
+  font: 700 0.72rem/1.2 var(--brand-font);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--brand-text-muted);
+  margin: 1.75rem 0 0.75rem;
+}
+/* The explanatory line under a card title. */
+.card > p.muted {
+  font-size: 0.9rem;
+  max-width: 90ch;
+  margin: 0.35rem 0 0;
+}
 .row {
   display: flex;
   gap: 0.6rem;
@@ -43,11 +57,12 @@
   min-width: 8rem;
 }
 .card {
-  background: var(--brand-surface);
-  border: 1px solid var(--brand-border);
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
   border-radius: var(--brand-radius);
   padding: 1.35rem 1.5rem;
-  box-shadow: var(--brand-shadow);
+  box-shadow: var(--glass-rim), var(--glass-shadow);
   margin-bottom: 1.5rem;
 }
 .cards {
@@ -61,7 +76,7 @@
 }
 .cards .card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--brand-shadow-md);
+  box-shadow: var(--glass-rim), var(--brand-shadow-md);
 }
 .tabs {
   display: inline-flex;
@@ -91,7 +106,7 @@
   border-color: transparent;
   color: var(--brand-text);
   transform: none;
-  box-shadow: none;
+  box-shadow: var(--glass-rim);
 }
 .tabs button[aria-selected='true'] {
   background: var(--brand-surface);
@@ -103,10 +118,11 @@
 /* ---------- Tables ---------- */
 .table-wrap {
   overflow-x: auto;
-  background: var(--brand-surface);
-  border: 1px solid var(--brand-border);
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
   border-radius: var(--brand-radius);
-  box-shadow: var(--brand-shadow);
+  box-shadow: var(--glass-rim), var(--glass-shadow);
   scrollbar-width: thin;
 }
 .toolbar {
@@ -229,4 +245,28 @@ ul.clean li {
 }
 ul.clean li:last-child {
   border-bottom: 0;
+}
+/* Menu-engineering quadrant: title, one muted line of advice, then items with their numbers beneath. */
+.quadrant h4 {
+  font-size: 0.95rem;
+  margin: 0;
+}
+.quadrant > p {
+  margin: 0.2rem 0 0.85rem;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--brand-text-muted);
+}
+.quadrant ul.clean li {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+}
+.quadrant ul.clean li > span:first-child {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.quadrant li > .muted {
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
 }
