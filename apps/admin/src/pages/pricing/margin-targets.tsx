@@ -37,6 +37,7 @@ export function MarginTargetsPage() {
                   <input
                     aria-label={`Target for ${r.name}`}
                     inputMode="decimal"
+                    placeholder="e.g. 70"
                     disabled={!manage}
                     defaultValue={value(r.id)}
                     key={`${r.id}-${value(r.id)}`}

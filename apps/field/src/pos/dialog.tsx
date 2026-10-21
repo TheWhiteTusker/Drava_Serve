@@ -67,7 +67,7 @@ export function PinSwitch({ outletId, onClose }: { outletId: string; onClose: ()
             <button className="secondary huge" onClick={() => setPin((p) => (p + '0').slice(0, 6))}>
               0
             </button>
-            <button className="huge" disabled={pin.length < 4} onClick={go}>
+            <button className="huge gold" disabled={pin.length < 4} onClick={go}>
               OK
             </button>
           </div>

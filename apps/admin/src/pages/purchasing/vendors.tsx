@@ -42,7 +42,7 @@ export function VendorsPage() {
             {
               label: 'Supplies',
               render: (r: any) => (
-                <Link to={`/vendors/${slugify(r.name)}/items`} onClick={(e) => e.stopPropagation()}>
+                <Link to={`/vendors/${slugify(r.name)}/items`} className="link" onClick={(e) => e.stopPropagation()}>
                   Items
                 </Link>
               ),
@@ -51,14 +51,14 @@ export function VendorsPage() {
           ]}
           defaults={{ department: 'food', active: true }}
           fields={[
-            { name: 'name', label: 'Name', required: true },
+            { name: 'name', label: 'Name', required: true, placeholder: 'e.g. Metro Cash & Carry, Fresh Valley Dairy' },
             { name: 'department', label: 'Part', type: 'select', required: true, options: [{ value: 'food', label: 'Food' }, { value: 'beverage', label: 'Beverage' }, { value: 'both', label: 'Both' }] },
-            { name: 'contactName', label: 'Contact person' },
-            { name: 'phone', label: 'Phone (for WhatsApp)' },
-            { name: 'email', label: 'Email' },
-            { name: 'gstin', label: 'GSTIN' },
-            { name: 'address', label: 'Address', type: 'textarea' },
-            { name: 'active', label: 'Active', type: 'checkbox' },
+            { name: 'contactName', label: 'Contact person', placeholder: 'e.g. Rajesh Sharma' },
+            { name: 'phone', label: 'Phone (for WhatsApp)', placeholder: 'e.g. +91 98765 43210' },
+            { name: 'email', label: 'Email', placeholder: 'e.g. orders@supplier.com' },
+            { name: 'gstin', label: 'GSTIN', placeholder: 'e.g. 29ABCDE1234F1Z5' },
+            { name: 'address', label: 'Address', type: 'textarea', span: 'full', placeholder: 'e.g. Plot 42, Wholesale Market Yard, APMC Complex' },
+            { name: 'active', label: 'Active', type: 'checkbox', span: 'full' },
           ]}
           subPages={{
             items: (r: any) => (

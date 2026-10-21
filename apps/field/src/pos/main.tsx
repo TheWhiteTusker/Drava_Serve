@@ -21,13 +21,26 @@ function App() {
   if (allowed.length === 1) return <Till key={`${allowed[0].id}-${s.user.id}`} outletId={allowed[0].id} />;
   if (!outletId || !allowed.some((o) => o.id === outletId)) {
     return (
-      <main className="wrap stack">
-        <h1>Which outlet is this counter at?</h1>
-        {allowed.map((o) => (
-          <button key={o.id} className="huge" onClick={() => (session.setOutlet(o.id), setOutletId(o.id))}>
-            {o.name}
-          </button>
-        ))}
+      <main className="wrap" style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: '2rem 1.25rem' }}>
+        <div className="card stack" style={{ width: 'min(480px, 100%)', padding: '2.5rem 2rem', textAlign: 'center' }}>
+          <div className="logo" role="img" aria-label="Logo" style={{ margin: '0 auto 1.5rem' }} />
+          <h1 style={{ fontSize: '1.6rem', marginBottom: '0.5rem' }}>Select Counter Location</h1>
+          <p className="muted" style={{ marginBottom: '1.75rem' }}>
+            Choose the outlet for this billing counter terminal.
+          </p>
+          <div className="stack" style={{ gap: '0.75rem' }}>
+            {allowed.map((o) => (
+              <button
+                key={o.id}
+                className="huge secondary"
+                style={{ width: '100%', justifyContent: 'center', fontSize: '1.2rem' }}
+                onClick={() => (session.setOutlet(o.id), setOutletId(o.id))}
+              >
+                {o.name}
+              </button>
+            ))}
+          </div>
+        </div>
       </main>
     );
   }

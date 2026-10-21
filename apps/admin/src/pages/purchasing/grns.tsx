@@ -64,17 +64,17 @@ export function GrnsPage() {
           <tbody>
             {(list.data ?? []).map((g) => (
               <tr key={g.id}>
-                <td>{g.number}</td>
+                <td><strong>{g.number}</strong></td>
                 <td>{istDate(new Date(g.createdAt))}</td>
                 <td>{g.vendor}</td>
-                <td>{rupee(g.amountGross)}</td>
-                <td>{Number(g.returnDeduction) ? `− ${rupee(g.returnDeduction)}` : '—'}</td>
-                <td>
+                <td className="num">{rupee(g.amountGross)}</td>
+                <td className="num">{Number(g.returnDeduction) ? `− ${rupee(g.returnDeduction)}` : '—'}</td>
+                <td className="num">
                   <strong>{rupee(g.amountPayable)}</strong>
                 </td>
-                <td>{rupee(g.paid)}</td>
+                <td className="num">{rupee(g.paid)}</td>
                 <td className="actions">
-                  <button className="ghost" onClick={() => rec.open(g.id)}>
+                  <button className="link" onClick={() => rec.open(g.id)}>
                     {can(s, 'accounts.pay', outletId) && g.status === 'approved' ? 'Record payment' : 'Open'}
                   </button>
                 </td>

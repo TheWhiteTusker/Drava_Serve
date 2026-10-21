@@ -81,12 +81,12 @@ export function IndentDetail({ id }: { id: string }) {
                 </td>
                 <td>
                   {editable ? (
-                    <input aria-label={`Order quantity for ${l.name}`} inputMode="decimal" defaultValue={qty(l.approvedQty ?? l.suggestedQty)} onChange={(e) => setEdits({ ...edits, [l.id]: e.target.value })} style={{ maxWidth: 100 }} />
+                    <input aria-label={`Order quantity for ${l.name}`} inputMode="decimal" placeholder="0" defaultValue={qty(l.approvedQty ?? l.suggestedQty)} onChange={(e) => setEdits({ ...edits, [l.id]: e.target.value })} style={{ maxWidth: 100 }} />
                   ) : (
                     `${qty(l.approvedQty ?? l.suggestedQty)} ${l.unit}`
                   )}
                 </td>
-                <td>{l.lastRate ? rupee(l.lastRate) : '—'}</td>
+                <td className="num">{l.lastRate ? rupee(l.lastRate) : '—'}</td>
               </tr>
             ))}
           </tbody>
@@ -96,7 +96,7 @@ export function IndentDetail({ id }: { id: string }) {
       <footer className="row end">
         {editable ? (
           <>
-            <button className="ghost" onClick={() => run(() => api(`/indents/${id}/cancel`, { method: 'POST' }))}>
+            <button className="ghost danger" onClick={() => run(() => api(`/indents/${id}/cancel`, { method: 'POST' }))}>
               Cancel order
             </button>
             {Object.keys(edits).length > 0 && (
@@ -104,20 +104,20 @@ export function IndentDetail({ id }: { id: string }) {
                 Save quantities
               </button>
             )}
-            <button onClick={() => run(async () => (Object.keys(edits).length && (await api(`/indents/${id}/lines`, { method: 'PUT', body: Object.entries(edits).map(([lid, q]) => ({ id: lid, approvedQty: q })) })), api(`/indents/${id}/approve`, { method: 'POST' })))}>
-              Approve
+            <button className="gold" onClick={() => run(async () => (Object.keys(edits).length && (await api(`/indents/${id}/lines`, { method: 'PUT', body: Object.entries(edits).map(([lid, q]) => ({ id: lid, approvedQty: q })) })), api(`/indents/${id}/approve`, { method: 'POST' })))}>
+              Approve order
             </button>
           </>
         ) : (
           i.status !== 'cancelled' && (
             <>
               <button className="secondary" onClick={() => run(print)}>
-                Print
+                Print PDF
               </button>
               <button className="secondary" onClick={() => run(download)}>
-                Download
+                Download PDF
               </button>
-              <button onClick={() => run(share)}>Share</button>
+              <button className="gold" onClick={() => run(share)}>Share with vendor</button>
             </>
           )
         )}

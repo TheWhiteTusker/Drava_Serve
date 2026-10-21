@@ -5,72 +5,82 @@ dialog {
   background: var(--brand-surface);
   color: var(--brand-text);
   padding: 0;
-  width: min(540px, calc(100vw - 2rem));
+  width: min(560px, calc(100vw - 2rem));
   max-height: calc(100vh - 2rem);
   box-shadow: var(--brand-shadow-lg);
+  overflow: hidden;
 }
 dialog.wide {
-  width: min(940px, calc(100vw - 2rem));
+  width: min(960px, calc(100vw - 2rem));
 }
 dialog[open] {
-  animation: rise 0.18s ease-out;
+  animation: rise 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.99);
+    transform: translateY(10px) scale(0.98);
   }
 }
 dialog::backdrop {
-  background: rgb(20 14 8 / 0.45);
-  backdrop-filter: blur(2px);
+  background: rgb(18 14 10 / 0.55);
+  backdrop-filter: blur(6px);
 }
 .dialog-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.1rem 1.4rem;
+  padding: 1.25rem 1.6rem;
   border-bottom: 1px solid var(--brand-border);
   position: sticky;
   top: 0;
   background: var(--brand-surface);
   z-index: 2;
 }
+.dialog-head h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
 .dialog-body {
-  padding: 1.25rem 1.4rem 1.4rem;
+  padding: 1.4rem 1.6rem 1.6rem;
 }
 .dialog-body footer.row.end {
   position: sticky;
-  bottom: -1.4rem;
+  bottom: -1.6rem;
   background: var(--brand-surface);
-  padding: 0.9rem 0;
+  padding: 1rem 0;
   margin-bottom: -0.4rem;
   border-top: 1px solid var(--brand-border);
+  gap: 0.75rem;
 }
 .toasts {
   position: fixed;
-  bottom: 1.25rem;
-  right: 1.25rem;
+  bottom: 1.5rem;
+  right: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.6rem;
   z-index: 100;
 }
 .toast {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.75rem;
   background: var(--brand-primary);
   color: var(--brand-primary-contrast);
-  padding: 0.75rem 1rem;
+  padding: 0.85rem 1.25rem;
   border-radius: var(--brand-radius);
   box-shadow: var(--brand-shadow-lg);
-  animation: rise 0.2s ease-out;
-  max-width: 420px;
+  border: 1px solid color-mix(in srgb, var(--brand-primary-contrast) 15%, transparent);
+  animation: rise 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  max-width: 440px;
+  font-size: 0.92rem;
+  font-weight: 500;
 }
 .toast.danger {
   background: var(--brand-danger);
+  border-color: var(--brand-danger-border);
   color: #fff;
 }
 
@@ -79,20 +89,23 @@ dialog::backdrop {
   border: 0;
   border-bottom: 1px solid var(--brand-border);
   border-radius: 0;
-  min-height: 58px;
-  font-size: 1.05rem;
-  padding: 0 1.25rem;
+  min-height: 60px;
+  font-size: 1.1rem;
+  padding: 0 1.5rem;
   box-shadow: none;
+  background: var(--brand-surface);
 }
 .palette input:focus {
   box-shadow: none;
+  border-bottom-color: var(--brand-accent);
 }
 .palette ul {
   list-style: none;
   margin: 0;
-  padding: 0.5rem;
+  padding: 0.6rem;
   max-height: 60vh;
   overflow-y: auto;
+  scrollbar-width: thin;
 }
 .palette li button {
   width: 100%;
@@ -101,6 +114,9 @@ dialog::backdrop {
   border-color: transparent;
   color: var(--brand-text);
   font-weight: 500;
+  border-radius: var(--brand-radius-small);
+  padding: 0.65rem 0.9rem;
+  box-shadow: none;
 }
 .palette li button .muted {
   margin-left: auto;
@@ -110,4 +126,6 @@ dialog::backdrop {
 .palette li button:hover:not(:disabled) {
   background: var(--brand-accent-soft);
   border-color: transparent;
+  color: var(--brand-text);
+  transform: none;
 }

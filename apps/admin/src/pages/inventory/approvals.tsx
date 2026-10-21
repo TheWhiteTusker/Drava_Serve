@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { api, useApi, useCurrentOutlet } from '../../api';
 import { useLiveReload } from '../../live';
-import { Badge, ErrorNote, Page, rupee, toast } from '../../ui';
+import { Badge, Empty, ErrorNote, Page, rupee, toast } from '../../ui';
 import { MOVE_LABEL } from './ledger';
 
 // ---------- Approvals ----------
@@ -48,15 +48,17 @@ export function ApprovalsPage() {
             {r.decidedByName && <p className="muted">Decided by {r.decidedByName}</p>}
             {r.status === 'pending' && (
               <footer className="row end">
-                <button className="ghost" onClick={() => decide(r.id, false)}>
+                <button className="ghost danger" onClick={() => decide(r.id, false)}>
                   Reject
                 </button>
-                <button onClick={() => decide(r.id, true)}>Approve</button>
+                <button className="gold" onClick={() => decide(r.id, true)}>
+                  Approve
+                </button>
               </footer>
             )}
           </article>
         ))}
-        {list.data?.length === 0 && <p className="muted">Nothing here.</p>}
+        {list.data?.length === 0 && <Empty title="No approvals found">Requests waiting for manager review will appear here.</Empty>}
       </div>
     </Page>
   );

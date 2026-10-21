@@ -27,11 +27,11 @@ export function ErrorNote({ error }: { error?: string | null }) {
   ) : null;
 }
 
-export function Empty({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {
+export function Empty({ title, children, action, icon }: { title: string; children?: ReactNode; action?: ReactNode; icon?: ReactNode }) {
   return (
     <div className="empty">
       <span className="empty-icon" aria-hidden>
-        <Inbox className="icon" />
+        {icon ?? <Inbox className="icon" />}
       </span>
       <strong>{title}</strong>
       {children && <div>{children}</div>}

@@ -135,7 +135,7 @@ export function GrnDetail({ id }: { id: string }) {
             </label>
             <label className="field">
               Reference
-              <input value={pay.reference ?? ''} onChange={(e) => setPay({ ...pay, reference: e.target.value })} />
+              <input placeholder="e.g. UTR / Cheque / Txn ID" value={pay.reference ?? ''} onChange={(e) => setPay({ ...pay, reference: e.target.value })} />
             </label>
             <label className="field">
               Amount (₹)
@@ -143,7 +143,7 @@ export function GrnDetail({ id }: { id: string }) {
             </label>
           </div>
           <ErrorNote error={error} />
-          <button>Save payment</button>
+          <button className="gold">Save payment</button>
         </form>
       )}
     </>

@@ -84,7 +84,7 @@ export function MenuItemsPage() {
           taxClassId: taxes.data?.find((t) => t.kind === (dept === 'beverage' && alcoholic ? 'liquor' : 'food'))?.id ?? null,
         }}
         fields={[
-          { name: 'name', label: 'Name', required: true },
+          { name: 'name', label: 'Name', required: true, placeholder: dept === 'food' ? 'e.g. Butter Chicken' : 'e.g. Classic Mojito' },
           {
             name: 'categoryId', label: dept === 'food' ? 'Course' : alcoholic ? 'Liquor type or sub-type' : 'Drink type', type: 'select', required: true,
             options: dept === 'food' ? courseOpts : alcoholic ? liquorOpts : drinkOpts,
@@ -93,22 +93,22 @@ export function MenuItemsPage() {
             ? [{ name: 'dietType', label: 'Diet type', type: 'select' as const, required: true, options: DIETS }]
             : [
                 { name: 'brandId', label: 'Brand', type: 'select' as const, options: opts(brands.data) },
-                { name: 'serveSizeMl', label: 'Serve size (ml)', type: 'decimal' as const, help: 'e.g. 30, 60, 750' },
+                { name: 'serveSizeMl', label: 'Serve size (ml)', type: 'decimal' as const, placeholder: 'e.g. 60', help: 'e.g. 30, 60, 750' },
               ]),
-          { name: 'sellingPrice', label: 'Price before tax (₹)', type: 'decimal', required: true },
+          { name: 'sellingPrice', label: 'Price before tax (₹)', type: 'decimal', required: true, placeholder: '0.00' },
           { name: 'taxClassId', label: 'Tax class', type: 'select', required: true, options: opts(taxes.data) },
-          { name: 'targetMarginPct', label: 'Target margin % (optional)', type: 'decimal', help: 'Overrides the outlet and course targets' },
-          { name: 'lowThreshold', label: '"Few left" at (portions)', type: 'number', help: 'Blank uses the outlet setting' },
-          { name: 'code', label: 'Short code' },
+          { name: 'targetMarginPct', label: 'Target margin % (optional)', type: 'decimal', placeholder: 'e.g. 70', help: 'Overrides the outlet and course targets' },
+          { name: 'lowThreshold', label: '"Few left" at (portions)', type: 'number', placeholder: 'e.g. 5', help: 'Blank uses the outlet setting' },
+          { name: 'code', label: 'Short code', placeholder: 'e.g. BC' },
           ...(dept === 'food'
             ? [
-                { name: 'calories', label: 'Calories (optional)', type: 'number' as const },
-                { name: 'allergens', label: 'Allergens', type: 'checks' as const, options: ALLERGENS.map((a) => ({ value: a, label: a[0].toUpperCase() + a.slice(1) })) },
+                { name: 'calories', label: 'Calories (optional)', type: 'number' as const, placeholder: 'e.g. 350' },
+                { name: 'allergens', label: 'Allergens', type: 'checks' as const, span: 2 as const, options: ALLERGENS.map((a) => ({ value: a, label: a[0].toUpperCase() + a.slice(1) })) },
               ]
             : []),
-          { name: 'tags', label: 'Tags', type: 'tags', placeholder: 'comma separated', help: `For example: ${TAG_SUGGESTIONS.slice(0, 5).join(', ')}` },
-          { name: 'description', label: 'Description', type: 'textarea' },
-          { name: 'active', label: 'On the menu', type: 'checkbox' },
+          { name: 'tags', label: 'Tags', type: 'tags', span: 2 as const, placeholder: 'e.g. chef-special, mild, popular', help: `Suggestions: ${TAG_SUGGESTIONS.slice(0, 5).join(', ')}` },
+          { name: 'description', label: 'Description', type: 'textarea', span: 'full' as const, placeholder: 'Brief description or tasting notes for staff and guests…' },
+          { name: 'active', label: 'On the menu', type: 'checkbox', span: 'full' as const },
         ]}
       />
   );

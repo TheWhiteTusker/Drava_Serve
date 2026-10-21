@@ -147,7 +147,7 @@ export function ActivityPage() {
     >
       <div className="tabs" role="tablist">
         {FILTERS.map(([k, label]) => (
-          <button key={label} role="tab" aria-selected={kind === k} onClick={() => setKind(k)}>
+          <button key={label} role="tab" aria-selected={kind === k} className={kind === k ? '' : 'ghost'} onClick={() => setKind(k)}>
             {label}
           </button>
         ))}

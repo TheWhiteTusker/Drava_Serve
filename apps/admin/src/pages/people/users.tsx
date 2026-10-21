@@ -34,12 +34,12 @@ export function UsersPage() {
       ]}
       defaults={{ active: true, roles: [] }}
       fields={[
-        { name: 'name', label: 'Name', required: true },
-        { name: 'login', label: 'Sign-in (email or phone)', required: true },
-        { name: 'phone', label: 'Phone' },
-        { name: 'password', label: 'Password', type: 'password', help: 'At least 8 characters. Leave blank to keep the current one.' },
-        { name: 'pin', label: 'PIN', type: 'password', help: '4 to 6 digits. Leave blank to keep the current one.' },
-        { name: 'active', label: 'Active', type: 'checkbox' },
+        { name: 'name', label: 'Name', required: true, placeholder: 'e.g. Rahul Sharma' },
+        { name: 'login', label: 'Sign-in (email or phone)', required: true, placeholder: 'rahul@restaurant.com or 9876543210' },
+        { name: 'phone', label: 'Phone', placeholder: '+91 98765 43210' },
+        { name: 'password', label: 'Password', type: 'password', placeholder: '••••••••', help: 'At least 8 characters. Leave blank to keep current password.' },
+        { name: 'pin', label: 'PIN', type: 'password', placeholder: '4-6 digit PIN', help: '4 to 6 digits. Leave blank to keep current PIN.' },
+        { name: 'active', label: 'Active user', type: 'checkbox', span: 'full' as const },
       ]}
       extra={(v, set) => (
         <fieldset className="field">

@@ -14,7 +14,13 @@ Needs **Node 24+**, **pnpm 11** (`corepack enable`) and two cloud databases: a *
 
 ## Run
 
-Each in its own terminal:
+All at once (builds `@fnb/shared`, then runs every app's dev server with prefixed output):
+
+```sh
+pnpm dev
+```
+
+Or each in its own terminal:
 
 ```sh
 pnpm dev:api                     # API on http://localhost:3000/api

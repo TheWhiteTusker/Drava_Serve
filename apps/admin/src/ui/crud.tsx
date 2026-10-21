@@ -80,8 +80,12 @@ export function CrudPage<T extends { id: string; version?: number }>(props: Prop
     <Page title={props.title} eyebrow={props.eyebrow} intro={props.intro} actions={add}>
       {props.before}
       <div className="toolbar">
-        <SearchBox value={q} onChange={setQ} placeholder={`Search ${props.title.toLowerCase()}`} />
-        <span className="muted">{list.data ? `${rows.length} shown` : ''}</span>
+        <SearchBox value={q} onChange={setQ} placeholder={`Search ${props.title.toLowerCase()}…`} />
+        {list.data && (
+          <span className="badge" style={{ marginLeft: 'auto', fontSize: '0.82rem', padding: '0.25rem 0.75rem' }}>
+            {rows.length} {rows.length === 1 ? 'item' : 'items'}
+          </span>
+        )}
       </div>
       <ErrorNote error={list.error} />
       <div className="table-wrap">
@@ -114,7 +118,7 @@ export function CrudPage<T extends { id: string; version?: number }>(props: Prop
         </table>
         {list.data && !rows.length && (
           <Empty title={q ? 'Nothing matches that search' : `No ${props.title.toLowerCase()} yet`} action={!q && add}>
-            {q ? 'Try a different word.' : props.canManage ? `Add your first ${noun} to get started.` : null}
+            {q ? 'Try a different search word.' : props.canManage ? `Add your first ${noun} to get started.` : null}
           </Empty>
         )}
       </div>
@@ -131,7 +135,7 @@ function slugMap<T extends { id: string }>(rows: T[], slugOf: (r: T) => string) 
 
 export function BackButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
-    <button type="button" className="ghost" onClick={onClick}>
+    <button type="button" className="secondary" onClick={onClick} style={{ minHeight: '38px', padding: '0.4rem 0.85rem' }}>
       <ArrowLeft className="icon" aria-hidden /> {label}
     </button>
   );
@@ -167,11 +171,11 @@ function RecordForm<T extends { id: string }>({ props, noun, row, onClose, onSav
           {props.extra?.(values, set)}
         </fieldset>
         <ErrorNote error={error} />
-        <footer className="row end">
-          <button type="button" className="ghost" onClick={onClose}>
+        <footer className="row end form-footer">
+          <button type="button" className="secondary" onClick={onClose}>
             Cancel
           </button>
-          {props.canManage && <button disabled={busy}>{busy ? 'Saving…' : row ? 'Save changes' : `Add ${noun}`}</button>}
+          {props.canManage && <button className="gold" disabled={busy}>{busy ? 'Saving…' : row ? 'Save changes' : `Add ${noun}`}</button>}
         </footer>
       </form>
       {row && props.aside?.(row)}

@@ -89,10 +89,10 @@ export function Approvals({ outletId, onClose }: { outletId: string; onClose: ()
           <p>{r.proposed?.summary}</p>
           {r.reason && <p className="muted">“{r.reason}”</p>}
           <div className="row">
-            <button className="secondary" onClick={() => decide(r.id, false)}>
+            <button className="secondary" style={{ color: 'var(--brand-danger)' }} onClick={() => decide(r.id, false)}>
               Reject
             </button>
-            <button onClick={() => decide(r.id, true)}>Approve</button>
+            <button className="gold" onClick={() => decide(r.id, true)}>Approve</button>
           </div>
         </div>
       ))}

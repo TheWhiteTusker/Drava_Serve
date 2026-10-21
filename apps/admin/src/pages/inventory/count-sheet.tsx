@@ -53,8 +53,10 @@ export function CountSheet({ id }: { id: string }) {
                       <input
                         aria-label={`Counted ${l.name}`}
                         inputMode="decimal"
+                        placeholder="0.00"
                         defaultValue={l.countedQty ?? ''}
                         onChange={(e) => setEdits({ ...edits, [l.stockItemId]: { cause: edits[l.stockItemId]?.cause ?? l.cause ?? '', countedQty: e.target.value } })}
+                        style={{ maxWidth: 110 }}
                       />
                     ) : (
                       fmtQty(l.countedQty, l.unit)
@@ -73,6 +75,7 @@ export function CountSheet({ id }: { id: string }) {
                     {c.status === 'counting' ? (
                       <input
                         aria-label={`Cause for ${l.name}`}
+                        placeholder="e.g. Spillage, portion variance, counting error"
                         defaultValue={l.cause ?? ''}
                         onChange={(e) => setEdits({ ...edits, [l.stockItemId]: { countedQty: edits[l.stockItemId]?.countedQty ?? l.countedQty ?? '', cause: e.target.value } })}
                       />
@@ -92,7 +95,7 @@ export function CountSheet({ id }: { id: string }) {
           <button className="secondary" onClick={save}>
             Save counts
           </button>
-          <button onClick={() => run(async () => (await save(), api(`/inventory/counts/${id}/submit`, { method: 'POST' })))}>Submit for approval</button>
+          <button className="gold" onClick={() => run(async () => (await save(), api(`/inventory/counts/${id}/submit`, { method: 'POST' })))}>Submit for approval</button>
         </footer>
       )}
     </>

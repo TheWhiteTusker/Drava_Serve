@@ -25,7 +25,7 @@ export function OutletsPage() {
         {
           label: 'Guest menu',
           render: (r: any) => (
-            <Link to={`/outlets/${slug(r)}`} onClick={(e) => e.stopPropagation()}>
+            <Link to={`/outlets/${slug(r)}`} className="link" onClick={(e) => e.stopPropagation()}>
               QR code
             </Link>
           ),
@@ -34,14 +34,14 @@ export function OutletsPage() {
       ]}
       defaults={{ state: 'Karnataka', active: true }}
       fields={[
-        { name: 'name', label: 'Name', required: true },
-        { name: 'code', label: 'Short code', required: true, help: 'Used in bill numbers, e.g. BLR1' },
-        { name: 'state', label: 'State', required: true },
-        { name: 'address', label: 'Address', type: 'textarea' },
-        { name: 'gstin', label: 'GSTIN' },
-        { name: 'fssaiNumber', label: 'FSSAI licence number', help: '14 digits' },
-        { name: 'exciseLicence', label: 'Excise licence number' },
-        { name: 'active', label: 'Active', type: 'checkbox' },
+        { name: 'name', label: 'Name', required: true, placeholder: 'e.g. Indiranagar Flagship, Koramangala Lounge' },
+        { name: 'code', label: 'Short code', required: true, placeholder: 'e.g. BLR1', help: 'Used in bill numbers, e.g. BLR1' },
+        { name: 'state', label: 'State', required: true, placeholder: 'e.g. Karnataka' },
+        { name: 'address', label: 'Address', type: 'textarea', span: 'full', placeholder: 'e.g. 12th Main Road, HAL 2nd Stage, Indiranagar, Bengaluru - 560038' },
+        { name: 'gstin', label: 'GSTIN', placeholder: 'e.g. 29AAAAA0000A1Z5' },
+        { name: 'fssaiNumber', label: 'FSSAI licence number', placeholder: 'e.g. 11223344556677', help: '14 digits' },
+        { name: 'exciseLicence', label: 'Excise licence number', placeholder: 'e.g. CL-9/EXC/2026/049' },
+        { name: 'active', label: 'Active', type: 'checkbox', span: 'full' },
       ]}
       aside={(r: any) => <MenuQr title="Guest menu QR code" label={r.name} url={`${location.origin}${guestMenuPath(s!.customer.code, r.code)}`} />}
     />

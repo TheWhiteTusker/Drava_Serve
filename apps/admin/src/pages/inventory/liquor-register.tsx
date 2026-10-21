@@ -19,7 +19,9 @@ export function LiquorRegisterPage() {
       actions={
         <>
           <input type="date" aria-label="Date" value={date} onChange={(e) => setDate(e.target.value)} />
-          <button onClick={() => window.print()}>Print</button>
+          <button className="secondary" onClick={() => window.print()}>
+            Print register
+          </button>
         </>
       }
     >

@@ -10,7 +10,7 @@ export function Placement({ item, onDone }: { item: any; onDone: () => void }) {
     <>
       <div className="field">
         <label htmlFor="pin">Pin at position (blank = ranked by margin)</label>
-        <input id="pin" inputMode="numeric" value={pin} onChange={(e) => setPin(e.target.value)} />
+        <input id="pin" inputMode="numeric" placeholder="e.g. 1" value={pin} onChange={(e) => setPin(e.target.value)} />
       </div>
       {item.department === 'beverage' && (
         <label className="check">
@@ -19,14 +19,18 @@ export function Placement({ item, onDone }: { item: any; onDone: () => void }) {
       )}
       <ErrorNote error={error} />
       <footer className="row end">
+        <button type="button" className="secondary" onClick={onDone}>
+          Cancel
+        </button>
         <button
+          className="gold"
           onClick={() =>
             api(`/menu-items/${item.id}/placement`, { method: 'PUT', body: { pinPosition: pin ? Number(pin) : null, offerExcluded: excluded } })
               .then(onDone)
               .catch((e) => setError(e.message))
           }
         >
-          Save
+          Save placement
         </button>
       </footer>
     </>

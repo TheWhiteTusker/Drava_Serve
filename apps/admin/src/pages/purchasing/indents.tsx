@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { api, useApi, useCurrentOutlet } from '../../api';
 import { useRecordPath } from '../../routing';
-import { BackButton, Badge, ErrorNote, Page, toast } from '../../ui';
+import { BackButton, Badge, Empty, ErrorNote, Page, toast } from '../../ui';
 import { nextDelivery } from './shared';
 import { IndentDetail } from './indent-detail';
 
@@ -59,10 +59,12 @@ export function IndentsPage() {
             <p className="muted">
               {i.lineCount} items · for {i.forDate}
             </p>
-            <button onClick={() => rec.open(i.id)}>Open</button>
+            <button className="secondary" onClick={() => rec.open(i.id)}>
+              View order
+            </button>
           </article>
         ))}
-        {list.data?.length === 0 && <p className="muted">No orders for this date yet.</p>}
+        {list.data?.length === 0 && <Empty title="No orders for this date">Click 'Build now' to generate vendor orders from par shortages, or pick a different delivery date.</Empty>}
       </div>
     </Page>
   );

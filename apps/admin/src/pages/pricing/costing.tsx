@@ -84,15 +84,15 @@ export function CostingPage() {
                           {r.offerExcluded && <Badge>no offers</Badge>}
                         </span>
                       </td>
-                      <td>
+                      <td className="num">
                         {rupee(r.sellingPrice)}
                         {r.offerPrice && <div className="muted">charging {rupee(r.offerPrice)} (offer)</div>}
                       </td>
-                      <td>{rupee(r.portionCost)}</td>
-                      <td>
+                      <td className="num">{rupee(r.portionCost)}</td>
+                      <td className="num">
                         <strong>{r.marginPct}%</strong> <span className="muted">· {rupee(r.marginAmount)}</span>
                       </td>
-                      <td>
+                      <td className="num">
                         {r.targetPct ? `${Number(r.targetPct)}%` : '—'}
                         {r.underTarget && (
                           <div>
@@ -100,15 +100,15 @@ export function CostingPage() {
                           </div>
                         )}
                       </td>
-                      <td>{r.portions == null ? '—' : Number(r.portions) <= 0 ? <Badge tone="danger">Out</Badge> : Number(r.portions)}</td>
+                      <td className="num">{r.portions == null ? '—' : Number(r.portions) <= 0 ? <Badge tone="danger">Out</Badge> : Number(r.portions)}</td>
                       <td className="actions">
                         {can(s, 'recipes.manage', outletId) && (
-                          <button className="ghost" onClick={() => rec.open(slugify(r.name))}>
+                          <button className="link" onClick={() => rec.open(slugify(r.name))}>
                             Recipe
                           </button>
                         )}
                         {can(s, 'menu.pins', outletId) && (
-                          <button className="ghost" onClick={() => rec.open(`${slugify(r.name)}/placement`)}>
+                          <button className="link" onClick={() => rec.open(`${slugify(r.name)}/placement`)}>
                             Pin / offers
                           </button>
                         )}

@@ -66,7 +66,7 @@ export function PinSwitch({ open, onClose }: { open: boolean; onClose: () => voi
             <button className="secondary big" onClick={() => press('0')}>
               0
             </button>
-            <button className="big" disabled={pin.length < 4} onClick={go}>
+            <button className="big gold" disabled={pin.length < 4} onClick={go}>
               OK
             </button>
           </div>

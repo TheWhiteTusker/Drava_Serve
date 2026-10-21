@@ -28,12 +28,12 @@ function NewPassword({ value, again, onChange, onAgain }: { value: string; again
     <>
       <div className="field">
         <label htmlFor="new-password">New password</label>
-        <input id="new-password" type="password" autoComplete="new-password" minLength={8} required value={value} onChange={(e) => onChange(e.target.value)} />
+        <input id="new-password" type="password" autoComplete="new-password" placeholder="••••••••" minLength={8} required value={value} onChange={(e) => onChange(e.target.value)} />
         <small className="muted">At least 8 characters</small>
       </div>
       <div className="field">
         <label htmlFor="new-password-again">New password again</label>
-        <input id="new-password-again" type="password" autoComplete="new-password" required value={again} onChange={(e) => onAgain(e.target.value)} />
+        <input id="new-password-again" type="password" autoComplete="new-password" placeholder="••••••••" required value={again} onChange={(e) => onAgain(e.target.value)} />
       </div>
     </>
   );
@@ -59,7 +59,7 @@ export function ForgotPassword({ onBack }: { onBack: () => void }) {
           </p>
           <div className="field">
             <label htmlFor="forgot-login">Email</label>
-            <input id="forgot-login" type="email" autoComplete="username" value={login} onChange={(e) => setLogin(e.target.value)} required autoFocus />
+            <input id="forgot-login" type="email" autoComplete="username" placeholder="name@restaurant.com" value={login} onChange={(e) => setLogin(e.target.value)} required autoFocus />
           </div>
           <ErrorNote error={f.error} />
           <button className="big" disabled={f.busy}>
@@ -90,7 +90,7 @@ export function ResetPassword({ token, onDone }: { token: string; onDone: () => 
       <h2>Choose a new password</h2>
       <NewPassword value={password} again={again} onChange={setPassword} onAgain={setAgain} />
       <ErrorNote error={f.error} />
-      <button className="big" disabled={f.busy}>
+      <button className="big gold" disabled={f.busy}>
         {f.busy ? 'Saving…' : 'Set the new password'}
       </button>
       <button type="button" className="link" onClick={onDone}>
@@ -117,15 +117,15 @@ export function ChangePassword({ open, onClose }: { open: boolean; onClose: () =
       <form onSubmit={f.submit}>
         <div className="field">
           <label htmlFor="current-password">Current password</label>
-          <input id="current-password" type="password" autoComplete="current-password" required value={current} onChange={(e) => setCurrent(e.target.value)} />
+          <input id="current-password" type="password" autoComplete="current-password" placeholder="••••••••" required value={current} onChange={(e) => setCurrent(e.target.value)} />
         </div>
         <NewPassword value={password} again={again} onChange={setPassword} onAgain={setAgain} />
         <ErrorNote error={f.error} />
         <footer className="row end">
-          <button type="button" className="ghost" onClick={close}>
+          <button type="button" className="secondary" onClick={close}>
             Cancel
           </button>
-          <button disabled={f.busy}>{f.busy ? 'Saving…' : 'Change password'}</button>
+          <button className="gold" disabled={f.busy}>{f.busy ? 'Saving…' : 'Change password'}</button>
         </footer>
       </form>
     </Modal>

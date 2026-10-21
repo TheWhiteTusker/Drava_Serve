@@ -3,7 +3,7 @@ import { slugify } from '@fnb/shared';
 import { can, useApi, useCurrentOutlet, useSession } from '../../api';
 import { useLiveReload } from '../../live';
 import { useRecordPath } from '../../routing';
-import { BackButton, Badge, Empty, ErrorNote, Modal, Page, rupee } from '../../ui';
+import { BackButton, Badge, Empty, ErrorNote, Modal, Page, rupee, SearchBox } from '../../ui';
 import { STATUS_LABEL, STATUS_TONE, fmtQty } from './format';
 import { TransferForm, WastageForm } from './stock-forms';
 import { Ledger } from './ledger';
@@ -44,11 +44,11 @@ export function StockPage() {
               Record wastage
             </button>
           )}
-          {can(s, 'inventory.transfer', outletId) && <button onClick={() => setDialog('transfer')}>Transfer</button>}
+          {can(s, 'inventory.transfer', outletId) && <button className="gold" onClick={() => setDialog('transfer')}>Transfer</button>}
         </>
       }
     >
-      <div className="row" style={{ marginBottom: '1rem' }}>
+      <div className="toolbar" style={{ marginBottom: '1.25rem' }}>
         <div className="tabs" role="tablist" style={{ margin: 0 }}>
           {(['food', 'beverage'] as const).map((d) => (
             <button key={d} role="tab" aria-selected={dept === d} className={dept === d ? '' : 'ghost'} onClick={() => setDept(d)}>
@@ -56,8 +56,8 @@ export function StockPage() {
             </button>
           ))}
         </div>
-        <input aria-label="Search" placeholder="Search items" value={filter} onChange={(e) => setFilter(e.target.value)} style={{ maxWidth: 280 }} />
-        {stock.data?.items.some((i: any) => i.value != null) && <strong>Stock value: {rupee(totalValue)}</strong>}
+        <SearchBox placeholder="Search stock items…" value={filter} onChange={setFilter} />
+        {stock.data?.items.some((i: any) => i.value != null) && <span className="badge gold">Total value: {rupee(totalValue)}</span>}
       </div>
       <ErrorNote error={stock.error} />
       <div className="table-wrap">

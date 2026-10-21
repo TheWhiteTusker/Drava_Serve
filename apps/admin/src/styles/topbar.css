@@ -9,11 +9,12 @@
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.55rem 1.25rem;
-  background: color-mix(in srgb, var(--brand-surface) 88%, transparent);
-  backdrop-filter: saturate(1.2) blur(10px);
+  gap: 0.75rem;
+  padding: 0.65rem 1.5rem;
+  background: color-mix(in srgb, var(--brand-surface) 82%, transparent);
+  backdrop-filter: saturate(1.6) blur(16px);
   border-bottom: 1px solid var(--brand-border);
+  box-shadow: 0 1px 4px rgb(31 25 19 / 0.03);
   position: sticky;
   top: 0;
   z-index: 20;
@@ -23,24 +24,40 @@
 }
 .topbar .customer {
   color: var(--brand-text-muted);
-  font-size: 0.9rem;
-  padding-left: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding-left: 0.85rem;
   border-left: 1px solid var(--brand-border);
+  letter-spacing: 0.02em;
 }
 .logo {
   display: block;
   height: 32px;
   width: 170px;
   background: var(--brand-logo) left center / contain no-repeat;
+  transition: opacity 0.15s;
+}
+.logo:hover {
+  opacity: 0.9;
 }
 .pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
   border: 1px solid var(--brand-border-strong);
   border-radius: 999px;
-  padding: 0 0.35rem 0 0.8rem;
+  padding: 0 0.5rem 0 0.85rem;
   background: var(--brand-surface);
+  box-shadow: var(--brand-shadow-xs);
+  transition-property: border-color, box-shadow;
+  transition-duration: 0.15s;
+}
+.pill:hover {
+  border-color: var(--brand-accent);
+  box-shadow: var(--brand-shadow-sm);
+}
+.pill svg {
+  color: var(--brand-accent-strong);
 }
 .pill select {
   border: 0;
@@ -49,14 +66,38 @@
   padding: 0 1.6rem 0 0;
   box-shadow: none;
   font-weight: 600;
+  font-size: 0.88rem;
   width: auto;
   max-width: 22rem;
+  cursor: pointer;
+}
+.pill select:focus {
+  outline: none;
+  box-shadow: none;
 }
 .search-trigger {
   color: var(--brand-text-muted);
   font-weight: 500;
-  min-width: 15rem;
+  font-size: 0.88rem;
+  min-width: 16rem;
   justify-content: flex-start;
+  background: var(--brand-surface-2);
+  border: 1px solid var(--brand-border);
+  border-radius: var(--brand-radius);
+  padding: 0.45rem 0.85rem;
+  box-shadow: none;
+  transition-property: border-color, background-color, box-shadow;
+  transition-duration: 0.15s;
+}
+.search-trigger:hover:not(:disabled) {
+  border-color: var(--brand-accent);
+  background: var(--brand-surface);
+  box-shadow: var(--brand-shadow-sm);
+  color: var(--brand-text);
+  transform: none;
+}
+.search-trigger svg {
+  color: var(--brand-accent-strong);
 }
 .search-trigger kbd {
   margin-left: auto;
@@ -67,13 +108,15 @@
 .avatar {
   display: inline-grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background: var(--brand-accent-soft);
+  background: linear-gradient(135deg, var(--brand-accent-soft) 0%, var(--brand-surface-2) 100%);
   color: var(--brand-accent-strong);
-  font: 700 0.8rem var(--brand-font);
-  border: 1px solid var(--brand-accent);
+  font: 700 0.82rem var(--brand-font);
+  border: 1.5px solid var(--brand-accent);
+  box-shadow: 0 0 0 2px var(--brand-accent-soft);
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 .usermenu {
   position: relative;
@@ -84,9 +127,10 @@
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  padding: 0.3rem 0.5rem;
+  padding: 0.25rem 0.5rem;
   border-radius: 999px;
   min-height: 44px;
+  transition: background-color 0.15s;
 }
 .usermenu > summary::-webkit-details-marker {
   display: none;
@@ -97,21 +141,33 @@
 .usermenu .menu {
   position: absolute;
   right: 0;
-  top: calc(100% + 6px);
-  min-width: 230px;
+  top: calc(100% + 8px);
+  min-width: 240px;
   background: var(--brand-surface);
   border: 1px solid var(--brand-border);
   border-radius: var(--brand-radius);
   box-shadow: var(--brand-shadow-lg);
-  padding: 0.4rem;
+  padding: 0.5rem;
   display: flex;
   flex-direction: column;
+  gap: 0.2rem;
+  animation: rise 0.15s ease-out;
 }
 .usermenu .menu button {
   justify-content: flex-start;
+  border-radius: var(--brand-radius-small);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
 }
 .usermenu .menu .who {
-  padding: 0.5rem 0.75rem;
+  padding: 0.6rem 0.75rem;
   border-bottom: 1px solid var(--brand-border);
   margin-bottom: 0.25rem;
+}
+.usermenu .menu .who strong {
+  display: block;
+  font-size: 0.92rem;
+}
+.usermenu .menu .who small {
+  color: var(--brand-text-muted);
 }

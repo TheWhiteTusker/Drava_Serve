@@ -58,12 +58,12 @@ export function WastageForm({ outletId, stores, onDone }: { outletId: string; st
         </div>
         <div className="field">
           <label htmlFor="w-qty">Quantity {unit && `(${unit})`}</label>
-          <input id="w-qty" inputMode="decimal" required value={v.qty ?? ''} onChange={(e) => setV({ ...v, qty: e.target.value })} />
+          <input id="w-qty" inputMode="decimal" placeholder="0.00" required value={v.qty ?? ''} onChange={(e) => setV({ ...v, qty: e.target.value })} />
         </div>
       </div>
       <div className="field">
         <label htmlFor="w-reason">Reason</label>
-        <input id="w-reason" required minLength={3} value={v.reason ?? ''} onChange={(e) => setV({ ...v, reason: e.target.value })} />
+        <input id="w-reason" placeholder="e.g. Expired before prep, spillage during dishwash, broken bottle" required minLength={3} value={v.reason ?? ''} onChange={(e) => setV({ ...v, reason: e.target.value })} />
       </div>
       <p className="muted">
         {['complimentary', 'staff_meal'].includes(v.movement) || !can(s, 'inventory.writeOff', outletId)
@@ -72,7 +72,10 @@ export function WastageForm({ outletId, stores, onDone }: { outletId: string; st
       </p>
       <ErrorNote error={error} />
       <footer className="row end">
-        <button>Save</button>
+        <button type="button" className="secondary" onClick={onDone}>
+          Cancel
+        </button>
+        <button className="gold">Record wastage</button>
       </footer>
     </form>
   );
@@ -114,7 +117,7 @@ export function TransferForm({ stores, onDone }: { stores: any[]; onDone: () => 
         {storeSelect('t-to', to, setTo, 'To')}
         <div className="field">
           <label htmlFor="t-note">Note</label>
-          <input id="t-note" value={note} onChange={(e) => setNote(e.target.value)} />
+          <input id="t-note" placeholder="e.g. Daily kitchen requisition, bar restock" value={note} onChange={(e) => setNote(e.target.value)} />
         </div>
       </div>
       <fieldset className="field">
@@ -129,7 +132,12 @@ export function TransferForm({ stores, onDone }: { stores: any[]; onDone: () => 
                 </option>
               ))}
             </select>
-            <input aria-label="Quantity" inputMode="decimal" placeholder="Quantity" value={l.qty} onChange={(e) => setLines(lines.map((x, j) => (j === i ? { ...x, qty: e.target.value } : x)))} style={{ maxWidth: 140 }} />
+            <input aria-label="Quantity" inputMode="decimal" placeholder="0.00" value={l.qty} onChange={(e) => setLines(lines.map((x, j) => (j === i ? { ...x, qty: e.target.value } : x)))} style={{ maxWidth: 140 }} />
+            {lines.length > 1 && (
+              <button type="button" className="ghost danger" onClick={() => setLines(lines.filter((_, j) => j !== i))}>
+                Remove
+              </button>
+            )}
           </div>
         ))}
         <button type="button" className="secondary" onClick={() => setLines([...lines, { stockItemId: '', qty: '' }])}>
@@ -138,7 +146,10 @@ export function TransferForm({ stores, onDone }: { stores: any[]; onDone: () => 
       </fieldset>
       <ErrorNote error={error} />
       <footer className="row end">
-        <button>Transfer</button>
+        <button type="button" className="secondary" onClick={onDone}>
+          Cancel
+        </button>
+        <button className="gold">Execute transfer</button>
       </footer>
     </form>
   );

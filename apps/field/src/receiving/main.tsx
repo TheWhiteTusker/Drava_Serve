@@ -145,7 +145,7 @@ function Gate({ d, save }: { d: any; save: (d: any) => void }) {
           <div className="stack">
             <label className="field">
               How much came? ({line.unit})
-              <input inputMode="decimal" autoFocus value={qty} onChange={(e) => setQty(e.target.value)} />
+              <input inputMode="decimal" placeholder="0.00" autoFocus value={qty} onChange={(e) => setQty(e.target.value)} />
             </label>
             <div className="row">
               <button className="secondary" onClick={() => setMode(null)}>
@@ -250,11 +250,11 @@ function Recheck({ d, save, showRates }: { d: any; save: (d: any) => void; showR
         <div className="row">
           <label className="field">
             Usable ({line.unit})
-            <input inputMode="decimal" value={v.acceptedQty ?? ''} onChange={(e) => setV({ ...v, acceptedQty: e.target.value })} />
+            <input inputMode="decimal" placeholder="0.00" value={v.acceptedQty ?? ''} onChange={(e) => setV({ ...v, acceptedQty: e.target.value })} />
           </label>
           <label className="field">
             Not usable ({line.unit})
-            <input inputMode="decimal" value={v.rejectedQty ?? ''} onChange={(e) => setV({ ...v, rejectedQty: e.target.value })} />
+            <input inputMode="decimal" placeholder="0.00" value={v.rejectedQty ?? ''} onChange={(e) => setV({ ...v, rejectedQty: e.target.value })} />
           </label>
         </div>
         {Number(v.rejectedQty) > 0 && (
@@ -269,7 +269,7 @@ function Recheck({ d, save, showRates }: { d: any; save: (d: any) => void; showR
         <div className="row">
           <label className="field">
             Weighed / counted
-            <input inputMode="decimal" value={v.measuredQty ?? ''} onChange={(e) => setV({ ...v, measuredQty: e.target.value })} />
+            <input inputMode="decimal" placeholder="Measured amount" value={v.measuredQty ?? ''} onChange={(e) => setV({ ...v, measuredQty: e.target.value })} />
           </label>
           {line.perishable && (
             <label className="field">
@@ -281,13 +281,13 @@ function Recheck({ d, save, showRates }: { d: any; save: (d: any) => void; showR
         {showRates && (
           <label className="field">
             Rate on the vendor's bill (₹ per {line.unit})
-            <input inputMode="decimal" value={v.billedRate ?? ''} onChange={(e) => setV({ ...v, billedRate: e.target.value })} />
+            <input inputMode="decimal" placeholder="e.g. 145.00" value={v.billedRate ?? ''} onChange={(e) => setV({ ...v, billedRate: e.target.value })} />
           </label>
         )}
         {over && <p className="note danger">More than came through the gate.</p>}
         <div className="row">
           <PhotoButton deliveryId={d.id} lineId={line.id} purpose="recheck_photo" />
-          <button disabled={over || !v.acceptedQty || (Number(v.rejectedQty) > 0 && !v.reason) || (showRates && !v.billedRate)} onClick={saveLine}>
+          <button className="gold" disabled={over || !v.acceptedQty || (Number(v.rejectedQty) > 0 && !v.reason) || (showRates && !v.billedRate)} onClick={saveLine}>
             Save line
           </button>
         </div>
@@ -304,7 +304,7 @@ function Recheck({ d, save, showRates }: { d: any; save: (d: any) => void; showR
         <h3>Vendor's bill</h3>
         <label className="field">
           Bill number
-          <input value={billNo} onChange={(e) => setBillNo(e.target.value)} />
+          <input placeholder="e.g. INV-2026-0042" value={billNo} onChange={(e) => setBillNo(e.target.value)} />
         </label>
         <PhotoButton deliveryId={d.id} purpose="vendor_bill" label="Photo of the bill" />
       </div>

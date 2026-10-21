@@ -26,51 +26,63 @@
 
   /* Brand */
   --brand-logo: url("./logo.svg");
-  --brand-primary: #2b241d; /* espresso: main buttons */
-  --brand-primary-hover: #3d342a;
-  --brand-primary-contrast: #fbf6ec;
-  --brand-accent: #a77a2c; /* brass gold: highlights, active states */
-  --brand-accent-strong: #7f5a1a; /* gold dark enough for text and links (4.5:1 on every surface) */
-  --brand-accent-soft: rgb(167 122 44 / 0.12);
+  --brand-primary: #1f1913; /* deep espresso */
+  --brand-primary-hover: #332b22;
+  --brand-primary-contrast: #fbf7ee;
+  --brand-accent: #b0822e; /* refined brass-gold */
+  --brand-accent-strong: #7d5718; /* gold dark enough for 4.5:1 text/links */
+  --brand-accent-soft: rgb(176 130 46 / 0.12);
+  --brand-accent-glow: rgb(176 130 46 / 0.25);
 
   /* Surfaces and text */
-  --brand-bg: #f6f1e8;
-  --brand-surface: #fffdf9;
-  --brand-surface-2: #f3ece0;
-  --brand-surface-3: #ebe2d2;
-  --brand-border: #e3d9c8;
-  --brand-border-strong: #cfc1a8;
-  --brand-text: #1f1a15;
+  --brand-bg: #f7f4ee;
+  --brand-surface: #ffffff;
+  --brand-surface-2: #f2eee5;
+  --brand-surface-3: #e8e2d4;
+  --brand-border: #e4dcd0;
+  --brand-border-strong: #cdbfab;
+  --brand-text: #1d1813;
   --brand-text-muted: #6e6455;
 
-  /* Status (text colour, and a soft background for badges) */
-  --brand-success: #2e7550;
-  --brand-success-soft: #e3f0e6;
-  --brand-warning: #8a5810; /* 4.5:1 on --brand-warning-soft, as on badges */
-  --brand-warning-soft: #f7ead2;
-  --brand-danger: #b0402b;
-  --brand-danger-soft: #f8e1dc;
-  --brand-info: #7f5a1a;
+  /* Status (text colour, and soft backgrounds / borders for badges) */
+  --brand-success: #1e7047;
+  --brand-success-soft: #e3f3ea;
+  --brand-success-border: #bce5d0;
+  --brand-warning: #8d560c;
+  --brand-warning-soft: #fcf1dc;
+  --brand-warning-border: #f6d89f;
+  --brand-danger: #b33924;
+  --brand-danger-soft: #fce8e4;
+  --brand-danger-border: #f7bbb0;
+  --brand-info: #7d5718;
+  --brand-info-soft: #fbf1de;
 
   /* Shape, type and depth */
-  --brand-radius: 12px;
+  --brand-radius-xs: 4px;
   --brand-radius-small: 8px;
+  --brand-radius: 12px;
   --brand-radius-large: 18px;
+  --brand-radius-xl: 24px;
+  --brand-radius-full: 9999px;
   --brand-font:
     "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --brand-font-heading: "Playfair Display", Georgia, "Times New Roman", serif;
   --brand-font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
-  --brand-shadow:
-    0 1px 2px rgb(60 40 20 / 0.05), 0 2px 8px -2px rgb(60 40 20 / 0.08);
-  --brand-shadow-lg:
-    0 2px 6px rgb(60 40 20 / 0.06), 0 18px 40px -12px rgb(60 40 20 / 0.22);
+  
+  /* Layered diffused shadows */
+  --brand-shadow-xs: 0 1px 2px rgb(31 25 19 / 0.04);
+  --brand-shadow-sm: 0 2px 4px rgb(31 25 19 / 0.04), 0 1px 2px rgb(31 25 19 / 0.02);
+  --brand-shadow: 0 3px 8px -1px rgb(31 25 19 / 0.06), 0 1px 3px rgb(31 25 19 / 0.03);
+  --brand-shadow-md: 0 6px 16px -2px rgb(31 25 19 / 0.08), 0 2px 6px -1px rgb(31 25 19 / 0.04);
+  --brand-shadow-lg: 0 16px 36px -6px rgb(31 25 19 / 0.12), 0 6px 14px -3px rgb(31 25 19 / 0.05);
+  --brand-shadow-glow: 0 0 0 1px var(--brand-accent), 0 4px 16px var(--brand-accent-soft);
 
-  /* Charts (validated for colour-blind safety and contrast on these surfaces) */
-  --chart-series: #a77a2c;
-  --chart-seq-low: #f3e6c8;
+  /* Charts */
+  --chart-series: #b0822e;
+  --chart-seq-low: #f5ebd2;
   --chart-seq-high: #563b12;
-  --chart-grid: #ece4d6;
-  --chart-axis: #cfc1a8;
+  --chart-grid: #ede5d7;
+  --chart-axis: #cfbfab;
 
   /* Compliance marks (not brand) */
   --mark-veg: #1a8a3a;
@@ -81,34 +93,41 @@
   :root:not([data-theme="light"]) {
     color-scheme: dark;
     --brand-logo: url("./logo-dark.svg");
-    --brand-primary: #d3ad62;
-    --brand-primary-hover: #e0bf7c;
-    --brand-primary-contrast: #1a150f;
-    --brand-accent: #d3ad62;
-    --brand-accent-strong: #e2c487;
-    --brand-accent-soft: rgb(211 173 98 / 0.14);
-    --brand-bg: #15120e;
-    --brand-surface: #201b16;
-    --brand-surface-2: #2a241d;
-    --brand-surface-3: #342c23;
-    --brand-border: #3a3127;
-    --brand-border-strong: #54473a;
-    --brand-text: #f3ebde;
-    --brand-text-muted: #b5a893;
+    --brand-primary: #d8b46e;
+    --brand-primary-hover: #e5c584;
+    --brand-primary-contrast: #15110d;
+    --brand-accent: #d8b46e;
+    --brand-accent-strong: #e7caa0;
+    --brand-accent-soft: rgb(216 180 110 / 0.15);
+    --brand-accent-glow: rgb(216 180 110 / 0.3);
+    --brand-bg: #12100d;
+    --brand-surface: #1c1813;
+    --brand-surface-2: #262019;
+    --brand-surface-3: #322b22;
+    --brand-border: #383025;
+    --brand-border-strong: #544738;
+    --brand-text: #f5ede1;
+    --brand-text-muted: #b8ab96;
     --brand-success: #7fcf9c;
-    --brand-success-soft: #1f3327;
-    --brand-warning: #e6b765;
-    --brand-warning-soft: #3a2d17;
-    --brand-danger: #f08f7b;
-    --brand-danger-soft: #3d221c;
-    --brand-info: #e2c487;
-    --brand-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
-    --brand-shadow-lg: 0 18px 40px -12px rgb(0 0 0 / 0.6);
-    --chart-series: #bb8b33;
-    --chart-seq-low: #2e261b;
-    --chart-seq-high: #ead3a0;
-    --chart-grid: #2f281f;
-    --chart-axis: #4a3f33;
+    --brand-success-soft: #193223;
+    --brand-success-border: #264a35;
+    --brand-warning: #e9ba6c;
+    --brand-warning-soft: #382c16;
+    --brand-warning-border: #524020;
+    --brand-danger: #f1907d;
+    --brand-danger-soft: #3d211b;
+    --brand-danger-border: #582f27;
+    --brand-info: #e7caa0;
+    --brand-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.4);
+    --brand-shadow-sm: 0 2px 4px rgb(0 0 0 / 0.4);
+    --brand-shadow: 0 3px 8px -1px rgb(0 0 0 / 0.5), 0 1px 3px rgb(0 0 0 / 0.3);
+    --brand-shadow-md: 0 6px 16px -2px rgb(0 0 0 / 0.6);
+    --brand-shadow-lg: 0 18px 42px -10px rgb(0 0 0 / 0.7);
+    --chart-series: #c69941;
+    --chart-seq-low: #2b2318;
+    --chart-seq-high: #edd8aa;
+    --chart-grid: #2f271e;
+    --chart-axis: #4a3e32;
     --mark-veg: #3dbb5f;
     --mark-nonveg: #c47a3d;
   }
@@ -117,34 +136,41 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
   --brand-logo: url("./logo-dark.svg");
-  --brand-primary: #d3ad62;
-  --brand-primary-hover: #e0bf7c;
-  --brand-primary-contrast: #1a150f;
-  --brand-accent: #d3ad62;
-  --brand-accent-strong: #e2c487;
-  --brand-accent-soft: rgb(211 173 98 / 0.14);
-  --brand-bg: #15120e;
-  --brand-surface: #201b16;
-  --brand-surface-2: #2a241d;
-  --brand-surface-3: #342c23;
-  --brand-border: #3a3127;
-  --brand-border-strong: #54473a;
-  --brand-text: #f3ebde;
-  --brand-text-muted: #b5a893;
+  --brand-primary: #d8b46e;
+  --brand-primary-hover: #e5c584;
+  --brand-primary-contrast: #15110d;
+  --brand-accent: #d8b46e;
+  --brand-accent-strong: #e7caa0;
+  --brand-accent-soft: rgb(216 180 110 / 0.15);
+  --brand-accent-glow: rgb(216 180 110 / 0.3);
+  --brand-bg: #12100d;
+  --brand-surface: #1c1813;
+  --brand-surface-2: #262019;
+  --brand-surface-3: #322b22;
+  --brand-border: #383025;
+  --brand-border-strong: #544738;
+  --brand-text: #f5ede1;
+  --brand-text-muted: #b8ab96;
   --brand-success: #7fcf9c;
-  --brand-success-soft: #1f3327;
-  --brand-warning: #e6b765;
-  --brand-warning-soft: #3a2d17;
-  --brand-danger: #f08f7b;
-  --brand-danger-soft: #3d221c;
-  --brand-info: #e2c487;
-  --brand-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
-  --brand-shadow-lg: 0 18px 40px -12px rgb(0 0 0 / 0.6);
-  --chart-series: #bb8b33;
-  --chart-seq-low: #2e261b;
-  --chart-seq-high: #ead3a0;
-  --chart-grid: #2f281f;
-  --chart-axis: #4a3f33;
+  --brand-success-soft: #193223;
+  --brand-success-border: #264a35;
+  --brand-warning: #e9ba6c;
+  --brand-warning-soft: #382c16;
+  --brand-warning-border: #524020;
+  --brand-danger: #f1907d;
+  --brand-danger-soft: #3d211b;
+  --brand-danger-border: #582f27;
+  --brand-info: #e7caa0;
+  --brand-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.4);
+  --brand-shadow-sm: 0 2px 4px rgb(0 0 0 / 0.4);
+  --brand-shadow: 0 3px 8px -1px rgb(0 0 0 / 0.5), 0 1px 3px rgb(0 0 0 / 0.3);
+  --brand-shadow-md: 0 6px 16px -2px rgb(0 0 0 / 0.6);
+  --brand-shadow-lg: 0 18px 42px -10px rgb(0 0 0 / 0.7);
+  --chart-series: #c69941;
+  --chart-seq-low: #2b2318;
+  --chart-seq-high: #edd8aa;
+  --chart-grid: #2f271e;
+  --chart-axis: #4a3e32;
   --mark-veg: #3dbb5f;
   --mark-nonveg: #c47a3d;
 }

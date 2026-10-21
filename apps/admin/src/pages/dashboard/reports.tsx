@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { businessDate } from '@fnb/shared';
 import { apiBlob, can, saveBlob, useApi, useCurrentOutlet, useSession } from '../../api';
 import { ErrorNote, Page, rupee } from '../../ui';
@@ -96,33 +97,35 @@ export function ReportsPage() {
             <thead>
               <tr>
                 <th>Day</th>
-                <th>Bills</th>
-                <th>Food</th>
-                <th>Liquor</th>
-                <th>Total</th>
-                <th>Cash</th>
-                <th>UPI</th>
-                <th>Card</th>
-                <th>Cash difference</th>
+                <th style={{ textAlign: 'right' }}>Bills</th>
+                <th style={{ textAlign: 'right' }}>Food</th>
+                <th style={{ textAlign: 'right' }}>Liquor</th>
+                <th style={{ textAlign: 'right' }}>Total</th>
+                <th style={{ textAlign: 'right' }}>Cash</th>
+                <th style={{ textAlign: 'right' }}>UPI</th>
+                <th style={{ textAlign: 'right' }}>Card</th>
+                <th style={{ textAlign: 'right' }}>Cash diff</th>
               </tr>
             </thead>
             <tbody>
               {(closes.data ?? []).map((c) => (
                 <tr key={c.business_date}>
-                  <td>{c.business_date}</td>
-                  <td>{c.bills}</td>
-                  <td>{rupee(c.food_sales)}</td>
-                  <td>{rupee(c.liquor_sales)}</td>
-                  <td>{rupee(c.total)}</td>
-                  <td>{rupee(c.cash)}</td>
-                  <td>{rupee(c.upi)}</td>
-                  <td>{rupee(c.card)}</td>
-                  <td>{c.cash_difference == null ? '—' : rupee(c.cash_difference)}</td>
+                  <td style={{ whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{c.business_date}</td>
+                  <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{c.bills}</td>
+                  <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{rupee(c.food_sales)}</td>
+                  <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{rupee(c.liquor_sales)}</td>
+                  <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 650 }}>{rupee(c.total)}</td>
+                  <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{rupee(c.cash)}</td>
+                  <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{rupee(c.upi)}</td>
+                  <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{rupee(c.card)}</td>
+                  <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: Number(c.cash_difference) < 0 ? 'var(--brand-danger)' : undefined }}>
+                    {c.cash_difference == null ? '—' : rupee(c.cash_difference)}
+                  </td>
                 </tr>
               ))}
               {closes.data?.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="muted">
+                  <td colSpan={9} className="muted" style={{ textAlign: 'center', padding: '1.5rem 0' }}>
                     No days closed in this range. Days are closed from the POS.
                   </td>
                 </tr>
@@ -130,7 +133,7 @@ export function ReportsPage() {
             </tbody>
           </table>
         </div>
-        <div className="row between">
+        <div className="row between" style={{ marginTop: '1.5rem', marginBottom: '0.5rem' }}>
           <h3>Stock variance from counts</h3>
           {exportOk && (
             <button className="secondary" onClick={() => download(`/reports/stock-variance?${q}&format=csv`, `stock-variance-${range[0]}-to-${range[1]}.csv`)}>
@@ -142,31 +145,40 @@ export function ReportsPage() {
           <table>
             <thead>
               <tr>
-                <th>Count</th>
+                <th>Count date</th>
                 <th>Store</th>
                 <th>Item</th>
-                <th>Books</th>
-                <th>Counted</th>
-                <th>Variance</th>
-                <th>Value</th>
+                <th style={{ textAlign: 'right' }}>Books</th>
+                <th style={{ textAlign: 'right' }}>Counted</th>
+                <th style={{ textAlign: 'right' }}>Variance</th>
+                <th style={{ textAlign: 'right' }}>Value</th>
                 <th>Cause</th>
               </tr>
             </thead>
             <tbody>
               {(variance.data ?? []).map((v, i) => (
                 <tr key={i}>
-                  <td>{String(v.count_date).slice(0, 10)}</td>
+                  <td style={{ whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{String(v.count_date).slice(0, 10)}</td>
                   <td>{v.store}</td>
-                  <td>{v.item}</td>
-                  <td>
+                  <td><strong>{v.item}</strong></td>
+                  <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
                     {num(v.expected_qty)} {v.unit}
                   </td>
-                  <td>{num(v.counted_qty)}</td>
-                  <td>{num(v.variance)}</td>
-                  <td>{rupee(v.variance_value)}</td>
-                  <td>{v.cause}</td>
+                  <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{num(v.counted_qty)}</td>
+                  <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 600, color: Number(v.variance) < 0 ? 'var(--brand-danger)' : 'var(--brand-success)' }}>
+                    {num(v.variance)}
+                  </td>
+                  <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 650 }}>{rupee(v.variance_value)}</td>
+                  <td>{v.cause || '—'}</td>
                 </tr>
               ))}
+              {variance.data?.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="muted" style={{ textAlign: 'center', padding: '1.5rem 0' }}>
+                    No variance records found in this range.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -181,7 +193,9 @@ export function ReportsPage() {
               Export CSV
             </button>
           )}
-          <a href="/liquor-register">Open the printable register</a>
+          <Link to="/liquor-register" className="link">
+            Open printable register
+          </Link>
         </div>
       </section>
 

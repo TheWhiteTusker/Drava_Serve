@@ -93,7 +93,7 @@ function NumberSetting({ label, k, value, onSave }: { label: string; k: string; 
   return (
     <div className="field">
       <label htmlFor={k}>{label}</label>
-      <input id={k} inputMode="decimal" defaultValue={value} key={value} onBlur={(e) => e.target.value !== String(value) && onSave(Number(e.target.value))} />
+      <input id={k} inputMode="decimal" placeholder="0" defaultValue={value} key={value} onBlur={(e) => e.target.value !== String(value) && onSave(Number(e.target.value))} />
     </div>
   );
 }

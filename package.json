@@ -4,6 +4,7 @@
   "packageManager": "pnpm@11.9.0",
   "scripts": {
     "build": "pnpm -r build",
+    "dev": "pnpm --filter @fnb/shared build && pnpm -r --parallel dev",
     "dev:api": "pnpm --filter @fnb/api dev",
     "dev:admin": "pnpm --filter @fnb/admin dev",
     "test": "pnpm --filter @fnb/shared build && pnpm -r test",

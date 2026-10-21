@@ -89,11 +89,11 @@ function RoleForm({ role, manage, onClose, onSaved }: { role: any; manage: boole
           <div className="grid">
             <div className="field">
               <label htmlFor="role-name">Name</label>
-              <input id="role-name" value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} required />
+              <input id="role-name" placeholder="e.g. Head Bartender, Sous Chef, Floor Manager" value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} required />
             </div>
             <div className="field">
               <label htmlFor="role-desc">Description</label>
-              <input id="role-desc" value={editing.description ?? ''} onChange={(e) => setEditing({ ...editing, description: e.target.value })} />
+              <input id="role-desc" placeholder="e.g. Full inventory and recipe management for bar operations" value={editing.description ?? ''} onChange={(e) => setEditing({ ...editing, description: e.target.value })} />
             </div>
           </div>
           {GROUPS.map(([g, prefixes]) => (
@@ -114,10 +114,10 @@ function RoleForm({ role, manage, onClose, onSaved }: { role: any; manage: boole
         </fieldset>
         <ErrorNote error={error} />
         <footer className="row end">
-          <button type="button" className="ghost" onClick={onClose}>
+          <button type="button" className="secondary" onClick={onClose}>
             Cancel
           </button>
-          {manage && <button>Save</button>}
+          {manage && <button className="gold">Save role</button>}
         </footer>
       </form>
     </Page>

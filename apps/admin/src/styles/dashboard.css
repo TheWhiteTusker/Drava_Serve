@@ -1,64 +1,116 @@
 /* ---------- Dashboard ---------- */
 .filters {
-  padding: 0.85rem 1rem;
+  padding: 0.85rem 1.15rem;
+  background: var(--brand-surface);
+  border: 1px solid var(--brand-border);
+  border-radius: var(--brand-radius);
+  box-shadow: var(--brand-shadow);
+  margin-bottom: 1.5rem;
+}
+.filters .row {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
 }
 .filters .row > input,
 .filters .row > select {
   flex: 0 1 auto;
   width: auto;
+  min-height: 40px;
+  font-size: 0.88rem;
 }
 .tiles {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 1.1rem;
+  margin-bottom: 1.5rem;
 }
 .tile {
   background: var(--brand-surface);
   border: 1px solid var(--brand-border);
   border-radius: var(--brand-radius);
-  padding: 1rem 1.15rem;
+  padding: 1.15rem 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.35rem;
   box-shadow: var(--brand-shadow);
+  position: relative;
+  overflow: hidden;
+  transition-property: transform, box-shadow, border-color;
+  transition-duration: 0.18s;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+.tile::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: transparent;
+  transition: background-color 0.18s;
+}
+.tile:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--brand-shadow-md);
+  border-color: var(--brand-border-strong);
+}
+.tile:hover::before {
+  background: linear-gradient(90deg, var(--brand-accent), transparent);
 }
 .tile .tile-label {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.55rem;
   color: var(--brand-text-muted);
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 .tile .tile-label svg {
   color: var(--brand-accent-strong);
   width: 16px;
   height: 16px;
+  padding: 5px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--brand-accent-soft);
+  box-sizing: border-box;
 }
 .tile strong {
-  font: 650 1.6rem/1.2 var(--brand-font);
-  letter-spacing: -0.02em;
+  font: 700 1.7rem/1.15 var(--brand-font);
+  letter-spacing: -0.025em;
   font-variant-numeric: tabular-nums;
+  color: var(--brand-text);
+  margin-top: 0.15rem;
+}
+.tile small {
+  font-size: 0.8rem;
+  line-height: 1.35;
 }
 .blocks {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-  gap: 1.25rem;
+  gap: 1.35rem;
 }
 .block {
   margin: 0;
   min-width: 0;
 }
 .block h2 {
-  margin-bottom: 0.9rem;
+  margin-bottom: 1rem;
+  font-size: 1.15rem;
 }
 .block.wide {
   grid-column: 1 / -1;
 }
 .table-wrap.scroll {
-  max-height: 360px;
+  max-height: 380px;
   overflow-y: auto;
+  scrollbar-width: thin;
 }
 .barlist {
   list-style: none;
@@ -67,49 +119,61 @@
 }
 .barlist li {
   display: grid;
-  grid-template-columns: minmax(8rem, 1.2fr) 2fr auto;
-  gap: 0.75rem;
+  grid-template-columns: minmax(8.5rem, 1.2fr) 2fr auto;
+  gap: 0.85rem;
   align-items: center;
-  padding: 0.3rem 0;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--brand-border) 60%, transparent);
+}
+.barlist li:last-child {
+  border-bottom: 0;
 }
 .barlist-track {
-  height: 10px;
-  border-left: 1px solid var(--chart-axis);
+  height: 8px;
+  border-left: 2px solid var(--chart-axis);
+  background: var(--brand-surface-2);
+  border-radius: 0 4px 4px 0;
+  overflow: hidden;
 }
 .barlist-bar {
   display: block;
   height: 100%;
-  background: var(--chart-series);
+  background: linear-gradient(90deg, var(--chart-series) 0%, color-mix(in srgb, var(--chart-series) 80%, #fff) 100%);
   border-radius: 0 4px 4px 0;
+  transition: width 0.4s ease-out;
 }
 .barlist-value {
   font-variant-numeric: tabular-nums;
+  font-size: 0.86rem;
   color: var(--brand-text-muted);
   white-space: nowrap;
+  font-weight: 500;
 }
 .chart {
   position: relative;
 }
 .chart-tip {
   position: absolute;
-  transform: translate(-50%, calc(-100% - 6px));
+  transform: translate(-50%, calc(-100% - 8px));
   background: var(--brand-primary);
   color: var(--brand-primary-contrast);
-  padding: 0.3rem 0.6rem;
+  padding: 0.4rem 0.75rem;
   border-radius: var(--brand-radius-small);
   font-size: 0.84rem;
+  font-weight: 500;
   white-space: nowrap;
   pointer-events: none;
-  z-index: 3;
+  z-index: 10;
   box-shadow: var(--brand-shadow-lg);
+  border: 1px solid color-mix(in srgb, var(--brand-primary-contrast) 15%, transparent);
 }
 .columns {
   display: flex;
   align-items: flex-end;
-  gap: 2px;
+  gap: 3px;
   height: 190px;
   border-bottom: 1px solid var(--chart-axis);
-  padding-top: 1.25rem;
+  padding-top: 1.5rem;
 }
 .col {
   flex: 1;
@@ -119,34 +183,53 @@
   justify-content: flex-end;
   align-items: center;
   position: relative;
+  cursor: pointer;
 }
 .col-bar {
   width: min(70%, 28px);
-  background: var(--chart-series);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--chart-series) 80%, #fff) 0%, var(--chart-series) 100%);
   border-radius: 4px 4px 0 0;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.col:hover .col-bar,
+.col:focus .col-bar {
+  opacity: 0.85;
+  transform: scaleY(1.02);
+  transform-origin: bottom;
 }
 .col-hour {
   position: absolute;
-  bottom: -1.3rem;
+  bottom: -1.4rem;
   font-size: 0.75rem;
   color: var(--brand-text-muted);
 }
 .col-label {
   font-size: 0.75rem;
-  color: var(--brand-text-muted);
+  font-weight: 650;
+  color: var(--brand-accent-strong);
+  margin-bottom: 2px;
 }
 .axis-note {
-  margin: 1.5rem 0 0;
+  margin: 1.75rem 0 0;
   font-size: 0.8rem;
 }
 .heat {
   display: grid;
-  gap: 2px;
+  gap: 3px;
   clear: both;
 }
 .heat-cell {
   height: 26px;
   border-radius: 4px;
+  transition: transform 0.12s;
+  cursor: pointer;
+}
+.heat-cell:hover,
+.heat-cell:focus {
+  transform: scale(1.15);
+  z-index: 2;
+  box-shadow: 0 0 0 2px var(--brand-accent);
+  outline: none;
 }
 .heat-hour,
 .heat-day {

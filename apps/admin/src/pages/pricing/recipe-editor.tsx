@@ -64,15 +64,15 @@ export function RecipeEditor({ item, onDone }: { item: any; onDone: () => void }
                   </td>
                   <td>
                     <span className="row tight">
-                      <input aria-label="Quantity" inputMode="decimal" value={l.quantity} onChange={(e) => set(i, 'quantity', e.target.value)} style={{ maxWidth: 110 }} /> {unit}
+                      <input aria-label="Quantity" inputMode="decimal" placeholder="0.00" value={l.quantity} onChange={(e) => set(i, 'quantity', e.target.value)} style={{ maxWidth: 110 }} /> {unit}
                     </span>
                   </td>
                   <td>
-                    <input aria-label="Yield %" inputMode="decimal" value={l.yieldPct} onChange={(e) => set(i, 'yieldPct', e.target.value)} style={{ maxWidth: 80 }} />
+                    <input aria-label="Yield %" inputMode="decimal" placeholder="100" value={l.yieldPct} onChange={(e) => set(i, 'yieldPct', e.target.value)} style={{ maxWidth: 80 }} />
                   </td>
-                  <td>{l.stockItemId && Number(l.quantity) > 0 ? rupee(portionCost([{ qty: l.quantity, yieldPct: l.yieldPct || 100, unitCost: costOf(l.stockItemId) }])) : '—'}</td>
+                  <td className="num">{l.stockItemId && Number(l.quantity) > 0 ? rupee(portionCost([{ qty: l.quantity, yieldPct: l.yieldPct || 100, unitCost: costOf(l.stockItemId) }])) : '—'}</td>
                   <td>
-                    <button className="ghost" onClick={() => setLines(lines.filter((_, j) => j !== i))}>
+                    <button className="ghost danger" onClick={() => setLines(lines.filter((_, j) => j !== i))}>
                       Remove
                     </button>
                   </td>
@@ -85,14 +85,19 @@ export function RecipeEditor({ item, onDone }: { item: any; onDone: () => void }
       <button className="secondary" onClick={() => setLines([...lines, { stockItemId: '', quantity: '', yieldPct: '100' }])} style={{ marginTop: '0.5rem' }}>
         Add ingredient
       </button>
-      <p>
+      <div className="card" style={{ marginTop: '1rem', background: 'var(--brand-surface-2)' }}>
         Portion cost <strong>{rupee(cost)}</strong> · price {rupee(item.sellingPrice)} · margin <strong>{m.pct}%</strong> ({rupee(m.amount)})
         {recipe.data.targetPct && ` · target ${Number(recipe.data.targetPct)}%`}
-      </p>
+      </div>
       <ErrorNote error={error} />
       {msg && <p className="note">{msg}</p>}
       <footer className="row end">
-        <button onClick={save}>Save recipe</button>
+        <button type="button" className="secondary" onClick={onDone}>
+          Cancel
+        </button>
+        <button className="gold" onClick={save}>
+          Save recipe
+        </button>
       </footer>
     </>
   );

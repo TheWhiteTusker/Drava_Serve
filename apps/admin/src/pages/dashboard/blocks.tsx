@@ -19,18 +19,18 @@ export function MarginBlocks({ x }: { x: any }) {
               <thead>
                 <tr>
                   <th>Dish</th>
-                  <th>Sold</th>
-                  <th>Margin ₹</th>
-                  <th>Margin %</th>
+                  <th style={{ textAlign: 'right' }}>Sold</th>
+                  <th style={{ textAlign: 'right' }}>Margin ₹</th>
+                  <th style={{ textAlign: 'right' }}>Margin %</th>
                 </tr>
               </thead>
               <tbody>
                 {x.margins.dishes.slice(0, 15).map((m: any) => (
                   <tr key={m.id}>
-                    <td>{m.name}</td>
-                    <td>{num(m.units)}</td>
-                    <td>{rupee(m.marginAmount)}</td>
-                    <td>{m.marginPct}%</td>
+                    <td><strong>{m.name}</strong></td>
+                    <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{num(m.units)}</td>
+                    <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{rupee(m.marginAmount)}</td>
+                    <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>{m.marginPct}%</td>
                   </tr>
                 ))}
               </tbody>
@@ -152,24 +152,24 @@ export function OffersBlock({ x }: { x: any }) {
                 <tr>
                   <th>On offer</th>
                   <th>Triggered by</th>
-                  <th>Menu price</th>
-                  <th>Charged</th>
-                  <th>Sold before</th>
-                  <th>Sold during</th>
+                  <th style={{ textAlign: 'right' }}>Menu price</th>
+                  <th style={{ textAlign: 'right' }}>Charged</th>
+                  <th style={{ textAlign: 'right' }}>Sold before</th>
+                  <th style={{ textAlign: 'right' }}>Sold during</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
                 {x.offers.map((o: any) => (
                   <tr key={o.id}>
-                    <td>{o.item}</td>
+                    <td><strong>{o.item}</strong></td>
                     <td>{o.trigger}</td>
-                    <td>{rupee(o.menuPrice)}</td>
-                    <td>{rupee(o.offerPrice)}</td>
-                    <td>
+                    <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{rupee(o.menuPrice)}</td>
+                    <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>{rupee(o.offerPrice)}</td>
+                    <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
                       {num(o.before.units)} · {rupee(o.before.revenue)}
                     </td>
-                    <td>
+                    <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 650, color: 'var(--brand-accent-strong)' }}>
                       {num(o.during.units)} · {rupee(o.during.revenue)}
                     </td>
                     <td>{o.status === 'active' ? <Badge tone="success">running</Badge> : <span className="muted">{o.endReason}</span>}</td>

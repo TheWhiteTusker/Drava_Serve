@@ -42,11 +42,11 @@ export function CategoriesPage() {
         ]}
         defaults={{ kind, sortOrder: 0, active: true, parentId: null }}
         fields={[
-          { name: 'name', label: 'Name', required: true },
+          { name: 'name', label: 'Name', required: true, placeholder: 'e.g. Starters, Main Course, Single Malt' },
           ...(kind === 'liquor_subtype'
             ? [{ name: 'parentId', label: 'Liquor type', type: 'select' as const, required: true, options: types.map((t) => ({ value: t.id, label: t.name })) }]
             : []),
-          { name: 'sortOrder', label: 'Order', type: 'number', help: 'Lower numbers come first' },
+          { name: 'sortOrder', label: 'Order', type: 'number', placeholder: '0', help: 'Lower numbers come first' },
           { name: 'active', label: 'Active', type: 'checkbox' },
         ]}
       />
@@ -68,7 +68,7 @@ export function BrandsPage() {
       ]}
       defaults={{ active: true }}
       fields={[
-        { name: 'name', label: 'Name', required: true },
+        { name: 'name', label: 'Name', required: true, placeholder: 'e.g. Glenfiddich, Kingfisher, Amrut' },
         { name: 'active', label: 'Active', type: 'checkbox' },
       ]}
     />
@@ -98,8 +98,8 @@ export function TaxClassesPage() {
       ]}
       defaults={{ kind: 'food', components: [], active: true }}
       fields={[
-        { name: 'code', label: 'Code', required: true },
-        { name: 'name', label: 'Name', required: true },
+        { name: 'code', label: 'Code', required: true, placeholder: 'e.g. GST_FOOD_5, VAT_LIQ_18' },
+        { name: 'name', label: 'Name', required: true, placeholder: 'e.g. Food GST 5%, Liquor VAT 20%' },
         { name: 'kind', label: 'Totalled as', type: 'select', required: true, options: [{ value: 'food', label: 'Food' }, { value: 'liquor', label: 'Liquor' }] },
         { name: 'active', label: 'Active', type: 'checkbox' },
       ]}
@@ -116,8 +116,8 @@ function TaxComponents({ value, onChange }: { value: { name: string; ratePct: st
       {value.map((c, i) => (
         <div key={i} className="row">
           <input aria-label="Tax name" placeholder="e.g. CGST" value={c.name} onChange={(e) => update(i, 'name', e.target.value)} />
-          <input aria-label="Rate %" inputMode="decimal" placeholder="%" value={c.ratePct} onChange={(e) => update(i, 'ratePct', e.target.value)} style={{ maxWidth: 100 }} />
-          <button type="button" className="ghost" onClick={() => onChange(value.filter((_, j) => j !== i))}>
+          <input aria-label="Rate %" inputMode="decimal" placeholder="2.5" value={c.ratePct} onChange={(e) => update(i, 'ratePct', e.target.value)} style={{ maxWidth: 100 }} />
+          <button type="button" className="ghost danger" onClick={() => onChange(value.filter((_, j) => j !== i))}>
             Remove
           </button>
         </div>

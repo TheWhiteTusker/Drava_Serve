@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { Eye, EyeOff, Search } from 'lucide-react';
+import { Eye, EyeOff, Search, X } from 'lucide-react';
 
 // ---------- Forms ----------
 
@@ -11,6 +11,7 @@ export interface FieldSpec {
   help?: string;
   required?: boolean;
   placeholder?: string;
+  span?: 1 | 2 | 'full';
   show?: (v: Record<string, any>) => boolean;
 }
 
@@ -18,18 +19,23 @@ export function Field({ spec, value, onChange }: { spec: FieldSpec; value: any; 
   const [showPassword, setShowPassword] = useState(false);
   const id = `f-${spec.name}`;
   const help = spec.help && <small className="muted">{spec.help}</small>;
+  const spanClass = spec.span === 'full' ? ' span-full' : spec.span === 2 ? ' span-2' : spec.type === 'textarea' || spec.type === 'checks' ? ' span-2' : '';
+
   if (spec.type === 'checkbox') {
     return (
-      <label className="check">
-        <input type="checkbox" checked={!!value} onChange={(e) => onChange(e.target.checked)} /> {spec.label}
+      <div className={`field${spanClass}`}>
+        <label className="check">
+          <input type="checkbox" checked={!!value} onChange={(e) => onChange(e.target.checked)} />
+          <span>{spec.label}</span>
+        </label>
         {help}
-      </label>
+      </div>
     );
   }
   if (spec.type === 'checks') {
     const set = new Set<string>(value ?? []);
     return (
-      <fieldset className="field">
+      <fieldset className={`field${spanClass}`}>
         <legend>{spec.label}</legend>
         <div className="checks">
           {spec.options!.map((o) => (
@@ -42,7 +48,7 @@ export function Field({ spec, value, onChange }: { spec: FieldSpec; value: any; 
                   onChange([...set]);
                 }}
               />
-              {o.label}
+              <span>{o.label}</span>
             </label>
           ))}
         </div>
@@ -63,7 +69,7 @@ export function Field({ spec, value, onChange }: { spec: FieldSpec; value: any; 
       </select>
     );
   } else if (spec.type === 'textarea') {
-    input = <textarea id={id} value={value ?? ''} onChange={(e) => onChange(e.target.value)} rows={3} />;
+    input = <textarea id={id} value={value ?? ''} placeholder={spec.placeholder} onChange={(e) => onChange(e.target.value)} rows={3} />;
   } else if (spec.type === 'tags') {
     input = (
       <input
@@ -112,7 +118,7 @@ export function Field({ spec, value, onChange }: { spec: FieldSpec; value: any; 
     );
   }
   return (
-    <div className="field">
+    <div className={`field${spanClass}`}>
       <label htmlFor={id}>
         {spec.label}
         {spec.required && <span aria-hidden style={{ color: 'var(--brand-accent-strong)' }}> *</span>}
@@ -137,10 +143,21 @@ export function Fields({ specs, values, set }: { specs: FieldSpec[]; values: Rec
 
 export function SearchBox({ value, onChange, placeholder = 'Search' }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
   return (
-    <label className="searchbox">
+    <div className="searchbox">
       <Search className="icon" aria-hidden />
       <span className="sr-only">{placeholder}</span>
       <input type="search" placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} />
-    </label>
+      {value && (
+        <button
+          type="button"
+          className="search-clear"
+          onClick={() => onChange('')}
+          aria-label="Clear search"
+          title="Clear search"
+        >
+          <X className="icon" style={{ width: 14, height: 14 }} />
+        </button>
+      )}
+    </div>
   );
 }

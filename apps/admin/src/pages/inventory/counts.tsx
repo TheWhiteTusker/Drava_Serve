@@ -52,7 +52,7 @@ export function CountsPage() {
             Date
             <input type="date" value={form.scheduledFor} onChange={(e) => setForm({ ...form, scheduledFor: e.target.value })} />
           </label>
-          <button style={{ alignSelf: 'flex-end' }}>Schedule count</button>
+          <button className="gold" style={{ alignSelf: 'flex-end' }}>Schedule count</button>
         </form>
       )}
       <ErrorNote error={error ?? counts.error} />
@@ -69,14 +69,14 @@ export function CountsPage() {
           <tbody>
             {(counts.data ?? []).map((c) => (
               <tr key={c.id}>
-                <td>{c.scheduledFor}</td>
+                <td><strong>{c.scheduledFor}</strong></td>
                 <td>{c.store}</td>
                 <td>
                   <Badge tone={c.status === 'approved' ? 'success' : c.status === 'submitted' ? 'warning' : 'neutral'}>{c.status}</Badge>
                 </td>
                 <td className="actions">
-                  <button className="ghost" onClick={() => rec.open(c.id)}>
-                    Open
+                  <button className="link" onClick={() => rec.open(c.id)}>
+                    Open count
                   </button>
                 </td>
               </tr>

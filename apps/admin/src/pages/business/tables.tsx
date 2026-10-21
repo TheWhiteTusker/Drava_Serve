@@ -42,7 +42,7 @@ export function TablesPage() {
       canManage={can(s, 'outlets.manage', outletId)}
       slugOf={(r: any) => tableSlug(r)}
       before={
-        <button className="ghost" onClick={() => rec.open('qr-codes')}>
+        <button className="secondary" onClick={() => rec.open('qr-codes')}>
           Print all QR codes
         </button>
       }
@@ -52,7 +52,7 @@ export function TablesPage() {
         {
           label: 'QR code',
           render: (r: any) => (
-            <Link to={`/tables/${tableSlug(r)}`} onClick={(e) => e.stopPropagation()}>
+            <Link to={`/tables/${tableSlug(r)}`} className="link" onClick={(e) => e.stopPropagation()}>
               QR code
             </Link>
           ),
@@ -61,9 +61,9 @@ export function TablesPage() {
       ]}
       defaults={{ outletId, sortOrder: (tables.data?.length ?? 0) + 1, active: true }}
       fields={[
-        { name: 'name', label: 'Name', required: true, help: 'As staff call it, e.g. T4 or Patio 2' },
-        { name: 'sortOrder', label: 'Position on the POS table picker', type: 'number' },
-        { name: 'active', label: 'In use', type: 'checkbox', help: 'A table not in use takes no orders from its QR code' },
+        { name: 'name', label: 'Name', required: true, placeholder: 'e.g. Table 4, Patio 2, Bar 1', help: 'As staff call it, e.g. T4 or Patio 2' },
+        { name: 'sortOrder', label: 'Position on the POS table picker', type: 'number', placeholder: '1' },
+        { name: 'active', label: 'In use', type: 'checkbox', span: 'full', help: 'A table not in use takes no orders from its QR code' },
       ]}
       aside={(r: any) => <MenuQr title="This table's QR code" label={`Table ${r.name}`} url={url(r)} />}
     />

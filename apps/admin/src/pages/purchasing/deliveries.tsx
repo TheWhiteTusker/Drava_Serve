@@ -3,8 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { businessDate } from '@fnb/shared';
 import { useApi, useCurrentOutlet } from '../../api';
 import { useLiveReload } from '../../live';
-import { ErrorNote, Page } from '../../ui';
+import { Badge, ErrorNote, Page } from '../../ui';
 import { GRN_STATUS } from './shared';
+
+const STAGE_TONES: Record<string, 'neutral' | 'warning' | 'gold' | 'success'> = {
+  expected: 'neutral',
+  gate_checked: 'warning',
+  rechecked: 'gold',
+  closed: 'success',
+};
 
 // ---------- Deliveries and goods received notes ----------
 
@@ -35,12 +42,16 @@ export function DeliveriesPage() {
           <tbody>
             {(list.data ?? []).map((d) => (
               <tr key={d.id}>
-                <td>{d.vendor}</td>
+                <td><strong>{d.vendor}</strong></td>
                 <td>{d.lineCount}</td>
-                <td>{{ expected: 'At the gate', gate_checked: 'Re-check', rechecked: 'Signatures', closed: 'Done' }[d.status as string]}</td>
+                <td>
+                  <Badge tone={STAGE_TONES[d.status] ?? 'neutral'}>
+                    {{ expected: 'At the gate', gate_checked: 'Re-check', rechecked: 'Signatures', closed: 'Done' }[d.status as string]}
+                  </Badge>
+                </td>
                 <td>
                   {d.grn ? (
-                    <button className="ghost" onClick={() => go(`/accounts/${d.grn.id}`)}>
+                    <button className="link" onClick={() => go(`/accounts/${d.grn.id}`)}>
                       {d.grn.number} · {GRN_STATUS[d.grn.status]?.[0]}
                     </button>
                   ) : (

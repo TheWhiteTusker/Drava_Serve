@@ -55,9 +55,9 @@ export function DayClose({ outletId, onClose }: { outletId: string; onClose: () 
         <div className="stack">
           <label className="field">
             Cash counted in the drawer
-            <input inputMode="decimal" value={cash} onChange={(e) => setCash(e.target.value)} />
+            <input inputMode="decimal" placeholder="0.00" value={cash} onChange={(e) => setCash(e.target.value)} />
           </label>
-          <button className="huge" onClick={close} disabled={t?.openBills > 0}>
+          <button className="huge gold" onClick={close} disabled={t?.openBills > 0}>
             Close the day
           </button>
         </div>

@@ -62,14 +62,14 @@ export function VendorItems({ vendor, onDone }: { vendor: any; onDone: () => voi
                     </select>
                   </td>
                   <td>
-                    <input aria-label="Pack size" inputMode="decimal" value={r.packSize} onChange={(e) => set(i, 'packSize', e.target.value)} style={{ maxWidth: 100 }} />
+                    <input aria-label="Pack size" inputMode="decimal" placeholder="1" value={r.packSize} onChange={(e) => set(i, 'packSize', e.target.value)} style={{ maxWidth: 100 }} />
                   </td>
                   <td>
                     <input type="checkbox" aria-label="Preferred vendor" checked={r.preferred} onChange={(e) => set(i, 'preferred', e.target.checked)} />
                   </td>
-                  <td>{r.lastRate ? `${rupee(r.lastRate.rate)} on ${r.lastRate.billedOn}` : '—'}</td>
+                  <td className="num">{r.lastRate ? `${rupee(r.lastRate.rate)} on ${r.lastRate.billedOn}` : '—'}</td>
                   <td>
-                    <button className="ghost" onClick={() => setRows(rows.filter((_, j) => j !== i))}>
+                    <button className="ghost danger" onClick={() => setRows(rows.filter((_, j) => j !== i))}>
                       Remove
                     </button>
                   </td>
@@ -84,7 +84,12 @@ export function VendorItems({ vendor, onDone }: { vendor: any; onDone: () => voi
       </button>
       <ErrorNote error={error} />
       <footer className="row end">
-        <button onClick={save}>Save</button>
+        <button type="button" className="secondary" onClick={onDone}>
+          Cancel
+        </button>
+        <button className="gold" onClick={save}>
+          Save items
+        </button>
       </footer>
     </>
   );

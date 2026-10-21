@@ -60,7 +60,7 @@ export function OffersPage() {
               {RULE_FIELDS.map(([k, label, help]) => (
                 <div key={k} className="field">
                   <label htmlFor={`r-${k}`}>{label}</label>
-                  <input id={`r-${k}`} inputMode="decimal" disabled={!manage} value={String(rule[k] ?? '')} onChange={(e) => setRule({ ...rule, [k]: e.target.value })} />
+                  <input id={`r-${k}`} inputMode="decimal" placeholder="0" disabled={!manage} value={String(rule[k] ?? '')} onChange={(e) => setRule({ ...rule, [k]: e.target.value })} />
                   {help && <small className="muted">{help}</small>}
                 </div>
               ))}
@@ -78,7 +78,9 @@ export function OffersPage() {
             <ErrorNote error={error} />
             {manage && (
               <footer className="row end">
-                <button onClick={save}>Save rule</button>
+                <button className="gold" onClick={save}>
+                  Save rule
+                </button>
               </footer>
             )}
           </>

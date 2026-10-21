@@ -37,7 +37,7 @@ export function PayDialog({ total, onPay, onClose }: { total: string; onPay: (p:
         <div className="stack" style={{ marginTop: '1rem' }}>
           <label className="field">
             Cash received (optional)
-            <input inputMode="decimal" autoFocus value={tendered} onChange={(e) => setTendered(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && ok && confirm()} />
+            <input inputMode="decimal" autoFocus placeholder={total} value={tendered} onChange={(e) => setTendered(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && ok && confirm()} />
           </label>
           <div className="quick-cash">
             {[...new Set([Math.ceil(Number(total)), Math.ceil(Number(total) / 100) * 100, Math.ceil(Number(total) / 500) * 500, Math.ceil(Number(total) / 2000) * 2000])].map((v) => (
@@ -59,7 +59,7 @@ export function PayDialog({ total, onPay, onClose }: { total: string; onPay: (p:
           {(['cash', 'upi', 'card'] as const).map((k) => (
             <label key={k} className="field">
               {k === 'upi' ? 'UPI' : k[0].toUpperCase() + k.slice(1)}
-              <input inputMode="decimal" value={split[k]} onChange={(e) => setSplit({ ...split, [k]: e.target.value })} />
+              <input inputMode="decimal" placeholder="0.00" value={split[k]} onChange={(e) => setSplit({ ...split, [k]: e.target.value })} />
             </label>
           ))}
           <p className={splitSum.eq(total) ? '' : 'note danger'}>
@@ -83,12 +83,12 @@ export function MoreDialog({ bill, onRequest, onClose }: { bill: LocalBill; onRe
       <div className="stack">
         <label className="field">
           Reason
-          <input value={reason} onChange={(e) => setReason(e.target.value)} />
+          <input placeholder="e.g. VIP guest, dish rejected, billing correction" value={reason} onChange={(e) => setReason(e.target.value)} />
         </label>
         <div className="row">
           <label className="field" style={{ flex: 2 }}>
             Discount %
-            <input inputMode="decimal" value={pct} onChange={(e) => setPct(e.target.value)} />
+            <input inputMode="decimal" placeholder="e.g. 10" value={pct} onChange={(e) => setPct(e.target.value)} />
           </label>
           <button disabled={!pct || reason.length < 3} onClick={() => onRequest('discount', { discountPct: pct, reason })}>
             Ask for discount
@@ -110,7 +110,7 @@ export function MoreDialog({ bill, onRequest, onClose }: { bill: LocalBill; onRe
           </button>
         </div>
         <button className="bad" disabled={reason.length < 3} onClick={() => onRequest('cancel', { reason })}>
-          Ask to cancel the whole bill
+          Cancel entire bill (requires approval)
         </button>
       </div>
     </Dialog>

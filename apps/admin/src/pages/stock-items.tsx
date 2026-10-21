@@ -51,17 +51,17 @@ export function StockItemsPage() {
           ...(dept === 'beverage'
             ? [
                 { name: 'brandId', label: 'Brand', type: 'select' as const, options: opts(brands.data) },
-                { name: 'bottleSizeMl', label: 'Bottle size (ml)', type: 'decimal' as const },
-                { name: 'abvPct', label: 'Alcohol %', type: 'decimal' as const },
+                { name: 'bottleSizeMl', label: 'Bottle size (ml)', type: 'decimal' as const, placeholder: 'e.g. 750' },
+                { name: 'abvPct', label: 'Alcohol %', type: 'decimal' as const, placeholder: 'e.g. 42.8' },
                 { name: 'origin', label: 'Origin', type: 'select' as const, options: ORIGINS.map((o) => ({ value: o, label: o === 'indian' ? 'Indian-made' : 'Imported' })) },
                 { name: 'priceTier', label: 'Price tier', type: 'select' as const, options: PRICE_TIERS.map((p) => ({ value: p, label: p })) },
               ]
             : []),
-          { name: 'sku', label: 'SKU / code' },
-          { name: 'currentCost', label: 'Current cost per base unit (₹)', type: 'decimal', help: 'Set automatically from vendor bills once receiving is live' },
-          { name: 'perishable', label: 'Perishable (track expiry, issue earliest expiry first)', type: 'checkbox' },
-          { name: 'shelfLifeDays', label: 'Shelf life (days)', type: 'number', show: (v) => v.perishable },
-          { name: 'active', label: 'Active', type: 'checkbox' },
+          { name: 'sku', label: 'SKU / code', placeholder: 'e.g. SK-1002' },
+          { name: 'currentCost', label: 'Current cost per base unit (₹)', type: 'decimal', placeholder: '0.00', help: 'Set automatically from vendor bills once receiving is live' },
+          { name: 'perishable', label: 'Perishable (track expiry, issue earliest expiry first)', type: 'checkbox', span: 2 as const },
+          { name: 'shelfLifeDays', label: 'Shelf life (days)', type: 'number', placeholder: 'e.g. 7', show: (v) => v.perishable },
+          { name: 'active', label: 'Active', type: 'checkbox', span: 'full' as const },
         ]}
         extra={(v, set) => (
           <>
