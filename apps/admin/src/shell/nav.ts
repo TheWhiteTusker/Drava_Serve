@@ -1,30 +1,43 @@
 import {
   Activity as ActivityIcon, Beer, BookOpen, Boxes, ChartColumn, ChefHat, ClipboardCheck, ClipboardList, FileBarChart, Gauge, History, LayoutGrid, Percent, QrCode, Receipt, Scale, Settings, ShoppingBasket, Store, Tag, Truck, UserCog, Users, Wallet, Wine, type LucideIcon,
 } from 'lucide-react';
+import { lazy } from 'react';
 import type { Permission } from '@fnb/shared';
-import { ActivityPage } from '../pages/activity';
-import { AuditPage } from '../pages/audit';
-import { DashboardPage } from '../pages/dashboard/dashboard';
-import { ReportsPage } from '../pages/dashboard/reports';
-import { ApprovalsPage } from '../pages/inventory/approvals';
-import { CountsPage } from '../pages/inventory/counts';
-import { LiquorRegisterPage } from '../pages/inventory/liquor-register';
-import { StockPage } from '../pages/inventory/stock';
-import { BrandsPage, CategoriesPage, LiquorTreePage, TaxClassesPage } from '../pages/catalog';
-import { MenuItemsPage } from '../pages/menu-items';
-import { CostingPage } from '../pages/pricing/costing';
-import { MarginTargetsPage } from '../pages/pricing/margin-targets';
-import { OffersPage } from '../pages/pricing/offers';
-import { DeliveriesPage } from '../pages/purchasing/deliveries';
-import { GrnsPage } from '../pages/purchasing/grns';
-import { IndentsPage } from '../pages/purchasing/indents';
-import { VendorsPage } from '../pages/purchasing/vendors';
-import { OutletsPage } from '../pages/business/outlets';
-import { SettingsPage } from '../pages/business/settings';
-import { TablesPage } from '../pages/business/tables';
-import { StockItemsPage } from '../pages/stock-items';
-import { RolesPage } from '../pages/people/roles';
-import { UsersPage } from '../pages/people/users';
+
+// ---------- Pages, each loaded the first time it is opened ----------
+
+// Every page is its own download, so the first screen carries only its own code. Hovering a menu link
+// fetches the page it leads to before the click (preload).
+function lazyPage(load: () => Promise<() => React.JSX.Element | null>) {
+  const Page = lazy(() => load().then((component) => ({ default: component })));
+  return Object.assign(Page, { preload: load });
+}
+const ActivityPage = lazyPage(() => import('../pages/activity').then((m) => m.ActivityPage));
+const AuditPage = lazyPage(() => import('../pages/audit').then((m) => m.AuditPage));
+const DashboardPage = lazyPage(() => import('../pages/dashboard/dashboard').then((m) => m.DashboardPage));
+const ReportsPage = lazyPage(() => import('../pages/dashboard/reports').then((m) => m.ReportsPage));
+const ApprovalsPage = lazyPage(() => import('../pages/inventory/approvals').then((m) => m.ApprovalsPage));
+const CountsPage = lazyPage(() => import('../pages/inventory/counts').then((m) => m.CountsPage));
+const LiquorRegisterPage = lazyPage(() => import('../pages/inventory/liquor-register').then((m) => m.LiquorRegisterPage));
+const StockPage = lazyPage(() => import('../pages/inventory/stock').then((m) => m.StockPage));
+const BrandsPage = lazyPage(() => import('../pages/catalog').then((m) => m.BrandsPage));
+const CategoriesPage = lazyPage(() => import('../pages/catalog').then((m) => m.CategoriesPage));
+const LiquorTreePage = lazyPage(() => import('../pages/catalog').then((m) => m.LiquorTreePage));
+const TaxClassesPage = lazyPage(() => import('../pages/catalog').then((m) => m.TaxClassesPage));
+const MenuItemsPage = lazyPage(() => import('../pages/menu-items').then((m) => m.MenuItemsPage));
+const CostingPage = lazyPage(() => import('../pages/pricing/costing').then((m) => m.CostingPage));
+const MarginTargetsPage = lazyPage(() => import('../pages/pricing/margin-targets').then((m) => m.MarginTargetsPage));
+const OffersPage = lazyPage(() => import('../pages/pricing/offers').then((m) => m.OffersPage));
+const DeliveriesPage = lazyPage(() => import('../pages/purchasing/deliveries').then((m) => m.DeliveriesPage));
+const GrnsPage = lazyPage(() => import('../pages/purchasing/grns').then((m) => m.GrnsPage));
+const IndentsPage = lazyPage(() => import('../pages/purchasing/indents').then((m) => m.IndentsPage));
+const VendorsPage = lazyPage(() => import('../pages/purchasing/vendors').then((m) => m.VendorsPage));
+const OutletsPage = lazyPage(() => import('../pages/business/outlets').then((m) => m.OutletsPage));
+const SettingsPage = lazyPage(() => import('../pages/business/settings').then((m) => m.SettingsPage));
+const TablesPage = lazyPage(() => import('../pages/business/tables').then((m) => m.TablesPage));
+const StockItemsPage = lazyPage(() => import('../pages/stock-items').then((m) => m.StockItemsPage));
+const RolesPage = lazyPage(() => import('../pages/people/roles').then((m) => m.RolesPage));
+const UsersPage = lazyPage(() => import('../pages/people/users').then((m) => m.UsersPage));
 
 // ---------- Navigation ----------
 
@@ -34,7 +47,7 @@ export interface NavItem {
   icon: LucideIcon;
   perm?: Permission;
   group: string;
-  page: () => React.JSX.Element | null;
+  page: React.ComponentType & { preload?: () => unknown };
   keywords?: string;
 }
 export const NAV: NavItem[] = [

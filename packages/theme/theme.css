@@ -128,7 +128,7 @@
     --brand-border-strong: #383842;
     --brand-text: #ffffff;
     --brand-text-muted: #c4b9a4;
-    --brand-backdrop: url("./backdrop-dark.webp");
+    --brand-backdrop: url("./backdrop-dark-2560.webp");
     --glass-fill: rgb(10 8 4 / 0.58);
     --glass-fill-hover: rgb(10 8 4 / 0.7);
     --glass-border: rgb(217 164 65 / 0.22);
@@ -186,7 +186,7 @@
   --brand-border-strong: #383842;
   --brand-text: #ffffff;
   --brand-text-muted: #c4b9a4;
-  --brand-backdrop: url("./backdrop-dark.webp");
+  --brand-backdrop: url("./backdrop-dark-2560.webp");
   --glass-fill: rgb(10 8 4 / 0.58);
   --glass-fill-hover: rgb(10 8 4 / 0.7);
   --glass-border: rgb(217 164 65 / 0.22);
@@ -244,4 +244,16 @@ h3 {
 p,
 li {
   text-wrap: pretty;
+}
+
+/* The full-size dark backdrop (6 MB) is fetched only by screens wider than the 2560px version. */
+@media (min-width: 2561px) {
+  :root[data-theme="dark"] {
+    --brand-backdrop: url("./backdrop-dark.webp");
+  }
+}
+@media (min-width: 2561px) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --brand-backdrop: url("./backdrop-dark.webp");
+  }
 }

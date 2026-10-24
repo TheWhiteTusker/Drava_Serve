@@ -1,5 +1,5 @@
 import { KeyRound, LogOut, Menu, Receipt, Search, Store, Tags, Truck, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import { guestMenuPath } from '@fnb/shared';
 import { can, setCurrentOutlet, setSession, useCurrentOutlet, type Session } from '../api';
@@ -94,7 +94,7 @@ export function Shell({ s }: { s: Session }) {
             {nav
               .filter((n) => n.group === g)
               .map((n) => (
-                <NavLink key={n.to} to={n.to}>
+                <NavLink key={n.to} to={n.to} onMouseEnter={() => n.page.preload?.()} onFocus={() => n.page.preload?.()}>
                   <n.icon className="icon" aria-hidden /> {n.label}
                 </NavLink>
               ))}
@@ -113,12 +113,14 @@ export function Shell({ s }: { s: Session }) {
       </nav>
       {/* Keyed by user: after a PIN switch every page reloads with the new person's access. */}
       <main id="content" tabIndex={-1} className="content" key={s.user.id}>
+        <Suspense fallback={<p className="muted" role="status">Loading…</p>}>
         <Routes>
           {nav.map((n) => (
             <Route key={n.to} path={`${n.to}/*`} element={<n.page />} />
           ))}
           <Route path="*" element={<Navigate to={(nav.find((n) => n.to === '/dashboard') ?? nav.find((n) => n.to === '/menu-items') ?? nav.find((n) => n.to === '/outlets')!).to} replace />} />
         </Routes>
+        </Suspense>
       </main>
       <PinSwitch open={pinOpen} onClose={() => setPinOpen(false)} />
       <ChangePassword open={passwordOpen} onClose={() => setPasswordOpen(false)} />
