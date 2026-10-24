@@ -46,7 +46,8 @@
   gap: 0.45rem;
   border: 1px solid var(--brand-border-strong);
   border-radius: 999px;
-  padding: 0 0.5rem 0 0.85rem;
+  min-height: 40px;
+  padding: 0 0.5rem 0 0.95rem;
   background: var(--brand-surface);
   box-shadow: var(--brand-shadow-xs);
   transition-property: border-color, box-shadow;
@@ -63,7 +64,11 @@
   border: 0;
   background: transparent;
   min-height: 38px;
-  padding: 0 1.6rem 0 0;
+  padding: 0 0.25rem 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  line-height: 1;
   box-shadow: none;
   font-weight: 600;
   font-size: 0.88rem;
@@ -71,20 +76,28 @@
   max-width: 22rem;
   cursor: pointer;
 }
+.pill select::picker-icon {
+  color: var(--brand-accent-strong);
+  font-size: 0.7rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
 .pill select:focus {
   outline: none;
   box-shadow: none;
 }
 .search-trigger {
-  color: var(--brand-text-muted);
+  color: var(--brand-text);
   font-weight: 500;
   font-size: 0.88rem;
   min-width: 16rem;
   justify-content: flex-start;
   background: var(--brand-surface-2);
-  border: 1px solid var(--brand-border);
-  border-radius: var(--brand-radius);
-  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--brand-border-strong);
+  border-radius: 999px;
+  min-height: 40px;
+  padding: 0 0.5rem 0 0.95rem;
   box-shadow: none;
   transition-property: border-color, background-color, box-shadow;
   transition-duration: 0.15s;

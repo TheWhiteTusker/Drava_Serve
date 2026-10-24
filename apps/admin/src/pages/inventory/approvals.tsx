@@ -34,7 +34,7 @@ export function ApprovalsPage() {
       <ErrorNote error={error ?? list.error} />
       <div className="cards">
         {(list.data ?? []).map((r) => (
-          <article key={r.id} className="card">
+          <article key={r.id} className="card approval">
             <header className="row between">
               <h3>{r.label}</h3>
               <Badge tone={r.status === 'approved' ? 'success' : r.status === 'pending' ? 'warning' : 'neutral'}>{r.status}</Badge>
