@@ -68,10 +68,10 @@ export function ReportsPage() {
         {me.data && (
           <>
             <h3 className="section-label">Food</h3>
-            <div className="cards">{group(me.data.food)}</div>
+            <div className="cards quadrants">{group(me.data.food)}</div>
             <h3 className="section-label">Beverage</h3>
-            <div className="cards">{group(me.data.beverage)}</div>
-            <div className="tiles">
+            <div className="cards quadrants">{group(me.data.beverage)}</div>
+            <div className="tiles single">
               <Tile label="Bar pour cost" value={`${me.data.pourCost.pct}%`} note={`Liquor cost ${rupee(me.data.pourCost.liquorCost)} ÷ liquor sales ${rupee(me.data.pourCost.liquorSales)}. Bars typically aim for about 20%.`} />
             </div>
           </>

@@ -8,6 +8,8 @@ import { closeAll, controlDb, controlSchema, migrateAll, resolveCustomer, tenant
 import { rebuildRollups } from './reports/rollup.js';
 import { hashSecret } from './secrets.js';
 import { seedDemo } from './seed.js';
+import { seedExtras } from './seed/extras.js';
+import { DEMO } from './seed/data.js';
 
 // pnpm db:migrate                       control database, then every customer database
 // pnpm customer:create <code> "<name>" --owner-login x --owner-name y --owner-password z
@@ -63,6 +65,12 @@ try {
       await migrateAll(() => {});
       await seedDemo({ reset: values.reset });
       break;
+    case 'seed:extras': {
+      const [demo] = await controlDb().select().from(controlSchema.customer).where(eq(controlSchema.customer.code, DEMO.code));
+      const tenant = await resolveCustomer(demo.id);
+      await asSystem(tenant!.db, 'system:seed', (tx) => seedExtras(tx));
+      break;
+    }
     case 'backup': {
       const all = await controlDb().select().from(controlSchema.customer);
       for (const c of all.filter((c) => !args[0] || c.code === args[0])) console.log(`${c.code}: ${(await backupCustomer(c)).key}`);

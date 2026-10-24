@@ -27,6 +27,9 @@
   gap: 1.1rem;
   margin-bottom: 1.5rem;
 }
+.tiles.single {
+  grid-template-columns: 1fr;
+}
 .tile {
   background: var(--glass-fill);
   border: 1px solid var(--glass-border);
@@ -113,6 +116,15 @@
   max-height: 380px;
   overflow-y: auto;
   scrollbar-width: thin;
+  overflow-x: hidden;
+}
+/* Tight cells so the four columns fit a narrow dashboard card without a sideways scroll. */
+.table-wrap.scroll th,
+.table-wrap.scroll td {
+  padding: 0.65rem 0.6rem;
+}
+.table-wrap.scroll th {
+  letter-spacing: 0.04em;
 }
 .barlist {
   list-style: none;

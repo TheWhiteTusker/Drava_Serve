@@ -9,6 +9,7 @@ import { controlDb, controlSchema, createCustomer, dropCustomer, tenantSchema as
 import { BAR_MENU, DEMO, FOOD_MENU, SOFT_MENU, istDate } from './seed/data.js';
 import { seedMenus, seedPeople, seedStock, seedVendors } from './seed/setup.js';
 import { seedSales } from './seed/sales.js';
+import { seedExtras } from './seed/extras.js';
 
 export async function seedDemo(opts: { reset?: boolean; log?: (s: string) => void } = {}) {
   const log = opts.log ?? console.log;
@@ -55,5 +56,6 @@ export async function seedDemo(opts: { reset?: boolean; log?: (s: string) => voi
     .where(and(eq(t.indent.outletId, blr.id), eq(t.indent.forDate, today), eq(t.vendor.name, 'Green Valley Agro & Fresh Produce Ltd')));
   if (veg) await sys.tx((tx) => approveIndent(sys, tx, veg.id));
   await sys.tx((tx) => rebuildRollups(tx)); // the rollups on the dashboard
+  await asSystem(db, 'system:seed', (tx) => seedExtras(tx, log));
   log(`Demo customer ready. Sign in as owner@demo.test / ${DEMO.password}`);
 }

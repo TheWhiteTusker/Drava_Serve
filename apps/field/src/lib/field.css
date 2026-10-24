@@ -121,15 +121,15 @@ button.ghost:hover:not(:disabled) {
   background: var(--glass-fill-flat);
 }
 button.gold {
-  background: linear-gradient(180deg, #f02d4e 0%, var(--brand-accent) 100%);
+  background: linear-gradient(180deg, #b8801f 0%, var(--brand-accent) 100%);
   border: 1px solid var(--brand-accent-strong);
   color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 2px 8px rgb(226 29 62 / 0.32);
+  box-shadow: 0 2px 8px rgb(154 107 18 / 0.32);
 }
 button.gold:hover:not(:disabled) {
-  background: linear-gradient(180deg, #ff3d5e 0%, #c91433 100%);
-  box-shadow: 0 4px 14px rgb(226 29 62 / 0.45);
+  background: linear-gradient(180deg, #c28a26 0%, #7a5410 100%);
+  box-shadow: 0 4px 14px rgb(154 107 18 / 0.45);
 }
 button.good {
   background: linear-gradient(180deg, color-mix(in srgb, var(--brand-success) 85%, #fff) 0%, var(--brand-success) 100%);
@@ -515,3 +515,52 @@ button.password-toggle:focus-visible {
   outline-offset: 1px;
 }
 
+
+/* The open list of a select. Browsers that support customizable selects draw the list from our CSS,
+   so the highlight is brass. Others keep their native list, tinted as far as they allow. */
+select {
+  accent-color: #9a6b12;
+}
+select option {
+  background-color: var(--brand-surface);
+  color: var(--brand-text);
+}
+select option:checked,
+select option:hover {
+  background: linear-gradient(#9a6b12, #9a6b12);
+  color: #ffffff;
+}
+@supports (appearance: base-select) {
+  select,
+  select::picker(select) {
+    appearance: base-select;
+  }
+  select::picker(select) {
+    background: var(--brand-surface);
+    color: var(--brand-text);
+    border: 1px solid var(--brand-border-strong);
+    border-radius: var(--brand-radius-small);
+    box-shadow: var(--brand-shadow-md);
+    padding: 0.25rem;
+  }
+  select option {
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+  }
+  select option:hover,
+  select option:focus-visible,
+  select option:checked {
+    background: #9a6b12;
+    color: #ffffff;
+  }
+  select option::checkmark {
+    color: #ffffff;
+  }
+}
+
+/* Selected text: brass instead of the browser's blue. */
+::selection {
+  background: #9a6b12;
+  color: #ffffff;
+  text-shadow: none;
+}

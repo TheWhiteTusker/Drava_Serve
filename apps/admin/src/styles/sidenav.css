@@ -13,9 +13,8 @@
   font: 700 0.68rem var(--brand-font);
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--brand-text-muted);
+  color: var(--brand-accent-strong);
   margin: 1.25rem 0.65rem 0.4rem;
-  opacity: 0.85;
 }
 #sidenav a {
   display: flex;
@@ -34,7 +33,7 @@
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 #sidenav a svg {
-  color: var(--brand-text-muted);
+  color: var(--brand-accent-strong);
   width: 17px;
   height: 17px;
   transition: color 0.15s, transform 0.15s;

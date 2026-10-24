@@ -58,16 +58,16 @@ export function CostingPage() {
         <section key={g} style={{ marginBottom: '1.25rem' }}>
           <h2>{g}</h2>
           <div className="table-wrap">
-            <table>
+            <table className="aligned">
               <thead>
                 <tr>
                   <th>#</th>
                   <th>Item</th>
-                  <th>Price</th>
-                  <th>Portion cost</th>
-                  <th>Margin</th>
-                  <th>Target</th>
-                  <th>Left</th>
+                  <th className="num">Price</th>
+                  <th className="num">Portion cost</th>
+                  <th className="num">Margin</th>
+                  <th className="num">Target</th>
+                  <th className="num">Left</th>
                   <th aria-label="Actions" />
                 </tr>
               </thead>

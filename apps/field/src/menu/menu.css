@@ -341,10 +341,10 @@ button:focus-visible {
   width: 100%;
   border: 1px solid var(--brand-accent-strong);
   padding: 0 1.2rem;
-  background: linear-gradient(180deg, #f02d4e 0%, var(--brand-accent) 100%);
+  background: linear-gradient(180deg, #b8801f 0%, var(--brand-accent) 100%);
   color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 4px 14px rgb(226 29 62 / 0.35);
+  box-shadow: 0 4px 14px rgb(154 107 18 / 0.35);
   transition-property: transform, box-shadow;
   transition-duration: 0.15s;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
