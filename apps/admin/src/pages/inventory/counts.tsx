@@ -35,7 +35,7 @@ export function CountsPage() {
     }
   }
   return (
-    <Page title="Stock counts" intro="Schedule a count, count the shelves, and the gap to the books is shown as variance by item and cause. Corrections post once a manager approves.">
+    <Page title="Stock counts" intro="Pick a day, count what is on the shelves, and the app shows what is missing or extra. A manager approves any correction.">
       {can(s, 'inventory.count', outletId) && (
         <form className="card row" onSubmit={schedule}>
           <label className="field" style={{ margin: 0 }}>

@@ -17,7 +17,7 @@ export function GrnsPage() {
   if (!outletId) return null;
   if (rec.slug) {
     return (
-      <Page eyebrow="Accounts" title="Goods received note" actions={<BackButton onClick={() => (rec.close(), list.reload())} label="All notes" />}>
+      <Page eyebrow="Bills to pay" title="Delivery receipt" actions={<BackButton onClick={() => (rec.close(), list.reload())} label="All notes" />}>
         <GrnDetail id={rec.slug} />
       </Page>
     );
@@ -27,8 +27,8 @@ export function GrnsPage() {
   }
   return (
     <Page
-      title="Accounts: goods received notes"
-      intro="Notes reach accounts once the watchman and staff have both signed. A note held for a rate rise cannot be paid until a manager releases it."
+      title="Bills to pay"
+      intro="Each delivery appears here once the gate and the kitchen have both checked it. If a price went up, a manager must approve it before you can pay."
       actions={
         <>
           <input type="date" aria-label="From" value={range.from} onChange={(e) => setRange({ ...range, from: e.target.value })} />

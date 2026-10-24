@@ -25,10 +25,35 @@ export const deviceId = (() => {
   return id;
 })();
 
+// Answers to GET requests, so a screen opens instantly with what it showed last and then checks
+// quietly for changes. Any write marks everything stale (it is still shown, then refreshed), so a
+// screen only re-renders when its data actually differs. Kept for the browser tab, never across sign-ins.
+const CACHE_KEY = 'fnb.cache';
+const FRESH_MS = 5 * 60_000;
+const cache = new Map<string, { json: string; data: unknown; at: number; epoch: number }>();
+let epoch = 0;
+try {
+  const saved = JSON.parse(sessionStorage.getItem(CACHE_KEY) ?? '[]') as [string, string][];
+  for (const [k, json] of saved) cache.set(k, { json, data: JSON.parse(json), at: 0, epoch }); // at 0: shown at once, always rechecked
+} catch {}
+let saveTimer: ReturnType<typeof setTimeout> | undefined;
+function persistCache() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify([...cache].map(([k, v]) => [k, v.json])));
+    } catch {} // storage full or blocked: the in-memory cache still works
+  }, 500);
+}
+
 let session = read<Session>(KEY);
 const listeners = new Set<() => void>();
 export function setSession(s: Session | null) {
   session = s;
+  cache.clear(); // another person (or no one) is signed in: nothing cached may carry over
+  try {
+    sessionStorage.removeItem(CACHE_KEY);
+  } catch {}
   if (s) localStorage.setItem(KEY, JSON.stringify(s));
   else localStorage.removeItem(KEY);
   listeners.forEach((l) => l());
@@ -66,20 +91,35 @@ export async function api<T = any>(path: string, opts: { method?: string; body?:
     body: opts.body ? JSON.stringify(opts.body) : undefined,
   });
   const data = res.status === 204 ? null : await res.json().catch(() => null);
+  if (res.ok && (opts.method ?? (opts.body ? 'POST' : 'GET')) !== 'GET') epoch++;
   if (res.status === 401 && session && !path.startsWith('/auth/')) setSession(null);
   if (!res.ok) throw new ApiError(res.status, data?.message ?? `Request failed (${res.status})`);
   return data as T;
 }
 
+async function fetchCached<T>(path: string): Promise<T> {
+  const fresh = await api<T>(path);
+  const json = JSON.stringify(fresh);
+  const hit = cache.get(path);
+  if (hit && hit.json === json) {
+    hit.at = Date.now();
+    hit.epoch = epoch;
+    return hit.data as T; // unchanged: hand back the same object so nothing re-renders
+  }
+  cache.set(path, { json, data: fresh, at: Date.now(), epoch });
+  persistCache();
+  return fresh;
+}
+
 export function useApi<T = any>(path: string | null) {
-  const [data, setData] = useState<T | null>(null);
+  const [data, setData] = useState<T | null>(() => (path ? ((cache.get(path)?.data as T) ?? null) : null));
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const reload = useCallback(async () => {
     if (!path) return;
     setLoading(true);
     try {
-      setData(await api<T>(path));
+      setData(await fetchCached<T>(path));
       setError(null);
     } catch (e) {
       setError((e as Error).message);
@@ -88,7 +128,11 @@ export function useApi<T = any>(path: string | null) {
     }
   }, [path]);
   useEffect(() => {
+    const hit = path ? cache.get(path) : undefined;
+    setData((hit?.data as T) ?? null); // the path changed: show its cached answer, or nothing while it loads
+    if (hit && hit.epoch === epoch && Date.now() - hit.at < FRESH_MS) return; // fresh and nothing was written since
     reload();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reload]);
   return { data, error, loading, reload };
 }

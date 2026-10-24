@@ -53,7 +53,7 @@ export function ReportsPage() {
       </div>
     ));
   return (
-    <Page title="Reports" intro="Monthly menu engineering, bar pour cost, day-close totals, stock variance and the liquor register, with CSV export.">
+    <Page title="Reports" intro="Which dishes make money, how much the bar spends on liquor, each day's totals, what stock went missing and the liquor log. Every table can be downloaded.">
       <ErrorNote error={error} />
       <section className="card">
         <div className="row between">

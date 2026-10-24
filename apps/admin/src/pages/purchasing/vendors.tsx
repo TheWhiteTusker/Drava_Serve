@@ -31,8 +31,8 @@ export function VendorsPage() {
       {tab === 'vendors' || rec.slug ? (
         <CrudPage
           singular="vendor"
-          title="Vendors"
-          intro="Who supplies what. Each vendor's items set the purchase unit and pack size the nightly indent rounds up to."
+          title="Suppliers and prices"
+          intro="Who sells you what, and at what price. The pack size you set here is how the daily order list rounds up."
           path="/vendors"
           canManage={can(s, 'vendors.manage')}
           columns={[
@@ -62,7 +62,7 @@ export function VendorsPage() {
           ]}
           subPages={{
             items: (r: any) => (
-              <Page eyebrow="Vendors" title={`What ${r.name} supplies`} actions={<BackButton onClick={rec.close} label="All vendors" />}>
+              <Page eyebrow="Suppliers" title={`What ${r.name} supplies`} actions={<BackButton onClick={rec.close} label="All suppliers" />}>
                 <VendorItems vendor={r} onDone={rec.close} />
               </Page>
             ),

@@ -19,7 +19,7 @@ export function MarginTargetsPage() {
       .catch((e) => setError(e.message));
   const rows = [{ id: null, name: 'Whole outlet (default)' }, ...(cats.data ?? []).filter((c) => c.kind === 'course' || c.kind === 'liquor_type' || c.kind === 'drink_type')];
   return (
-    <Page title="Margin targets" intro="The most specific target wins: a dish's own target, then its course or type, then the outlet. Dishes that fall under target after a price rise are flagged with a suggested price for a manager to approve.">
+    <Page title="Profit targets" intro="The most specific target wins: a dish's own target, then its course or type, then the outlet. Dishes that fall under target after a price rise are flagged with a suggested price for a manager to approve.">
       <ErrorNote error={error ?? targets.error} />
       <div className="table-wrap">
         <table>

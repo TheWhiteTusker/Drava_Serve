@@ -21,7 +21,7 @@ export function IndentsPage() {
     try {
       const r = await api('/indents/build', { body: { outletId, forDate: date } });
       toast(`${r.indents.length} vendor order${r.indents.length === 1 ? '' : 's'} built`);
-      setMsg(r.unassigned.length ? `No vendor is set for: ${r.unassigned.join(', ')}. Add them under Vendors and rates.` : null);
+      setMsg(r.unassigned.length ? `No vendor is set for: ${r.unassigned.join(', ')}. Add them under Suppliers and prices.` : null);
       list.reload();
     } catch (e) {
       setError((e as Error).message);
@@ -36,8 +36,8 @@ export function IndentsPage() {
   }
   return (
     <Page
-      title="Nightly indent"
-      intro="Built every night at the cut-off: par level − stock on hand − already on order, rounded up to each vendor's pack size. Approve, then share the PDF with the vendor."
+      title="Order from vendors"
+      intro="Every night the app works out what to buy: what you should keep, minus what you have, minus what is already ordered. Check the list, approve it, then send it to the supplier."
       actions={
         <>
           <input type="date" aria-label="Delivery date" value={date} onChange={(e) => setDate(e.target.value)} />

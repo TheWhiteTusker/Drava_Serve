@@ -29,8 +29,8 @@ export function StockItemsPage() {
         }
         singular="stock item"
         key={dept}
-        title={dept === 'food' ? 'Food stock items' : 'Beverage stock items'}
-        intro="Stock is held in a base unit (grams, millilitres or pieces). Purchase units convert what vendors sell into base units. For liquor, each bottle size of a label is one item, held in ml."
+        title={dept === 'food' ? 'Food ingredients' : 'Drinks and bottles'}
+        intro="Everything you buy and keep. Stock is counted in grams, millilitres or pieces; add the pack you buy (a kg bag, a case of 12) so orders convert correctly. Each bottle size of a liquor label is its own item."
         path="/stock-items"
         query={`?department=${dept}`}
         canManage={can(s, 'catalog.manage')}

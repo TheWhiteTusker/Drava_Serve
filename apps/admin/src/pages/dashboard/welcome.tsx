@@ -24,15 +24,16 @@ export function Welcome({ outletId }: { outletId: string | null }) {
   const counts = useApi<any[]>(show && outletId ? `/inventory/counts?outletId=${outletId}` : null);
   const targets = useApi<any[]>(show && outletId ? `/margin-targets?outletId=${outletId}` : null);
   const steps: [string, boolean, string][] = [
-    ['Add your outlets, with FSSAI and licence numbers', !!outlets.data?.length, '/outlets'],
-    ['Add your team and give them roles and PINs', (users.data?.length ?? 0) > 1, '/users'],
-    ['Add stock items with par levels', !!items.data?.some((i) => i.levels.length), '/stock-items'],
-    ['Add menu items and their recipes', !!costing.data?.some((c) => Number(c.portionCost) > 0), '/costing'],
-    ['Add vendors and what they supply', !!vendors.data?.length, '/vendors'],
-    ['Count your opening stock', !!counts.data?.some((c) => c.status === 'approved'), '/counts'],
-    ['Set your margin targets', !!targets.data?.length, '/margin-targets'],
+    ['Add your restaurant or bar, with its FSSAI and licence numbers', !!outlets.data?.length, '/outlets'],
+    ['Add your staff and give each a job and a PIN', (users.data?.length ?? 0) > 1, '/users'],
+    ['List what you buy and how much you like to keep', !!items.data?.some((i) => i.levels.length), '/stock-items'],
+    ['Add your dishes and drinks and what goes in each', !!costing.data?.some((c) => Number(c.portionCost) > 0), '/costing'],
+    ['Add your suppliers and what they sell you', !!vendors.data?.length, '/vendors'],
+    ['Count what is on the shelves today', !!counts.data?.some((c) => c.status === 'approved'), '/counts'],
+    ['Set how much profit you want on each dish', !!targets.data?.length, '/margin-targets'],
   ];
   const done = steps.filter((x) => x[1]).length;
+  const next = steps.find((x) => !x[1]);
   const loading = [outlets, users, items, vendors].some((x) => !x.data);
   const quick = (
     <div className="card">
@@ -42,10 +43,10 @@ export function Welcome({ outletId }: { outletId: string | null }) {
           <Receipt className="icon" aria-hidden /> Open the POS
         </a>
         <Link to="/stock">
-          <Trash2 className="icon" aria-hidden /> Record wastage
+          <Trash2 className="icon" aria-hidden /> Record wasted stock
         </Link>
         <Link to="/indents">
-          <ShoppingBasket className="icon" aria-hidden /> Tonight's indent
+          <ShoppingBasket className="icon" aria-hidden /> Tonight's order list
         </Link>
         <Link to="/approvals">
           <ClipboardCheck className="icon" aria-hidden /> Approvals
@@ -64,11 +65,16 @@ export function Welcome({ outletId }: { outletId: string | null }) {
           </button>
         </div>
         <p className="muted" style={{ margin: 0 }}>
-          {done} of {steps.length} done. Each step takes a few minutes.
+          {done} of {steps.length} done. Each step takes a few minutes; do them in order.
         </p>
         <div className="progress" aria-hidden>
           <span style={{ width: `${(done / steps.length) * 100}%` }} />
         </div>
+        {next && (
+          <Link className="link" to={next[2]} style={{ margin: '0.75rem 0' }}>
+            Next: {next[0]}
+          </Link>
+        )}
         <ul className="checklist">
           {steps.map(([label, ok, to]) => (
             <li key={label} className={ok ? 'done' : ''}>

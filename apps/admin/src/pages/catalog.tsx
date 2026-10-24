@@ -80,7 +80,7 @@ export function TaxClassesPage() {
   return (
     <CrudPage
       singular="tax class"
-      title="Tax classes"
+      title="Taxes"
       intro={
         <>
           Each menu item carries one tax class; food and liquor are totalled separately on every bill. Rates here are
