@@ -202,16 +202,16 @@ button.ghost:active:not(:disabled) {
   transform: scale(0.975);
 }
 button.gold {
-  background: linear-gradient(180deg, #b8801f 0%, var(--brand-accent) 100%);
+  background: linear-gradient(180deg, #4a8a14 0%, var(--brand-accent) 100%);
   border: 1px solid var(--brand-accent-strong);
   color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 2px 8px rgb(154 107 18 / 0.3);
+  box-shadow: 0 2px 8px rgb(61 122 14 / 0.3);
 }
 button.gold:hover:not(:disabled) {
-  background: linear-gradient(180deg, #c28a26 0%, #7a5410 100%);
+  background: linear-gradient(180deg, #55961a 0%, #2f6a0a 100%);
   border-color: var(--brand-accent-strong);
-  box-shadow: 0 4px 14px rgb(154 107 18 / 0.45);
+  box-shadow: 0 4px 14px rgb(61 122 14 / 0.45);
 }
 button.link {
   background: none;
@@ -311,9 +311,9 @@ button.password-toggle:focus-visible {
 
 
 /* The open list of a select. Browsers that support customizable selects draw the list from our CSS,
-   so the highlight is brass. Others keep their native list, tinted as far as they allow. */
+   so the highlight is green. Others keep their native list, tinted as far as they allow. */
 select {
-  accent-color: #9a6b12;
+  accent-color: #3d7a0e;
 }
 select option {
   background-color: var(--brand-surface);
@@ -321,7 +321,7 @@ select option {
 }
 select option:checked,
 select option:hover {
-  background: linear-gradient(#9a6b12, #9a6b12);
+  background: linear-gradient(#3d7a0e, #3d7a0e);
   color: #ffffff;
 }
 @supports (appearance: base-select) {
@@ -344,7 +344,7 @@ select option:hover {
   select option:hover,
   select option:focus-visible,
   select option:checked {
-    background: #9a6b12;
+    background: #3d7a0e;
     color: #ffffff;
   }
   select option::checkmark {
@@ -352,9 +352,9 @@ select option:hover {
   }
 }
 
-/* Selected text: brass instead of the browser's blue. */
+/* Selected text: green instead of the browser's blue. */
 ::selection {
-  background: #9a6b12;
+  background: #3d7a0e;
   color: #ffffff;
   text-shadow: none;
 }

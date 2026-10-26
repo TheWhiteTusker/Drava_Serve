@@ -28,6 +28,13 @@ class RedisIoAdapter extends IoAdapter {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
+  app.getHttpAdapter().getInstance().disable('x-powered-by');
+  app.use((_req: unknown, res: { setHeader: (k: string, v: string) => void }, next: () => void) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    next();
+  });
+  if (process.env.NODE_ENV === 'production' && !process.env.CORS_ORIGIN) console.warn('CORS_ORIGIN is not set: any website may call this API. Set it to the app origins, comma separated.');
   app.enableCors({ origin: process.env.CORS_ORIGIN?.split(',') ?? true });
   app.enableShutdownHooks();
   if (process.env.REDIS_URL) {

@@ -143,7 +143,8 @@ export class ErrorFilter implements ExceptionFilter {
     };
     const hit = map[pgErr?.code];
     if (hit) {
-      return res.status(hit[0]).json({ statusCode: hit[0], message: hit[1], detail: pgErr.detail ?? pgErr.constraint });
+      console.warn(`database refused a write: ${pgErr.code} ${pgErr.detail ?? pgErr.constraint ?? ''}`); // details stay in the server log
+      return res.status(hit[0]).json({ statusCode: hit[0], message: hit[1] });
     }
     console.error(err);
     res.status(500).json({ statusCode: 500, message: 'Something went wrong' });

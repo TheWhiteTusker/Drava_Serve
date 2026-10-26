@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, ForbiddenException, Get, Post, Query, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Body, CanActivate, Controller, ExecutionContext, ForbiddenException, Get, HttpException, Injectable, Post, Query, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { and, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm';
 import { zChangePassword, zForgotPassword, zLogin, zPinSwitch, zResetPassword } from '@fnb/shared';
@@ -29,6 +29,29 @@ async function checkSecret(db: TenantDb, user: typeof t.appUser.$inferSelect, se
   if (!ok) throw new UnauthorizedException(WRONG);
 }
 
+// Slows guessing from one address, on top of the per-user lockout: 20 sign-in style requests a minute.
+// ponytail: counted in this process's memory, so each server instance keeps its own count. Move to
+// Redis (already optional here) if the API runs on many instances and guessing becomes a concern.
+const hits = new Map<string, { n: number; resetAt: number }>();
+@Injectable()
+class AuthRateLimit implements CanActivate {
+  canActivate(c: ExecutionContext) {
+    const req = c.switchToHttp().getRequest();
+    if (req.method !== 'POST') return true;
+    const ip = String(req.headers['x-forwarded-for'] ?? req.ip ?? '').split(',')[0].trim();
+    const now = Date.now();
+    const h = hits.get(ip);
+    if (!h || h.resetAt < now) {
+      if (hits.size > 5000) for (const [k, v] of hits) if (v.resetAt < now) hits.delete(k);
+      hits.set(ip, { n: 1, resetAt: now + 60_000 });
+      return true;
+    }
+    if (++h.n > 20) throw new HttpException('Too many attempts. Wait a minute and try again', 429);
+    return true;
+  }
+}
+
+@UseGuards(AuthRateLimit)
 @Controller('auth')
 export class AuthController {
   constructor(private jwt: JwtService) {}

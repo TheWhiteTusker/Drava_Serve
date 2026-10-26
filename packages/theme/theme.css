@@ -2,7 +2,7 @@
  * White Tusker brand theme — THE ONE FILE TO EDIT.
  *
  * Until the real logo and colours arrive, this is a "warm luxury" placeholder: ivory surfaces,
- * espresso ink, a brass-gold accent, serif headings (Playfair Display) and a clean sans for
+ * espresso ink, a lime-green accent, serif headings (Playfair Display) and a clean sans for
  * everything else (Inter). To drop in the brand:
  *   1. Replace logo.svg (light backgrounds) and logo-dark.svg (dark backgrounds) in this folder,
  *      or point --brand-logo at other files.
@@ -29,10 +29,10 @@
   --brand-primary: #09090b; /* true black */
   --brand-primary-hover: #202026;
   --brand-primary-contrast: #ffffff;
-  --brand-accent: #9a6b12; /* brass gold, from the backdrop */
-  --brand-accent-strong: #6b4809; /* dark brass: 4.5:1 for text and links on see-through glass */
-  --brand-accent-soft: rgb(154 107 18 / 0.1);
-  --brand-accent-glow: rgb(154 107 18 / 0.25);
+  --brand-accent: #3d7a0e; /* deep green, from the backdrop */
+  --brand-accent-strong: #2a5508; /* dark green: 4.5:1 for text and links on see-through glass */
+  --brand-accent-soft: rgb(61 122 14 / 0.1);
+  --brand-accent-glow: rgb(61 122 14 / 0.25);
 
   /* Surfaces and text - Full clean white & neutral slates */
   --brand-bg: #ffffff;
@@ -47,7 +47,7 @@
   /* Page backdrop and glass. Cards are thin frosted panes with no border, lifted by a soft
    * shadow; buttons are glass without the blur (dozens of blurred POS tiles would be slow).
    * Softened platinum backdrop and milky frosted glass diffuse all harsh glare and bloom,
-   * keeping muted text and brass accents crisp at >4.5:1 WCAG AAA. */
+   * keeping muted text and green accents crisp at >4.5:1 WCAG AAA. */
   --brand-backdrop: url("./backdrop-light.webp");
   --glass-fill: rgb(255 255 255 / 0.25);
   --glass-fill-flat: rgb(255 255 255 / 0.72);
@@ -60,7 +60,7 @@
   --glass-shadow: 0 12px 36px -10px rgb(0 0 0 / 0.14), 0 2px 8px rgb(0 0 0 / 0.05);
   /* Never set the rims to none: they're used in shadow lists, where none is invalid. */
   --glass-rim: inset 0 1px 0 rgb(255 255 255 / 0.75); /* light catching the top edge, not an outline */
-  --glass-rim-tinted: inset 1px 1px 0 rgb(255 255 255 / 0.8), inset -1px -1px 0 rgb(154 107 18 / 0.12);
+  --glass-rim-tinted: inset 1px 1px 0 rgb(255 255 255 / 0.8), inset -1px -1px 0 rgb(61 122 14 / 0.12);
 
   /* Status (text colour, and soft backgrounds / borders for badges) */
   --brand-success: #1e7047;
@@ -96,7 +96,7 @@
   --brand-shadow-glow: 0 0 0 1px var(--brand-accent), 0 4px 16px var(--brand-accent-soft);
 
   /* Charts */
-  --chart-series: #d9a441;
+  --chart-series: #5aa51c;
   --chart-seq-low: #fce8eb;
   --chart-seq-high: #7a0c1f;
   --chart-grid: #e8e8ed;
@@ -111,13 +111,13 @@
   :root:not([data-theme="light"]) {
     color-scheme: dark;
     --brand-logo: url("./logo-dark.svg");
-    --brand-primary: #d9a441;
-    --brand-primary-hover: #e8b957;
-    --brand-primary-contrast: #1a1205;
-    --brand-accent: #d9a441;
-    --brand-accent-strong: #f0c46a;
-    --brand-accent-soft: rgb(217 164 65 / 0.18);
-    --brand-accent-glow: rgb(217 164 65 / 0.35);
+    --brand-primary: #8be33a;
+    --brand-primary-hover: #9cec4e;
+    --brand-primary-contrast: #0c1a03;
+    --brand-accent: #8be33a;
+    --brand-accent-strong: #b6f27a;
+    --brand-accent-soft: rgb(139 227 58 / 0.18);
+    --brand-accent-glow: rgb(139 227 58 / 0.35);
 
     /* Surfaces and text - Full true black & cool graphite */
     --brand-bg: #000000;
@@ -127,15 +127,15 @@
     --brand-border: #232328;
     --brand-border-strong: #383842;
     --brand-text: #ffffff;
-    --brand-text-muted: #c4b9a4;
+    --brand-text-muted: #b8c4ad;
     --brand-backdrop: url("./backdrop-dark-2560.webp");
-    --glass-fill: rgb(10 8 4 / 0.58);
-    --glass-fill-hover: rgb(10 8 4 / 0.7);
-    --glass-border: rgb(217 164 65 / 0.22);
-    --glass-veil: rgb(8 6 3 / 0.78);
+    --glass-fill: rgb(5 9 3 / 0.58);
+    --glass-fill-hover: rgb(5 9 3 / 0.7);
+    --glass-border: rgb(139 227 58 / 0.22);
+    --glass-veil: rgb(4 7 2 / 0.78);
   --text-halo: 0 1px 3px rgb(0 0 0 / 0.95), 0 0 16px rgb(0 0 0 / 0.85);
-  --head-scrim: rgb(8 6 3 / 0.55);
-    --glass-fill-flat: rgb(10 8 4 / 0.72);
+  --head-scrim: rgb(4 7 2 / 0.55);
+    --glass-fill-flat: rgb(5 9 3 / 0.72);
     --glass-shadow: 0 12px 40px -12px rgb(0 0 0 / 0.7);
     --glass-blur: blur(24px) saturate(140%);
     --glass-rim: 0 0 #0000; /* no rim in dark mode; "none" is invalid inside shadow lists */
@@ -150,15 +150,15 @@
     --brand-danger: #f1907d;
     --brand-danger-soft: #331515;
     --brand-danger-border: #4f1e1e;
-    --brand-info: #f0c46a;
+    --brand-info: #b6f27a;
     --brand-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.6);
     --brand-shadow-sm: 0 2px 4px rgb(0 0 0 / 0.6);
     --brand-shadow: 0 3px 8px -1px rgb(0 0 0 / 0.7), 0 1px 3px rgb(0 0 0 / 0.5);
     --brand-shadow-md: 0 6px 18px -2px rgb(0 0 0 / 0.8);
     --brand-shadow-lg: 0 18px 46px -8px rgb(0 0 0 / 0.9);
-    --chart-series: #d9a441;
-    --chart-seq-low: #2a1d08;
-    --chart-seq-high: #ffd98a;
+    --chart-series: #8be33a;
+    --chart-seq-low: #14240a;
+    --chart-seq-high: #c8f79c;
     --chart-grid: #1c1c22;
     --chart-axis: #353540;
     --mark-veg: #3dbb5f;
@@ -169,13 +169,13 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
   --brand-logo: url("./logo-dark.svg");
-  --brand-primary: #d9a441;
-  --brand-primary-hover: #e8b957;
-  --brand-primary-contrast: #1a1205;
-  --brand-accent: #d9a441;
-  --brand-accent-strong: #f0c46a;
-  --brand-accent-soft: rgb(217 164 65 / 0.18);
-  --brand-accent-glow: rgb(217 164 65 / 0.35);
+  --brand-primary: #8be33a;
+  --brand-primary-hover: #9cec4e;
+  --brand-primary-contrast: #0c1a03;
+  --brand-accent: #8be33a;
+  --brand-accent-strong: #b6f27a;
+  --brand-accent-soft: rgb(139 227 58 / 0.18);
+  --brand-accent-glow: rgb(139 227 58 / 0.35);
 
   /* Surfaces and text - Full true black & cool graphite */
   --brand-bg: #000000;
@@ -185,15 +185,15 @@
   --brand-border: #232328;
   --brand-border-strong: #383842;
   --brand-text: #ffffff;
-  --brand-text-muted: #c4b9a4;
+  --brand-text-muted: #b8c4ad;
   --brand-backdrop: url("./backdrop-dark-2560.webp");
-  --glass-fill: rgb(10 8 4 / 0.58);
-  --glass-fill-hover: rgb(10 8 4 / 0.7);
-  --glass-border: rgb(217 164 65 / 0.22);
-  --glass-veil: rgb(8 6 3 / 0.78);
+  --glass-fill: rgb(5 9 3 / 0.58);
+  --glass-fill-hover: rgb(5 9 3 / 0.7);
+  --glass-border: rgb(139 227 58 / 0.22);
+  --glass-veil: rgb(4 7 2 / 0.78);
   --text-halo: 0 1px 3px rgb(0 0 0 / 0.95), 0 0 16px rgb(0 0 0 / 0.85);
-  --head-scrim: rgb(8 6 3 / 0.55);
-  --glass-fill-flat: rgb(10 8 4 / 0.72);
+  --head-scrim: rgb(4 7 2 / 0.55);
+  --glass-fill-flat: rgb(5 9 3 / 0.72);
   --glass-shadow: 0 12px 40px -12px rgb(0 0 0 / 0.7);
   --glass-blur: blur(24px) saturate(140%);
   --glass-rim: 0 0 #0000; /* no rim in dark mode; "none" is invalid inside shadow lists */
@@ -208,15 +208,15 @@
   --brand-danger: #f1907d;
   --brand-danger-soft: #331515;
   --brand-danger-border: #4f1e1e;
-  --brand-info: #f0c46a;
+  --brand-info: #b6f27a;
   --brand-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.6);
   --brand-shadow-sm: 0 2px 4px rgb(0 0 0 / 0.6);
   --brand-shadow: 0 3px 8px -1px rgb(0 0 0 / 0.7), 0 1px 3px rgb(0 0 0 / 0.5);
   --brand-shadow-md: 0 6px 18px -2px rgb(0 0 0 / 0.8);
   --brand-shadow-lg: 0 18px 46px -8px rgb(0 0 0 / 0.9);
-  --chart-series: #d9a441;
-  --chart-seq-low: #2a1d08;
-  --chart-seq-high: #ffd98a;
+  --chart-series: #8be33a;
+  --chart-seq-low: #14240a;
+  --chart-seq-high: #c8f79c;
   --chart-grid: #1c1c22;
   --chart-axis: #353540;
   --mark-veg: #3dbb5f;
