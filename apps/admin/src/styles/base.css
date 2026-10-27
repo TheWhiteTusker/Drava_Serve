@@ -14,7 +14,7 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
-/* Type scale: serif for page (h1) and card (h2) titles only; everything below is the sans. */
+/* Type scale: bold page (h1) and card (h2) titles; everything below is regular weight. */
 h1,
 h2,
 h3,
@@ -23,10 +23,11 @@ h4 {
   letter-spacing: -0.01em;
 }
 h1 {
-  font: 600 2rem/1.15 var(--brand-font-heading);
+  font: 700 2rem/1.15 var(--brand-font-heading);
+  letter-spacing: -0.02em;
 }
 h2 {
-  font: 600 1.3rem/1.25 var(--brand-font-heading);
+  font: 700 1.3rem/1.25 var(--brand-font-heading);
 }
 h3 {
   font: 600 1rem/1.35 var(--brand-font);
@@ -138,31 +139,20 @@ button {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.6rem 1.15rem;
-  border: 1px solid color-mix(in srgb, var(--brand-primary) 70%, transparent);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--brand-primary) 72%, transparent) 0%,
-    color-mix(in srgb, var(--brand-primary) 86%, transparent) 100%
-  );
+  border: 1px solid transparent;
+  border-radius: var(--brand-radius-full);
+  background: var(--brand-primary);
   color: var(--brand-primary-contrast);
   cursor: pointer;
   font-weight: 600;
   letter-spacing: 0.01em;
   white-space: nowrap;
-  box-shadow: var(--glass-rim-tinted), 0 1px 3px rgb(0 0 0 / 0.12), 0 1px 2px rgb(0 0 0 / 0.06);
   transition-property: background-color, border-color, transform, box-shadow;
   transition-duration: 0.15s;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 button:hover:not(:disabled) {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--brand-primary-hover) 80%, transparent) 0%,
-    color-mix(in srgb, var(--brand-primary) 92%, transparent) 100%
-  );
-  border-color: var(--brand-primary-hover);
-  box-shadow: var(--glass-rim-tinted), 0 3px 8px rgb(0 0 0 / 0.16), 0 1px 3px rgb(0 0 0 / 0.08);
-  transform: translateY(-1px);
+  background: var(--brand-primary-hover);
 }
 button:active:not(:disabled) {
   transform: scale(0.975);
@@ -202,16 +192,14 @@ button.ghost:active:not(:disabled) {
   transform: scale(0.975);
 }
 button.gold {
-  background: linear-gradient(180deg, #4a8a14 0%, var(--brand-accent) 100%);
-  border: 1px solid var(--brand-accent-strong);
-  color: #ffffff;
+  background: var(--brand-highlight);
+  border: 1px solid transparent;
+  color: var(--brand-highlight-contrast);
   font-weight: 700;
-  box-shadow: 0 2px 8px rgb(61 122 14 / 0.3);
+  box-shadow: none;
 }
 button.gold:hover:not(:disabled) {
-  background: linear-gradient(180deg, #55961a 0%, #2f6a0a 100%);
-  border-color: var(--brand-accent-strong);
-  box-shadow: 0 4px 14px rgb(61 122 14 / 0.45);
+  background: var(--brand-highlight-hover);
 }
 button.link {
   background: none;
@@ -231,7 +219,7 @@ button.link:hover:not(:disabled) {
 button.danger {
   background: linear-gradient(180deg, var(--brand-danger) 0%, color-mix(in srgb, var(--brand-danger) 88%, #000) 100%);
   border-color: var(--brand-danger);
-  color: #ffffff;
+  color: var(--brand-bg);
   box-shadow: 0 2px 6px rgb(179 57 36 / 0.25);
 }
 button.danger:hover:not(:disabled) {
@@ -313,7 +301,7 @@ button.password-toggle:focus-visible {
 /* The open list of a select. Browsers that support customizable selects draw the list from our CSS,
    so the highlight is green. Others keep their native list, tinted as far as they allow. */
 select {
-  accent-color: #3d7a0e;
+  accent-color: var(--brand-highlight);
 }
 select option {
   background-color: var(--brand-surface);
@@ -321,8 +309,8 @@ select option {
 }
 select option:checked,
 select option:hover {
-  background: linear-gradient(#3d7a0e, #3d7a0e);
-  color: #ffffff;
+  background: linear-gradient(var(--brand-highlight), var(--brand-highlight));
+  color: var(--brand-highlight-contrast);
 }
 @supports (appearance: base-select) {
   select,
@@ -344,17 +332,17 @@ select option:hover {
   select option:hover,
   select option:focus-visible,
   select option:checked {
-    background: #3d7a0e;
-    color: #ffffff;
+    background: var(--brand-highlight);
+    color: var(--brand-highlight-contrast);
   }
   select option::checkmark {
-    color: #ffffff;
+    color: var(--brand-highlight-contrast);
   }
 }
 
 /* Selected text: green instead of the browser's blue. */
 ::selection {
-  background: #3d7a0e;
-  color: #ffffff;
+  background: var(--brand-highlight);
+  color: var(--brand-highlight-contrast);
   text-shadow: none;
 }

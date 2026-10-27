@@ -1,14 +1,15 @@
 /*
  * White Tusker brand theme — THE ONE FILE TO EDIT.
  *
- * Until the real logo and colours arrive, this is a "warm luxury" placeholder: ivory surfaces,
- * espresso ink, a lime-green accent, serif headings (Playfair Display) and a clean sans for
- * everything else (Inter). To drop in the brand:
- *   1. Replace logo.svg (light backgrounds) and logo-dark.svg (dark backgrounds) in this folder,
+ * Flat near-black: solid charcoal cards with large radii on a plain black page, white bold sans
+ * type, grey secondary text and a lime accent kept for highlights (primary actions, the selected
+ * tab or day, progress, badges). Dark is the default everywhere; light applies only when the
+ * admin picks it (data-theme="light"). To drop in the brand:
+ *   1. Replace logo-dark.svg (dark backgrounds) and logo.svg (light backgrounds) in this folder,
  *      or point --brand-logo at other files.
- *   2. Change the --brand-* values in the light block, then in both dark blocks.
- *   3. Change the font imports below and --brand-font / --brand-font-heading. Fonts are bundled
- *      with the apps (no Google requests), so the offline POS and the guest menu keep them.
+ *   2. Change the --brand-* values in both blocks.
+ *   3. Change the font import below and --brand-font. Fonts are bundled with the apps (no Google
+ *      requests), so the offline POS and the guest menu keep them.
  *   4. If the accent changes, re-validate the --chart-* colours for colour-blind safety.
  * Every app (admin, POS, receiving, guest menu) reads only these tokens.
  *
@@ -17,188 +18,51 @@
  */
 
 @import "@fontsource-variable/inter";
-@import "@fontsource/playfair-display/500.css";
-@import "@fontsource/playfair-display/600.css";
-@import "@fontsource/playfair-display/700.css";
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
   /* Brand */
-  --brand-logo: url("./logo.svg");
-  --brand-primary: #09090b; /* true black */
-  --brand-primary-hover: #202026;
-  --brand-primary-contrast: #ffffff;
-  --brand-accent: #3d7a0e; /* deep green, from the backdrop */
-  --brand-accent-strong: #2a5508; /* dark green: 4.5:1 for text and links on see-through glass */
-  --brand-accent-soft: rgb(61 122 14 / 0.1);
-  --brand-accent-glow: rgb(61 122 14 / 0.25);
-
-  /* Surfaces and text - Full clean white & neutral slates */
-  --brand-bg: #ffffff;
-  --brand-surface: #ffffff;
-  --brand-surface-2: #f4f4f7;
-  --brand-surface-3: #eaeaf0;
-  --brand-border: #e2e2e8;
-  --brand-border-strong: #c8c8d4;
-  --brand-text: #09090b;
-  --brand-text-muted: #4a4a56; /* 4.5:1 on see-through glass over the darkest fold of the backdrop */
-
-  /* Page backdrop and glass. Cards are thin frosted panes with no border, lifted by a soft
-   * shadow; buttons are glass without the blur (dozens of blurred POS tiles would be slow).
-   * Softened platinum backdrop and milky frosted glass diffuse all harsh glare and bloom,
-   * keeping muted text and green accents crisp at >4.5:1 WCAG AAA. */
-  --brand-backdrop: url("./backdrop-light.webp");
-  --glass-fill: rgb(255 255 255 / 0.25);
-  --glass-fill-flat: rgb(255 255 255 / 0.72);
-  --glass-fill-hover: rgb(255 255 255 / 0.85);
-  --glass-border: transparent;
-  --glass-veil: rgb(255 255 255 / 0.25); /* sidebar and topbar */
-  --text-halo: none; /* text that sits straight on the backdrop */
-  --head-scrim: transparent; /* pane behind page titles */
-  --glass-blur: blur(12px) saturate(135%);
-  --glass-shadow: 0 12px 36px -10px rgb(0 0 0 / 0.14), 0 2px 8px rgb(0 0 0 / 0.05);
-  /* Never set the rims to none: they're used in shadow lists, where none is invalid. */
-  --glass-rim: inset 0 1px 0 rgb(255 255 255 / 0.75); /* light catching the top edge, not an outline */
-  --glass-rim-tinted: inset 1px 1px 0 rgb(255 255 255 / 0.8), inset -1px -1px 0 rgb(61 122 14 / 0.12);
-
-  /* Status (text colour, and soft backgrounds / borders for badges) */
-  --brand-success: #1e7047;
-  --brand-success-soft: #e3f3ea;
-  --brand-success-border: #bce5d0;
-  --brand-warning: #b56e08;
-  --brand-warning-soft: #fdf5e7;
-  --brand-warning-border: #f8dfb1;
-  --brand-danger: #b33924;
-  --brand-danger-soft: #fce8e4;
-  --brand-danger-border: #f7bbb0;
-  --brand-info: #b0132e;
-  --brand-info-soft: #fde8ec;
-
-  /* Shape, type and depth */
-  --brand-radius-xs: 4px;
-  --brand-radius-small: 8px;
-  --brand-radius: 12px;
-  --brand-radius-large: 18px;
-  --brand-radius-xl: 24px;
-  --brand-radius-full: 9999px;
-  --brand-font:
-    "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --brand-font-heading: "Playfair Display", Georgia, "Times New Roman", serif;
-  --brand-font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
-  
-  /* Layered diffused shadows (neutral, no brown) */
-  --brand-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.04);
-  --brand-shadow-sm: 0 2px 4px rgb(0 0 0 / 0.05), 0 1px 2px rgb(0 0 0 / 0.03);
-  --brand-shadow: 0 3px 8px -1px rgb(0 0 0 / 0.08), 0 1px 3px rgb(0 0 0 / 0.04);
-  --brand-shadow-md: 0 6px 16px -2px rgb(0 0 0 / 0.1), 0 2px 6px -1px rgb(0 0 0 / 0.05);
-  --brand-shadow-lg: 0 16px 36px -6px rgb(0 0 0 / 0.14), 0 6px 14px -3px rgb(0 0 0 / 0.06);
-  --brand-shadow-glow: 0 0 0 1px var(--brand-accent), 0 4px 16px var(--brand-accent-soft);
-
-  /* Charts */
-  --chart-series: #5aa51c;
-  --chart-seq-low: #fce8eb;
-  --chart-seq-high: #7a0c1f;
-  --chart-grid: #e8e8ed;
-  --chart-axis: #bcbcc7;
-
-  /* Compliance marks (not brand) */
-  --mark-veg: #1a8a3a;
-  --mark-nonveg: #7b3f12;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --brand-logo: url("./logo-dark.svg");
-    --brand-primary: #8be33a;
-    --brand-primary-hover: #9cec4e;
-    --brand-primary-contrast: #0c1a03;
-    --brand-accent: #8be33a;
-    --brand-accent-strong: #b6f27a;
-    --brand-accent-soft: rgb(139 227 58 / 0.18);
-    --brand-accent-glow: rgb(139 227 58 / 0.35);
-
-    /* Surfaces and text - Full true black & cool graphite */
-    --brand-bg: #000000;
-    --brand-surface: #0a0a0c;
-    --brand-surface-2: #141417;
-    --brand-surface-3: #1f1f24;
-    --brand-border: #232328;
-    --brand-border-strong: #383842;
-    --brand-text: #ffffff;
-    --brand-text-muted: #b8c4ad;
-    --brand-backdrop: url("./backdrop-dark-2560.webp");
-    --glass-fill: rgb(5 9 3 / 0.58);
-    --glass-fill-hover: rgb(5 9 3 / 0.7);
-    --glass-border: rgb(139 227 58 / 0.22);
-    --glass-veil: rgb(4 7 2 / 0.78);
-  --text-halo: 0 1px 3px rgb(0 0 0 / 0.95), 0 0 16px rgb(0 0 0 / 0.85);
-  --head-scrim: rgb(4 7 2 / 0.55);
-    --glass-fill-flat: rgb(5 9 3 / 0.72);
-    --glass-shadow: 0 12px 40px -12px rgb(0 0 0 / 0.7);
-    --glass-blur: blur(24px) saturate(140%);
-    --glass-rim: 0 0 #0000; /* no rim in dark mode; "none" is invalid inside shadow lists */
-    --glass-rim-tinted: 0 0 #0000;
-
-    --brand-success: #7fcf9c;
-    --brand-success-soft: #193223;
-    --brand-success-border: #264a35;
-    --brand-warning: #e9ba6c;
-    --brand-warning-soft: rgb(233 186 108 / 0.15);
-    --brand-warning-border: rgb(233 186 108 / 0.35);
-    --brand-danger: #f1907d;
-    --brand-danger-soft: #331515;
-    --brand-danger-border: #4f1e1e;
-    --brand-info: #b6f27a;
-    --brand-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.6);
-    --brand-shadow-sm: 0 2px 4px rgb(0 0 0 / 0.6);
-    --brand-shadow: 0 3px 8px -1px rgb(0 0 0 / 0.7), 0 1px 3px rgb(0 0 0 / 0.5);
-    --brand-shadow-md: 0 6px 18px -2px rgb(0 0 0 / 0.8);
-    --brand-shadow-lg: 0 18px 46px -8px rgb(0 0 0 / 0.9);
-    --chart-series: #8be33a;
-    --chart-seq-low: #14240a;
-    --chart-seq-high: #c8f79c;
-    --chart-grid: #1c1c22;
-    --chart-axis: #353540;
-    --mark-veg: #3dbb5f;
-    --mark-nonveg: #c47a3d;
-  }
-}
-
-:root[data-theme="dark"] {
-  color-scheme: dark;
   --brand-logo: url("./logo-dark.svg");
-  --brand-primary: #8be33a;
-  --brand-primary-hover: #9cec4e;
-  --brand-primary-contrast: #0c1a03;
-  --brand-accent: #8be33a;
-  --brand-accent-strong: #b6f27a;
-  --brand-accent-soft: rgb(139 227 58 / 0.18);
-  --brand-accent-glow: rgb(139 227 58 / 0.35);
+  --brand-primary: #c6f432; /* lime */
+  --brand-primary-hover: #d4f75c;
+  --brand-primary-contrast: #0b0b0b;
+  --brand-accent: #c6f432;
+  --brand-accent-strong: #d4f75c; /* text and links on charcoal */
+  --brand-accent-soft: rgb(198 244 50 / 0.14);
+  --brand-accent-glow: rgb(198 244 50 / 0.3);
+  /* Lime fill with dark text in both themes: highlighted CTAs, the active nav item, selection. */
+  --brand-highlight: #c6f432;
+  --brand-highlight-hover: #d4f75c;
+  --brand-highlight-contrast: #0b0b0b;
 
-  /* Surfaces and text - Full true black & cool graphite */
-  --brand-bg: #000000;
-  --brand-surface: #0a0a0c;
-  --brand-surface-2: #141417;
-  --brand-surface-3: #1f1f24;
-  --brand-border: #232328;
-  --brand-border-strong: #383842;
+  /* Surfaces and text */
+  --brand-bg: #0b0b0b;
+  --brand-surface: #181818; /* cards */
+  --brand-surface-2: #222222; /* pills and tiles inside cards */
+  --brand-surface-3: #2c2c2c;
+  --brand-border: #262626;
+  --brand-border-strong: #3a3a3a;
   --brand-text: #ffffff;
-  --brand-text-muted: #b8c4ad;
-  --brand-backdrop: url("./backdrop-dark-2560.webp");
-  --glass-fill: rgb(5 9 3 / 0.58);
-  --glass-fill-hover: rgb(5 9 3 / 0.7);
-  --glass-border: rgb(139 227 58 / 0.22);
-  --glass-veil: rgb(4 7 2 / 0.78);
-  --text-halo: 0 1px 3px rgb(0 0 0 / 0.95), 0 0 16px rgb(0 0 0 / 0.85);
-  --head-scrim: rgb(4 7 2 / 0.55);
-  --glass-fill-flat: rgb(5 9 3 / 0.72);
-  --glass-shadow: 0 12px 40px -12px rgb(0 0 0 / 0.7);
-  --glass-blur: blur(24px) saturate(140%);
-  --glass-rim: 0 0 #0000; /* no rim in dark mode; "none" is invalid inside shadow lists */
+  --brand-text-muted: #9b9b9b; /* 6:1 on the cards */
+
+  /* No backdrop image and no glass: the glass tokens resolve to flat surfaces so every app keeps
+   * working without edits. Never set the rims or shadow to none: they're used in shadow lists,
+   * where none is invalid. */
+  --brand-backdrop: none;
+  --glass-fill: var(--brand-surface);
+  --glass-fill-flat: #232323;
+  --glass-fill-hover: #2d2d2d;
+  --glass-border: #232323; /* hairline around cards */
+  --glass-veil: #121212; /* sidebar, topbar, bottom bar */
+  --text-halo: none;
+  --head-scrim: transparent;
+  --glass-blur: none;
+  --glass-shadow: 0 0 #0000;
+  --glass-rim: 0 0 #0000;
   --glass-rim-tinted: 0 0 #0000;
 
+  /* Status (text colour, and soft backgrounds / borders for badges) */
   --brand-success: #7fcf9c;
   --brand-success-soft: #193223;
   --brand-success-border: #264a35;
@@ -208,19 +72,87 @@
   --brand-danger: #f1907d;
   --brand-danger-soft: #331515;
   --brand-danger-border: #4f1e1e;
-  --brand-info: #b6f27a;
-  --brand-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.6);
-  --brand-shadow-sm: 0 2px 4px rgb(0 0 0 / 0.6);
-  --brand-shadow: 0 3px 8px -1px rgb(0 0 0 / 0.7), 0 1px 3px rgb(0 0 0 / 0.5);
-  --brand-shadow-md: 0 6px 18px -2px rgb(0 0 0 / 0.8);
-  --brand-shadow-lg: 0 18px 46px -8px rgb(0 0 0 / 0.9);
-  --chart-series: #8be33a;
-  --chart-seq-low: #14240a;
-  --chart-seq-high: #c8f79c;
-  --chart-grid: #1c1c22;
-  --chart-axis: #353540;
+  --brand-info: #c6f432;
+  --brand-info-soft: rgb(198 244 50 / 0.14);
+
+  /* Shape, type and depth */
+  --brand-radius-xs: 6px;
+  --brand-radius-small: 10px;
+  --brand-radius: 16px;
+  --brand-radius-large: 22px;
+  --brand-radius-xl: 28px;
+  --brand-radius-full: 9999px;
+  --brand-font:
+    "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --brand-font-heading: var(--brand-font);
+  --brand-font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --brand-shadow-xs: 0 0 #0000;
+  --brand-shadow-sm: 0 0 #0000;
+  --brand-shadow: 0 0 #0000;
+  --brand-shadow-md: 0 8px 24px -6px rgb(0 0 0 / 0.6);
+  --brand-shadow-lg: 0 18px 46px -8px rgb(0 0 0 / 0.8);
+  --brand-shadow-glow: 0 0 0 1px var(--brand-accent), 0 4px 16px var(--brand-accent-soft);
+
+  /* Charts */
+  --chart-series: #c6f432;
+  --chart-seq-low: #1d2408;
+  --chart-seq-high: #e4fa9e;
+  --chart-grid: #222222;
+  --chart-axis: #3a3a3a;
+
+  /* Compliance marks (not brand) */
   --mark-veg: #3dbb5f;
   --mark-nonveg: #c47a3d;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --brand-logo: url("./logo.svg");
+  --brand-primary: #0b0b0b;
+  --brand-primary-hover: #262626;
+  --brand-primary-contrast: #ffffff;
+  --brand-accent: #5a8a00;
+  --brand-accent-strong: #3f6400; /* 4.5:1 text on white */
+  --brand-accent-soft: rgb(198 244 50 / 0.35);
+  --brand-accent-glow: rgb(198 244 50 / 0.5);
+
+  --brand-bg: #f2f2f2;
+  --brand-surface: #ffffff;
+  --brand-surface-2: #f0f0f0;
+  --brand-surface-3: #e6e6e6;
+  --brand-border: #e4e4e4;
+  --brand-border-strong: #cccccc;
+  --brand-text: #0b0b0b;
+  --brand-text-muted: #5e5e5e;
+
+  --glass-border: #e4e4e4;
+  --glass-fill-flat: #ececec;
+  --glass-fill-hover: #e2e2e2;
+  --glass-veil: #ffffff;
+
+  --brand-success: #1e7047;
+  --brand-success-soft: #e3f3ea;
+  --brand-success-border: #bce5d0;
+  --brand-warning: #b56e08;
+  --brand-warning-soft: #fdf5e7;
+  --brand-warning-border: #f8dfb1;
+  --brand-danger: #b33924;
+  --brand-danger-soft: #fce8e4;
+  --brand-danger-border: #f7bbb0;
+  --brand-info: #3f6400;
+  --brand-info-soft: rgb(198 244 50 / 0.35);
+
+  --brand-shadow-md: 0 6px 16px -2px rgb(0 0 0 / 0.1);
+  --brand-shadow-lg: 0 16px 36px -6px rgb(0 0 0 / 0.14);
+
+  --chart-series: #5a8a00;
+  --chart-seq-low: #f1fbd2;
+  --chart-seq-high: #2f4a00;
+  --chart-grid: #e8e8e8;
+  --chart-axis: #c4c4c4;
+  --mark-veg: #1a8a3a;
+  --mark-nonveg: #7b3f12;
 }
 
 /* Respect the device's "reduce motion" setting in every app. */
@@ -244,16 +176,4 @@ h3 {
 p,
 li {
   text-wrap: pretty;
-}
-
-/* The full-size dark backdrop (6 MB) is fetched only by screens wider than the 2560px version. */
-@media (min-width: 2561px) {
-  :root[data-theme="dark"] {
-    --brand-backdrop: url("./backdrop-dark.webp");
-  }
-}
-@media (min-width: 2561px) and (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --brand-backdrop: url("./backdrop-dark.webp");
-  }
 }

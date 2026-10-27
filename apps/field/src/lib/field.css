@@ -21,10 +21,11 @@ h3 {
   line-height: 1.2;
 }
 h1 {
-  font: 600 1.7rem/1.15 var(--brand-font-heading);
+  font: 700 1.7rem/1.15 var(--brand-font-heading);
+  letter-spacing: -0.02em;
 }
 h2 {
-  font: 600 1.25rem/1.2 var(--brand-font-heading);
+  font: 700 1.25rem/1.2 var(--brand-font-heading);
 }
 .muted {
   color: var(--brand-text-muted);
@@ -75,18 +76,13 @@ button {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.65rem 1.15rem;
-  border: 1px solid color-mix(in srgb, var(--brand-primary) 70%, transparent);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--brand-primary) 72%, transparent) 0%,
-    color-mix(in srgb, var(--brand-primary) 86%, transparent) 100%
-  );
+  border: 1px solid transparent;
+  border-radius: var(--brand-radius-full);
+  background: var(--brand-primary);
   color: var(--brand-primary-contrast);
   font-weight: 650;
   cursor: pointer;
   touch-action: manipulation;
-  border-radius: var(--brand-radius);
-  box-shadow: var(--glass-rim-tinted), 0 1px 3px rgb(0 0 0 / 0.12), 0 1px 2px rgb(0 0 0 / 0.06);
   transition-property: background-color, transform, box-shadow, border-color;
   transition-duration: 0.15s;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
@@ -121,32 +117,31 @@ button.ghost:hover:not(:disabled) {
   background: var(--glass-fill-flat);
 }
 button.gold {
-  background: linear-gradient(180deg, #4a8a14 0%, var(--brand-accent) 100%);
-  border: 1px solid var(--brand-accent-strong);
-  color: #ffffff;
+  background: var(--brand-highlight);
+  border: 1px solid transparent;
+  color: var(--brand-highlight-contrast);
   font-weight: 700;
-  box-shadow: 0 2px 8px rgb(61 122 14 / 0.32);
+  box-shadow: none;
 }
 button.gold:hover:not(:disabled) {
-  background: linear-gradient(180deg, #55961a 0%, #2f6a0a 100%);
-  box-shadow: 0 4px 14px rgb(61 122 14 / 0.45);
+  background: var(--brand-highlight-hover);
 }
 button.good {
   background: linear-gradient(180deg, color-mix(in srgb, var(--brand-success) 85%, #fff) 0%, var(--brand-success) 100%);
   border: 1px solid var(--brand-success);
-  color: #fff;
+  color: var(--brand-bg);
   box-shadow: 0 2px 8px rgb(30 112 71 / 0.25);
 }
 button.warn {
   background: linear-gradient(180deg, color-mix(in srgb, var(--brand-warning) 85%, #fff) 0%, var(--brand-warning) 100%);
   border: 1px solid var(--brand-warning);
-  color: #fff;
+  color: var(--brand-bg);
   box-shadow: 0 2px 8px rgb(141 86 12 / 0.25);
 }
 button.bad {
   background: linear-gradient(180deg, color-mix(in srgb, var(--brand-danger) 85%, #fff) 0%, var(--brand-danger) 100%);
   border: 1px solid var(--brand-danger);
-  color: #fff;
+  color: var(--brand-bg);
   box-shadow: 0 2px 8px rgb(179 57 36 / 0.25);
 }
 button.huge {
@@ -428,7 +423,7 @@ label.field > select {
 }
 .toast.danger {
   background: var(--brand-danger);
-  color: #fff;
+  color: var(--brand-bg);
 }
 @keyframes rise {
   from {
@@ -519,7 +514,7 @@ button.password-toggle:focus-visible {
 /* The open list of a select. Browsers that support customizable selects draw the list from our CSS,
    so the highlight is green. Others keep their native list, tinted as far as they allow. */
 select {
-  accent-color: #3d7a0e;
+  accent-color: var(--brand-highlight);
 }
 select option {
   background-color: var(--brand-surface);
@@ -527,8 +522,8 @@ select option {
 }
 select option:checked,
 select option:hover {
-  background: linear-gradient(#3d7a0e, #3d7a0e);
-  color: #ffffff;
+  background: linear-gradient(var(--brand-highlight), var(--brand-highlight));
+  color: var(--brand-highlight-contrast);
 }
 @supports (appearance: base-select) {
   select,
@@ -550,17 +545,17 @@ select option:hover {
   select option:hover,
   select option:focus-visible,
   select option:checked {
-    background: #3d7a0e;
-    color: #ffffff;
+    background: var(--brand-highlight);
+    color: var(--brand-highlight-contrast);
   }
   select option::checkmark {
-    color: #ffffff;
+    color: var(--brand-highlight-contrast);
   }
 }
 
 /* Selected text: green instead of the browser's blue. */
 ::selection {
-  background: #3d7a0e;
-  color: #ffffff;
+  background: var(--brand-highlight);
+  color: var(--brand-highlight-contrast);
   text-shadow: none;
 }

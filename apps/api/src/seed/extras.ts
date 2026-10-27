@@ -5,12 +5,14 @@ import { tenantSchema as t } from '../db/index.js';
 import { liquorRegister } from '../inventory/liquor-register.js';
 import { dayTotals } from '../pos/day-close.js';
 import { istDate } from './data.js';
+import { seedLiquor } from './liquor.js';
 
 const daysAgo = (n: number) => new Date(Date.now() - n * 86_400_000);
 
 // Fills the screens the main seed leaves empty (deliveries, GRNs, payments, returns, counts,
-// transfers, approvals, day close, guest orders, activity), 3 to 5 rows each. Safe to run twice.
+// transfers, approvals, day close, guest orders, activity, liquor), 3 to 5 rows each. Safe to run twice.
 export async function seedExtras(tx: Tx, log: (s: string) => void = console.log) {
+  await seedLiquor(tx, log); // its own check, so it also fills a database seeded before it existed
   if ((await tx.select({ id: t.goodsReceivedNote.id }).from(t.goodsReceivedNote).limit(1)).length) {
     log('Extra sample data is already there.');
     return;

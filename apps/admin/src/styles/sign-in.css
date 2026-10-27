@@ -6,8 +6,8 @@
 }
 .login-brand {
   background:
-    radial-gradient(900px 500px at 15% 10%, rgb(61 122 14 / 0.22), transparent 65%),
-    linear-gradient(160deg, #141416 0%, #000000 100%);
+    radial-gradient(900px 500px at 15% 10%, rgb(198 244 50 / 0.12), transparent 65%),
+    linear-gradient(160deg, #181818 0%, #0b0b0b 100%);
   color: #ffffff;
   padding: 3.5rem 4rem;
   display: flex;
@@ -52,7 +52,7 @@
 }
 .login-brand li svg {
   color: var(--brand-accent);
-  background: rgb(61 122 14 / 0.2);
+  background: var(--brand-accent-soft);
   padding: 5px;
   width: 26px;
   height: 26px;
