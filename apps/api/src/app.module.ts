@@ -21,6 +21,7 @@ import { InventoryController } from './inventory/stock.controller.js';
 import { PosController } from './pos/controller.js';
 import { DayCloseController } from './pos/day-close.js';
 import { GuestOrdersController } from './pos/guest-orders.js';
+import { KitchenController } from './pos/kitchen.js';
 import { ReportsController } from './reports/controller.js';
 import { PricingController } from './pricing/recipes.js';
 import { PricingRulesController } from './pricing/rules.js';
@@ -49,7 +50,7 @@ class HealthController {
     MenuItemsController, DiningTablesController, LiquorTreeController, ApprovalsController, InventoryController, InventoryCountsController,
     VendorsController, VendorItemsController, VendorRatesController, IndentsController,
     DeliveriesController, GrnsController, AttachmentsController, PricingController, PricingRulesController, PublicMenuController,
-    PosController, GuestOrdersController, DayCloseController, ReportsController, DataController, ActivityController, JobsController,
+    PosController, GuestOrdersController, KitchenController, DayCloseController, ReportsController, DataController, ActivityController, JobsController,
   ],
   providers: [
     LiveGateway,

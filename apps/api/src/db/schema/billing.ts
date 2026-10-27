@@ -122,6 +122,7 @@ export const orderLine = pgTable(
     costAtSale: unitCost(), // portion cost when sold, for margin reports
     status: text().$type<'active' | 'voided'>().notNull().default('active'),
     voidReason: text(),
+    readyAt: ts(), // the kitchen or bar marked it ready on the kitchen screen
     createdAt: ts().notNull().defaultNow(),
   },
   (t) => [index().on(t.billId), index().on(t.menuItemId, t.createdAt)],

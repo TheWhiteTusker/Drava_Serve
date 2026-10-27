@@ -33,6 +33,7 @@ export const PERMISSIONS = {
   // POS
   'pos.bill': 'Open bills, take orders and payments',
   'pos.dayClose': 'Close the day',
+  'kitchen.view': 'See kitchen and bar orders and mark them ready',
   // Reports
   'reports.view': 'See the dashboard and reports',
   'reports.export': 'Export reports',
@@ -55,7 +56,7 @@ export const SEED_ROLES: { name: string; description: string; permissions: Permi
       'catalog.view', 'catalog.manage', 'recipes.manage', 'prices.manage', 'menu.pins',
       'inventory.view', 'inventory.transfer', 'inventory.wastage', 'inventory.writeOff', 'inventory.count',
       'vendors.manage', 'rates.view', 'indent.manage', 'receiving.recheck', 'grn.approve',
-      'approvals.decide', 'pos.bill', 'pos.dayClose', 'reports.view', 'reports.export', 'audit.view',
+      'approvals.decide', 'pos.bill', 'pos.dayClose', 'kitchen.view', 'reports.view', 'reports.export', 'audit.view',
     ],
   },
   {
@@ -68,13 +69,13 @@ export const SEED_ROLES: { name: string; description: string; permissions: Permi
     description: 'Re-check, return notes, transfers, stock counts',
     permissions: [
       'catalog.view', 'inventory.view', 'inventory.transfer', 'inventory.wastage', 'inventory.count',
-      'receiving.recheck', 'rates.view',
+      'receiving.recheck', 'rates.view', 'kitchen.view',
     ],
   },
   {
     name: 'Chef / bar manager',
     description: 'Recipes, kitchen or bar stock, wastage and spillage',
-    permissions: ['catalog.view', 'recipes.manage', 'inventory.view', 'inventory.wastage', 'inventory.writeOff', 'rates.view'],
+    permissions: ['catalog.view', 'recipes.manage', 'inventory.view', 'inventory.wastage', 'inventory.writeOff', 'rates.view', 'kitchen.view'],
   },
   {
     name: 'Cashier',

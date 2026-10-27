@@ -60,7 +60,7 @@ export async function seedSales(tx: Tx, outlets: Outlet[], stock: Stock, menus: 
           orderLinesToInsert.push({
             billId: bill.id, orderId: order.id, menuItemId: l.c.item.id, name: l.c.item.name, department: l.c.item.department,
             taxClassId: l.tax.id, taxKind: l.tax.kind, qty: String(l.qty), menuPrice: l.c.item.sellingPrice, priceCharged: l.c.item.sellingPrice,
-            costAtSale: l.c.cost, createdAt: opened,
+            costAtSale: l.c.cost, createdAt: opened, readyAt: paid,
           });
           const recipe = recipesByItem.get(l.c.item.id) ?? [];
           for (const r of recipe) {

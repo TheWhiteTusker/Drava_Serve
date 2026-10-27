@@ -135,7 +135,7 @@ export async function seedLiquor(tx: Tx, log: (s: string) => void = console.log)
       const cost = recipe.reduce((a, r) => a.plus(dec(liquor.find((s) => s.id === r.stockItemId)!.currentCost).times(r.quantity)), dec(0));
       await tx.insert(t.orderLine).values({
         billId: bill.id, orderId: order.id, menuItemId: l.item.id, name: l.item.name, department: l.item.department, taxClassId: liquorTax.id, taxKind: liquorTax.kind,
-        qty: String(l.qty), menuPrice: l.item.sellingPrice, priceCharged: l.item.sellingPrice, costAtSale: rupees(cost), createdAt: opened,
+        qty: String(l.qty), menuPrice: l.item.sellingPrice, priceCharged: l.item.sellingPrice, costAtSale: rupees(cost), createdAt: opened, readyAt: paid,
       });
       for (const r of recipe) moves.push({ storeId: bar.id, stockItemId: r.stockItemId, qty: dec(r.quantity).times(l.qty).neg().toFixed(3), movement: 'sale', refType: 'bill', refId: bill.id, at: paid });
     }

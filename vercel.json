@@ -16,6 +16,7 @@
       "rewrites": [
         { "source": "/pos/(.*)", "destination": "/pos/index.html" },
         { "source": "/receiving/(.*)", "destination": "/receiving/index.html" },
+        { "source": "/kitchen/(.*)", "destination": "/kitchen/index.html" },
         { "source": "/m/(.*)", "destination": "/menu/index.html" }
       ]
     },
@@ -27,7 +28,7 @@
   },
   "rewrites": [
     { "source": "/api/(.*)", "destination": { "service": "api" } },
-    { "source": "/(pos|receiving|m|menu|field-assets)/(.*)", "destination": { "service": "field" } },
+    { "source": "/(pos|receiving|kitchen|m|menu|field-assets)/(.*)", "destination": { "service": "field" } },
     { "source": "/icon.svg", "destination": { "service": "field" } },
     { "source": "/(.*)", "destination": { "service": "admin" } }
   ]

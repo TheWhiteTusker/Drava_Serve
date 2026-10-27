@@ -78,6 +78,13 @@
       "when": 1792402833092,
       "tag": "0010_beverage_types",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793084461272,
+      "tag": "0011_kitchen_display",
+      "breakpoints": true
     }
   ]
 }

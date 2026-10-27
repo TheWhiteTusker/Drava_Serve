@@ -17,6 +17,7 @@ export type LiveEvent =
   | 'bill' // a bill changed (open bills list)
   | 'approval' // approval queue changed
   | 'guestOrder' // a guest sent an order from the table QR menu, or one was decided
+  | 'kitchen' // the kitchen or bar marked an order ready, or took it back
   | 'activity'; // a new entry in the activity feed
 
 let io: Server | undefined;
