@@ -88,7 +88,7 @@ export class PricingController {
   async costing(@C() ctx: Ctx, @Query('outletId') outletId: string) {
     ctx.assert('rates.view', outletId);
     const items = await ctx.db
-      .select({ m: t.menuItem, cat: t.category.name, rank: t.menuRank.position, portions: t.menuRank.availablePortions })
+      .select({ m: t.menuItem, cat: t.category.name, catKind: t.category.kind, rank: t.menuRank.position, portions: t.menuRank.availablePortions })
       .from(t.menuItem)
       .innerJoin(t.category, eq(t.category.id, t.menuItem.categoryId))
       .leftJoin(t.menuRank, eq(t.menuRank.menuItemId, t.menuItem.id))
@@ -97,13 +97,13 @@ export class PricingController {
     const targets = await targetsFor(ctx.db, items.map((i) => i.m));
     const offers = await ctx.db.select().from(t.activeDiscount).where(and(eq(t.activeDiscount.outletId, outletId), eq(t.activeDiscount.status, 'active')));
     return items
-      .map(({ m, cat, rank, portions }) => {
+      .map(({ m, cat, catKind, rank, portions }) => {
         const cost = costs.get(m.id)!;
         const mg = margin(m.sellingPrice, cost);
         const target = targets.get(m.id);
         const offer = offers.find((o) => o.menuItemId === m.id);
         return {
-          id: m.id, name: m.name, department: m.department, category: cat, dietType: m.dietType, sellingPrice: m.sellingPrice, portionCost: cost,
+          id: m.id, name: m.name, department: m.department, category: cat, alcoholic: catKind !== 'drink_type', dietType: m.dietType, sellingPrice: m.sellingPrice, portionCost: cost,
           marginAmount: mg.amount, marginPct: mg.pct, targetPct: target, underTarget: target != null && dec(mg.pct).lt(target),
           suggestedPrice: target && dec(cost).gt(0) ? suggestedPrice(cost, target) : null, rank, portions, pinPosition: m.pinPosition,
           offerExcluded: m.offerExcluded, offerPrice: offer?.offerPrice ?? null, version: m.version, active: m.active,

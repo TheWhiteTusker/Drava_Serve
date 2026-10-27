@@ -7,7 +7,9 @@ const UNIT_LABEL = { g: 'grams', ml: 'millilitres', pc: 'pieces' } as Record<str
 
 export function StockItemsPage() {
   const s = useSession();
-  const [dept, setDept] = useState<'food' | 'beverage'>('food');
+  // The liquor tree links here with ?department=beverage (and &category= for a new bottle).
+  const params = new URLSearchParams(location.search);
+  const [dept, setDept] = useState<'food' | 'beverage'>(params.get('department') === 'beverage' ? 'beverage' : 'food');
   const cats = useApi<any[]>('/categories');
   const brands = useApi<any[]>('/brands');
   const catName = (id: string) => cats.data?.find((c) => c.id === id)?.name ?? '';
@@ -43,7 +45,7 @@ export function StockItemsPage() {
           { label: 'Perishable', render: (r: any) => (r.perishable ? 'Yes' : 'No') },
           { label: 'Status', render: (r: any) => yesNo(r.active) },
         ]}
-        defaults={{ department: dept, baseUnit: dept === 'food' ? 'g' : 'ml', perishable: false, active: true, units: [], levels: [], currentCost: '0' }}
+        defaults={{ department: dept, categoryId: params.get('category'), baseUnit: dept === 'food' ? 'g' : 'ml', perishable: false, active: true, units: [], levels: [], currentCost: '0' }}
         fields={[
           { name: 'name', label: 'Name', required: true, placeholder: dept === 'beverage' ? 'e.g. Royal Stag 750 ml' : 'e.g. Tomato' },
           { name: 'categoryId', label: dept === 'food' ? 'Group' : 'Liquor sub-type (or group)', type: 'select', options: catOpts },

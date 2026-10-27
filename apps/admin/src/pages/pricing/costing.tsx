@@ -14,6 +14,7 @@ export function CostingPage() {
   const s = useSession();
   const outletId = useCurrentOutlet();
   const [dept, setDept] = useState<'food' | 'beverage'>('food');
+  const [alcoholic, setAlcoholic] = useState(true);
   const rows = useApi<any[]>(outletId ? `/costing?outletId=${outletId}` : null);
   const rec = useRecordPath();
   useLiveReload(['menu', 'availability'], rows.reload);
@@ -33,7 +34,7 @@ export function CostingPage() {
       </Page>
     );
   }
-  const list = (rows.data ?? []).filter((r) => r.department === dept);
+  const list = (rows.data ?? []).filter((r) => r.department === dept && (dept === 'food' || r.alcoholic === alcoholic));
   const groups = [...new Set(list.map((r) => r.category))];
   return (
     <Page
@@ -52,7 +53,14 @@ export function CostingPage() {
             {d === 'food' ? 'Food' : 'Beverage'}
           </button>
         ))}
+        {dept === 'beverage' &&
+          ([true, false] as const).map((a) => (
+            <button key={String(a)} role="tab" aria-selected={alcoholic === a} className={alcoholic === a ? 'secondary' : 'ghost'} onClick={() => setAlcoholic(a)}>
+              {a ? 'Alcoholic' : 'Non-alcoholic'}
+            </button>
+          ))}
       </div>
+      {rows.data && !list.length && <Empty title="No dishes here yet">Add them under the menu, then give each a recipe.</Empty>}
       <ErrorNote error={rows.error} />
       {groups.map((g) => (
         <section key={g} style={{ marginBottom: '1.25rem' }}>

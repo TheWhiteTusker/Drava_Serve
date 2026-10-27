@@ -31,6 +31,11 @@ export const FOOD: StockRow[] = [
   ['Dark chocolate', 'food', 'g', '0.700', 'kg', '1000', 2000, false],
   ['Soda water', 'beverage', 'ml', '0.040', 'crate of 24 x 300 ml', '7200', 14400, false],
   ['Cola', 'beverage', 'ml', '0.060', 'crate of 24 x 300 ml', '7200', 14400, false],
+  ['Tonic water', 'beverage', 'ml', '0.080', 'crate of 24 x 300 ml', '7200', 7200, false],
+  ['Orange juice', 'beverage', 'ml', '0.120', '1 litre pack', '1000', 8000, true],
+  ['Mineral water', 'beverage', 'ml', '0.020', 'case of 12 x 1 litre', '12000', 24000, false],
+  ['Coffee powder', 'food', 'g', '1.200', '500 g pack', '500', 1000, false],
+  ['Tea leaves', 'food', 'g', '0.500', 'kg', '1000', 1000, false],
 ];
 
 // [product name, type, sub-type, brand, bottle ml, abv %, origin, tier, ₹ per ml, par bottles]
@@ -46,6 +51,25 @@ export const LIQUOR: LiquorRow[] = [
   ['Bombay Sapphire 750 ml', 'Gin', 'London dry', 'Bombay Sapphire', 750, '40', 'imported', 'premium', '3.20', 4],
   ['Kingfisher Premium 650 ml', 'Beer', 'Lager', 'Kingfisher', 650, '4.8', 'indian', 'economy', '0.25', 48],
   ['Sula Shiraz 750 ml', 'Wine', 'Red', 'Sula', 750, '13', 'indian', 'standard', '1.10', 6],
+  ["McDowell's No.1 750 ml", 'Whisky', 'Indian', "McDowell's No.1", 750, '42.8', 'indian', 'economy', '0.95', 12],
+  ['Johnnie Walker Red Label 750 ml', 'Whisky', 'Blended Scotch', 'Johnnie Walker', 750, '40', 'imported', 'premium', '2.40', 6],
+  ['Jameson 750 ml', 'Whisky', 'Irish', 'Jameson', 750, '40', 'imported', 'premium', '3.40', 6],
+  ['Jim Beam White 750 ml', 'Whisky', 'Bourbon', 'Jim Beam', 750, '40', 'imported', 'premium', '2.80', 4],
+  ['Captain Morgan Spiced 750 ml', 'Rum', 'Spiced', 'Captain Morgan', 750, '35', 'indian', 'standard', '1.40', 8],
+  ['Magic Moments 750 ml', 'Vodka', 'Plain', 'Magic Moments', 750, '37.5', 'indian', 'economy', '0.90', 10],
+  ['Absolut 750 ml', 'Vodka', 'Plain', 'Absolut', 750, '40', 'imported', 'premium', '2.00', 6],
+  ['Tanqueray 750 ml', 'Gin', 'London dry', 'Tanqueray', 750, '43.1', 'imported', 'premium', '3.00', 4],
+  ['Greater Than 750 ml', 'Gin', 'Indian craft', 'Greater Than', 750, '40', 'indian', 'standard', '1.50', 6],
+  ['Hennessy VS 700 ml', 'Brandy', 'Cognac', 'Hennessy', 700, '40', 'imported', 'luxury', '5.20', 3],
+  ['Jose Cuervo Especial Silver 750 ml', 'Tequila and mezcal', 'Blanco', 'Jose Cuervo', 750, '38', 'imported', 'premium', '2.40', 4],
+  ['Baileys Irish Cream 750 ml', 'Liqueurs', 'Cream', 'Baileys', 750, '17', 'imported', 'premium', '2.20', 4],
+  ['Kahlúa 750 ml', 'Liqueurs', 'Coffee', 'Kahlúa', 750, '20', 'imported', 'premium', '2.00', 3],
+  ['Budweiser 650 ml', 'Beer', 'Lager', 'Budweiser', 650, '5', 'indian', 'standard', '0.26', 36],
+  ['Bira 91 White 650 ml', 'Beer', 'Wheat', 'Bira 91', 650, '4.7', 'indian', 'standard', '0.22', 36],
+  ['Hoegaarden 330 ml', 'Beer', 'Wheat', 'Hoegaarden', 330, '4.9', 'imported', 'premium', '0.60', 24],
+  ['Grover Zampa La Réserve 750 ml', 'Wine', 'Red', 'Grover Zampa', 750, '14', 'indian', 'premium', '1.30', 6],
+  ["Jacob's Creek Chardonnay 750 ml", 'Wine', 'White', "Jacob's Creek", 750, '13', 'imported', 'premium', '1.40', 4],
+  ['Bacardi Breezer Cranberry 275 ml', 'Ready-to-drink', 'Breezers', 'Bacardi Breezer', 275, '4.8', 'indian', 'economy', '0.30', 24],
 ];
 
 // [menu item, course, diet, price, recipe [stock item, qty]]
@@ -77,6 +101,20 @@ export const SOFT_MENU: [string, string, number, string, [string, number][]][] =
   ['Fresh Lime Soda', 'Soft drinks', 300, '110', [['Lemon', 1], ['Soda water', 250], ['Sugar', 20]]],
   ['Virgin Mojito', 'Mocktails', 300, '180', [['Lemon', 1], ['Mint leaves', 10], ['Sugar', 25], ['Soda water', 200]]],
   ['Classic Cold Brew Float', 'Mocktails', 300, '220', [['Sugar', 15], ['Milk', 60], ['Vanilla ice cream', 40]]],
+  ['Sunset Cooler', 'Mocktails', 300, '200', [['Orange juice', 150], ['Soda water', 120], ['Sugar', 10], ['Mint leaves', 3]]],
+  ['Coca-Cola', 'Soft drinks', 300, '90', [['Cola', 300]]],
+  ['Tonic Water', 'Soft drinks', 300, '100', [['Tonic water', 300]]],
+  ['Fresh Orange Juice', 'Juices and shakes', 250, '160', [['Orange juice', 250]]],
+  ['Cold Coffee', 'Juices and shakes', 300, '190', [['Coffee powder', 10], ['Milk', 200], ['Sugar', 20], ['Vanilla ice cream', 40]]],
+  ['Masala Chai', 'Tea and coffee', 150, '60', [['Tea leaves', 5], ['Milk', 100], ['Sugar', 10], ['Mixed spices', 1]]],
+  ['Filter Coffee', 'Tea and coffee', 150, '70', [['Coffee powder', 12], ['Milk', 100], ['Sugar', 10]]],
+  ['Mineral Water 1 L', 'Water', 1000, '60', [['Mineral water', 1000]]],
+];
+
+// [menu item, serve ml, price, recipe]: cocktails, taxed as liquor.
+export const COCKTAILS: [string, number, string, [string, number][]][] = [
+  ['Cuba Libre', 210, '380', [['Bacardi Carta Blanca 750 ml', 60], ['Cola', 150], ['Lemon', 0.5]]],
+  ['Gin and Tonic', 210, '420', [['Greater Than 750 ml', 60], ['Tonic water', 150], ['Lemon', 0.25]]],
 ];
 
 // [menu item, product, serve ml, price]; one bottle sells as several items.
@@ -98,13 +136,36 @@ export const BAR_MENU: [string, string, number, string][] = [
   ['Kingfisher Premium bottle', 'Kingfisher Premium 650 ml', 650, '350'],
   ['Sula Shiraz glass', 'Sula Shiraz 750 ml', 150, '450'],
   ['Sula Shiraz bottle', 'Sula Shiraz 750 ml', 750, '2200'],
+  ["McDowell's No.1 30 ml", "McDowell's No.1 750 ml", 30, '120'],
+  ["McDowell's No.1 60 ml", "McDowell's No.1 750 ml", 60, '230'],
+  ['Johnnie Walker Red Label 60 ml', 'Johnnie Walker Red Label 750 ml', 60, '560'],
+  ['Jameson 60 ml', 'Jameson 750 ml', 60, '600'],
+  ['Jameson bottle', 'Jameson 750 ml', 750, '6200'],
+  ['Jim Beam White 60 ml', 'Jim Beam White 750 ml', 60, '520'],
+  ['Captain Morgan Spiced 60 ml', 'Captain Morgan Spiced 750 ml', 60, '300'],
+  ['Magic Moments 60 ml', 'Magic Moments 750 ml', 60, '220'],
+  ['Absolut 60 ml', 'Absolut 750 ml', 60, '420'],
+  ['Tanqueray 60 ml', 'Tanqueray 750 ml', 60, '560'],
+  ['Greater Than 60 ml', 'Greater Than 750 ml', 60, '340'],
+  ['Hennessy VS 60 ml', 'Hennessy VS 700 ml', 60, '980'],
+  ['Jose Cuervo Especial Silver 30 ml', 'Jose Cuervo Especial Silver 750 ml', 30, '260'],
+  ['Baileys Irish Cream 60 ml', 'Baileys Irish Cream 750 ml', 60, '440'],
+  ['Kahlúa 60 ml', 'Kahlúa 750 ml', 60, '400'],
+  ['Budweiser bottle', 'Budweiser 650 ml', 650, '400'],
+  ['Bira 91 White bottle', 'Bira 91 White 650 ml', 650, '420'],
+  ['Hoegaarden bottle', 'Hoegaarden 330 ml', 330, '380'],
+  ['Grover Zampa La Réserve glass', 'Grover Zampa La Réserve 750 ml', 150, '520'],
+  ['Grover Zampa La Réserve bottle', 'Grover Zampa La Réserve 750 ml', 750, '2600'],
+  ["Jacob's Creek Chardonnay glass", "Jacob's Creek Chardonnay 750 ml", 150, '560'],
+  ["Jacob's Creek Chardonnay bottle", "Jacob's Creek Chardonnay 750 ml", 750, '2800'],
+  ['Bacardi Breezer Cranberry', 'Bacardi Breezer Cranberry 275 ml', 275, '220'],
 ];
 
 export const VENDORS: [string, 'food' | 'beverage', string[]][] = [
   ['Green Valley Agro & Fresh Produce Ltd', 'food', ['Tomato', 'Onion', 'Potato', 'Sweet corn', 'Capsicum', 'Lemon', 'Mint leaves', 'Ginger garlic paste']],
   ['Heritage Farms & Dairy Co.', 'food', ['Paneer', 'Chicken boneless', 'Eggs', 'Milk', 'Fresh cream', 'Butter', 'Vanilla ice cream']],
-  ['Maharaja Grains & Spices Traders', 'food', ['Cooking oil', 'Basmati rice', 'Maida', 'Mixed spices', 'Sugar', 'Dark chocolate']],
-  ['Southern Craft Beverages Ltd', 'beverage', ['Soda water', 'Cola']],
+  ['Maharaja Grains & Spices Traders', 'food', ['Cooking oil', 'Basmati rice', 'Maida', 'Mixed spices', 'Sugar', 'Dark chocolate', 'Coffee powder', 'Tea leaves']],
+  ['Southern Craft Beverages Ltd', 'beverage', ['Soda water', 'Cola', 'Tonic water', 'Orange juice', 'Mineral water']],
   ['United Spirits & Beverages Distributorship', 'beverage', LIQUOR.map((l) => l[0])],
 ];
 
@@ -118,10 +179,23 @@ export const STAFF: [string, string, string, string, 'outlet1' | 'all'][] = [
   ['accounts@demo.test', 'Farah Khan', 'Accounts', '7777', 'all'],
 ];
 
-// Stock left today, fixed for the demo: at Indiranagar (offers on) Royal Stag is down to four
-// 60 ml pegs, so Blenders Pride (priced just above it, plenty in stock) is on offer.
+// Stock left today, fixed for the demo: at Indiranagar (offers on) each low drink has a few
+// pegs left and its substitutes (same type and serve, priced 1-25% above, plenty in stock) go
+// on offer. Low → on offer:
+//   Royal Stag 60 → Blenders Pride 60          Jim Beam 60 → Jameson 60, Johnnie Walker Red 60
+//   Bacardi 60 → Captain Morgan 60             Magic Moments 60 → Smirnoff 60
+//   Budweiser → Bira 91                        Sula glass → Grover Zampa glass, Jacob's Creek glass
+//   Sula bottle → Grover Zampa bottle          Cuba Libre (Bacardi low) → Gin and Tonic
 export const LEFT_TODAY: Record<string, Record<string, number>> = {
-  BLR1: { 'Royal Stag 750 ml': 240, 'Blenders Pride 750 ml': 4500 },
+  BLR1: {
+    'Royal Stag 750 ml': 240, 'Blenders Pride 750 ml': 4500,
+    'Jim Beam White 750 ml': 240, 'Jameson 750 ml': 4500, 'Johnnie Walker Red Label 750 ml': 3000,
+    'Bacardi Carta Blanca 750 ml': 240, 'Captain Morgan Spiced 750 ml': 4500,
+    'Magic Moments 750 ml': 180, 'Smirnoff 750 ml': 3000,
+    'Budweiser 650 ml': 1300, 'Bira 91 White 650 ml': 26000,
+    'Sula Shiraz 750 ml': 600, 'Grover Zampa La Réserve 750 ml': 12000, "Jacob's Creek Chardonnay 750 ml": 3000,
+    'Greater Than 750 ml': 3000, 'Tonic water': 7200,
+  },
 };
 
 // Repeatable "random" numbers so the sample week is the same every time.

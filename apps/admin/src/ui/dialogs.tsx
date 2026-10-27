@@ -27,8 +27,8 @@ export function Modal({ open, title, onClose, children, wide }: { open: boolean;
 }
 
 // A question with a typed answer (used instead of the browser's prompt box).
-export function AskDialog({ open, title, label, confirm, onAnswer, onClose }: { open: boolean; title: string; label: string; confirm: string; onAnswer: (v: string) => void; onClose: () => void }) {
-  const [v, setV] = useState('');
+export function AskDialog({ open, title, label, confirm, initial = '', onAnswer, onClose }: { open: boolean; title: string; label: string; confirm: string; initial?: string; onAnswer: (v: string) => void; onClose: () => void }) {
+  const [v, setV] = useState(initial);
   return (
     <Modal open={open} title={title} onClose={() => (setV(''), onClose())}>
       <form

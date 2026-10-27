@@ -14,13 +14,14 @@ export function StockPage() {
   const outletId = useCurrentOutlet();
   const [dept, setDept] = useState<'food' | 'beverage'>('food');
   const [filter, setFilter] = useState('');
+  const [status, setStatus] = useState<'all' | keyof typeof STATUS_LABEL>('all');
   const stock = useApi<any>(outletId ? `/inventory/stock?outletId=${outletId}&department=${dept}` : null);
   const [dialog, setDialog] = useState<null | 'wastage' | 'transfer'>(null);
   const rec = useRecordPath();
   const all = useApi<any[]>(rec.slug ? '/stock-items' : null);
   useLiveReload(['stock'], stock.reload);
   if (!outletId) return null;
-  const items = (stock.data?.items ?? []).filter((i: any) => i.name.toLowerCase().includes(filter.toLowerCase()));
+  const items = (stock.data?.items ?? []).filter((i: any) => (status === 'all' || i.status === status) && i.name.toLowerCase().includes(filter.toLowerCase()));
   const stores = stock.data?.stores ?? [];
   const totalValue = items.reduce((a: number, i: any) => a + Number(i.value ?? 0), 0);
 
@@ -53,6 +54,11 @@ export function StockPage() {
           {(['food', 'beverage'] as const).map((d) => (
             <button key={d} role="tab" aria-selected={dept === d} className={dept === d ? '' : 'ghost'} onClick={() => setDept(d)}>
               {d === 'food' ? 'Food' : 'Beverage'}
+            </button>
+          ))}
+          {(['all', 'reorder', 'critical', 'out', 'healthy'] as const).map((x) => (
+            <button key={x} role="tab" aria-selected={status === x} className={status === x ? 'secondary' : 'ghost'} onClick={() => setStatus(x)}>
+              {x === 'all' ? 'All' : STATUS_LABEL[x]}
             </button>
           ))}
         </div>
@@ -98,6 +104,7 @@ export function StockPage() {
             ))}
           </tbody>
         </table>
+        {stock.data && !items.length && <Empty title="Nothing matches">Try another status or search word.</Empty>}
       </div>
       <Modal open={dialog === 'wastage'} title="Record wastage" onClose={() => setDialog(null)}>
         <WastageForm outletId={outletId} stores={stores} onDone={() => (setDialog(null), stock.reload())} />

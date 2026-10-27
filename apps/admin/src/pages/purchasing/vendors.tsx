@@ -14,6 +14,7 @@ export function VendorsPage() {
   const s = useSession();
   const rec = useRecordPath();
   const [tab, setTab] = useState<'vendors' | 'rates'>('vendors');
+  const [dept, setDept] = useState<'food' | 'beverage'>('food');
   return (
     <>
       {!rec.slug && (
@@ -30,6 +31,16 @@ export function VendorsPage() {
       )}
       {tab === 'vendors' || rec.slug ? (
         <CrudPage
+          before={
+            <div className="tabs" role="tablist">
+              {(['food', 'beverage'] as const).map((d) => (
+                <button key={d} role="tab" aria-selected={dept === d} className={dept === d ? 'secondary' : 'ghost'} onClick={() => setDept(d)}>
+                  {d === 'food' ? 'Food' : 'Beverage'}
+                </button>
+              ))}
+            </div>
+          }
+          filter={(r: any) => r.department === dept || r.department === 'both'}
           singular="vendor"
           title="Suppliers and prices"
           intro="Who sells you what, and at what price. The pack size you set here is how the daily order list rounds up."
@@ -49,7 +60,7 @@ export function VendorsPage() {
             },
             { label: 'Status', render: (r: any) => yesNo(r.active) },
           ]}
-          defaults={{ department: 'food', active: true }}
+          defaults={{ department: dept, active: true }}
           fields={[
             { name: 'name', label: 'Name', required: true, placeholder: 'e.g. Metro Cash & Carry, Fresh Valley Dairy' },
             { name: 'department', label: 'Part', type: 'select', required: true, options: [{ value: 'food', label: 'Food' }, { value: 'beverage', label: 'Beverage' }, { value: 'both', label: 'Both' }] },

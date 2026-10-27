@@ -18,11 +18,55 @@
   font: 600 1.05rem var(--brand-font-heading);
   min-height: 44px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.6rem;
+  list-style: none;
 }
-.tree ul {
-  margin: 0.35rem 0;
+.tree summary::-webkit-details-marker {
+  display: none;
+}
+.tree .chev {
+  transition: transform 0.15s;
+  flex: none;
+}
+.tree details[open] > summary > .chev {
+  transform: rotate(90deg);
+}
+.tree .tree-name {
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.tree details.tree-type[open] > summary {
+  border-bottom: 1px solid var(--brand-border);
+  padding-bottom: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+/* A sub-type: a lighter card inside its type. */
+.tree details.tree-sub {
+  background: var(--brand-surface);
+  backdrop-filter: none;
+  box-shadow: var(--brand-shadow-xs);
+  padding: 0.35rem 1rem;
+}
+.tree details.tree-sub > summary {
+  font: 500 0.92rem var(--brand-font);
+  min-height: 40px;
+}
+.tree details.tree-sub > .table-wrap,
+.tree details.tree-sub > p {
+  margin: 0.25rem 0 0.6rem;
+}
+.tree .tree-actions {
+  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.tree .tree-actions button {
+  min-height: 32px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.84rem;
 }
 
 /* ---------- Getting started ---------- */

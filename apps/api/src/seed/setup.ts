@@ -3,7 +3,7 @@ import { dec, rupees } from '@fnb/shared';
 import { createOutlet } from '../bootstrap.js';
 import { hashSecret } from '../secrets.js';
 import { controlDb, controlSchema, tenantSchema as t } from '../db/index.js';
-import { BAR_MENU, DEMO, FOOD, FOOD_MENU, LIQUOR, SOFT_MENU, STAFF, VENDORS, istDate } from './data.js';
+import { BAR_MENU, COCKTAILS, DEMO, FOOD, FOOD_MENU, LIQUOR, SOFT_MENU, STAFF, VENDORS, istDate } from './data.js';
 import type { Tx } from '../db/index.js';
 
 
@@ -131,10 +131,9 @@ export async function seedMenus(tx: Tx, outlets: Outlet[], { items, cat, food, l
       const s = items.get(product)!;
       await add({ outletId: o.id, name, department: 'beverage', categoryId: s.categoryId!, brandId: s.brandId, serveSizeMl: String(ml), sellingPrice: price, taxClassId: liquorTax.id }, [[product, ml]]);
     }
-    await add(
-      { outletId: o.id, name: 'Cuba Libre', department: 'beverage', categoryId: cat('Cocktails').id, serveSizeMl: '210', sellingPrice: '380', taxClassId: liquorTax.id },
-      [['Bacardi Carta Blanca 750 ml', 60], ['Cola', 150], ['Lemon', 0.5]],
-    );
+    for (const [name, ml, price, recipe] of COCKTAILS) {
+      await add({ outletId: o.id, name, department: 'beverage', categoryId: cat('Cocktails').id, serveSizeMl: String(ml), sellingPrice: price, taxClassId: liquorTax.id }, recipe);
+    }
     menus.set(o.id, m);
 
     await tx.insert(t.diningTable).values(Array.from({ length: 10 }, (_, i) => ({ outletId: o.id, name: `T${i + 1}`, sortOrder: i })));
