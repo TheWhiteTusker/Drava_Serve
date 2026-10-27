@@ -48,15 +48,19 @@ export function createSession(app: string) {
     can: (perm: Permission, outletId?: string | null) =>
       !!session?.grants.some((g) => g.permission === perm && (outletId === undefined || g.outletId === null || g.outletId === outletId)),
     async api<T = any>(path: string, opts: { method?: string; body?: unknown; form?: FormData } = {}): Promise<T> {
-      const res = await fetch(`/api${path}`, {
-        method: opts.method ?? (opts.body || opts.form ? 'POST' : 'GET'),
-        headers: {
-          ...(opts.form ? {} : { 'content-type': 'application/json' }),
-          'x-device-id': deviceId,
-          ...(session ? { authorization: `Bearer ${session.token}` } : {}),
-        },
-        body: opts.form ?? (opts.body ? JSON.stringify(opts.body) : undefined),
-      });
+      const method = opts.method ?? (opts.body || opts.form ? 'POST' : 'GET');
+      const send = () =>
+        fetch(`/api${path}`, {
+          method,
+          headers: {
+            ...(opts.form ? {} : { 'content-type': 'application/json' }),
+            'x-device-id': deviceId,
+            ...(session ? { authorization: `Bearer ${session.token}` } : {}),
+          },
+          body: opts.form ?? (opts.body ? JSON.stringify(opts.body) : undefined),
+        });
+      let res = await send();
+      if (method === 'GET' && res.status >= 500 && res.status <= 504) res = await send(); // a read that hit a cold or dropped server: safe to ask again
       const data = await res.json().catch(() => null);
       if (res.status === 401 && session && !path.startsWith('/auth/')) set(null);
       if (!res.ok) throw Object.assign(new Error(data?.message ?? `Request failed (${res.status})`), { status: res.status, data });

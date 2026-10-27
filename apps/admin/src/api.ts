@@ -81,17 +81,21 @@ export class ApiError extends Error {
 }
 
 export async function api<T = any>(path: string, opts: { method?: string; body?: unknown } = {}): Promise<T> {
-  const res = await fetch(`/api${path}`, {
-    method: opts.method ?? (opts.body ? 'POST' : 'GET'),
-    headers: {
-      'content-type': 'application/json',
-      'x-device-id': deviceId,
-      ...(session ? { authorization: `Bearer ${session.token}` } : {}),
-    },
-    body: opts.body ? JSON.stringify(opts.body) : undefined,
-  });
+  const method = opts.method ?? (opts.body ? 'POST' : 'GET');
+  const send = () =>
+    fetch(`/api${path}`, {
+      method,
+      headers: {
+        'content-type': 'application/json',
+        'x-device-id': deviceId,
+        ...(session ? { authorization: `Bearer ${session.token}` } : {}),
+      },
+      body: opts.body ? JSON.stringify(opts.body) : undefined,
+    });
+  let res = await send();
+  if (method === 'GET' && res.status >= 500 && res.status <= 504) res = await send(); // a read that hit a cold or dropped server: safe to ask again
   const data = res.status === 204 ? null : await res.json().catch(() => null);
-  if (res.ok && (opts.method ?? (opts.body ? 'POST' : 'GET')) !== 'GET') epoch++;
+  if (res.ok && method !== 'GET') epoch++;
   if (res.status === 401 && session && !path.startsWith('/auth/')) setSession(null);
   if (!res.ok) throw new ApiError(res.status, data?.message ?? `Request failed (${res.status})`);
   return data as T;

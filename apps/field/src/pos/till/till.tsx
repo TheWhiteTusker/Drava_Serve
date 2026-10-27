@@ -87,7 +87,13 @@ export function Till({ outletId }: { outletId: string }) {
     () =>
       session
         .api<GuestOrder[]>(`/pos/guest-orders?outletId=${outletId}`)
-        .then(setGuest)
+        .then((list) =>
+          setGuest((old) => {
+            const fresh = list.filter((g) => !old.some((o) => o.id === g.id));
+            if (fresh.length) toast(`New order from table ${fresh[0].table}`);
+            return list;
+          }),
+        )
         .catch(() => {}),
     [outletId],
   );
@@ -119,8 +125,15 @@ export function Till({ outletId }: { outletId: string }) {
       loadServerBills();
       loadGuestOrders();
     });
+    // Without a live connection (some hosts cannot keep one open), ask every 15 seconds instead.
+    const poll = setInterval(() => {
+      if (sock.connected) return;
+      loadServerBills();
+      loadGuestOrders();
+    }, 15_000);
     return () => {
       clearInterval(timer);
+      clearInterval(poll);
       sock.close();
     };
   }, [s.token, outletId, loadCatalog, loadServerBills, mergeServerBill, loadGuestOrders]);

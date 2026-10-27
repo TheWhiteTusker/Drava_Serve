@@ -218,14 +218,16 @@ async function watch(id: string) {
     refresh();
     if (d.status !== 'pending') sock.close();
   };
-  sock.on('guestOrder', done);
-  // After a dropped connection, one request catches a decision made while it was down.
-  sock.io.on('reconnect', () =>
+  const check = () =>
     fetch(`/api/public/orders/${base}/${id}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => d && done(d))
-      .catch(() => {}),
-  );
+      .catch(() => {});
+  sock.on('guestOrder', done);
+  // After a dropped connection, one request catches a decision made while it was down.
+  sock.io.on('reconnect', check);
+  // Without a live connection (some hosts cannot keep one open), ask every 10 seconds instead.
+  const poll = setInterval(() => (sent.find((x) => x.id === id)?.status !== 'pending' ? clearInterval(poll) : !sock.connected && check()), 10_000);
 }
 
 // One listener for every add, remove and button on the page.
@@ -309,7 +311,9 @@ async function load() {
     return;
   }
   try {
-    const res = await fetch(`/api/public/menu/${base}${code.table ? `?table=${encodeURIComponent(code.table)}` : ''}`);
+    const url = `/api/public/menu/${base}${code.table ? `?table=${encodeURIComponent(code.table)}` : ''}`;
+    let res = await fetch(url);
+    if (res.status >= 500) res = await fetch(url); // a cold or dropped server: ask once more
     if (!res.ok) throw new Error();
     const first = !data;
     data = await res.json();

@@ -75,9 +75,8 @@ function Board() {
     sock.on('bill', load);
     sock.on('kitchen', load);
     sock.on('connect', load);
-    sock.on('disconnect', () => setOnline(false));
     const timer = setInterval(() => tick((n) => n + 1), 30_000); // ticket ages
-    const poll = setInterval(load, 60_000); // in case a live update was missed
+    const poll = setInterval(() => !sock.connected && load(), 15_000); // without a live connection (some hosts cannot keep one open)
     return () => (sock.close(), clearInterval(timer), clearInterval(poll));
   }, [s.token, load]);
 
